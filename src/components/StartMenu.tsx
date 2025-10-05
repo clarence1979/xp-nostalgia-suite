@@ -93,7 +93,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
             <div className="w-12 h-12 rounded bg-blue-500 flex items-center justify-center">
               <User className="w-8 h-8 text-white" />
             </div>
-            <span className="font-bold text-sm">Administrator</span>
+            <span className="font-bold text-sm">Teachingtools.dev</span>
           </div>
         </div>
         
