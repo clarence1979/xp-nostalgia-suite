@@ -64,9 +64,10 @@ export const PrivacyContent = () => {
         <section>
           <h2 className="text-lg font-semibold mb-2">7. Contact Us</h2>
           <p className="text-gray-700">
-            For privacy-related inquiries, please contact:<br />
-            Email: privacy@teachingtools.dev<br />
-            Address: [Your School/Organization Address]
+            For privacy-related inquiries, please visit:<br />
+            <a href="https://clarence.guru/#contact" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              https://clarence.guru/#contact
+            </a>
           </p>
         </section>
       </div>
