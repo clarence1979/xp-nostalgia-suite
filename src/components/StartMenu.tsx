@@ -178,10 +178,6 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           <div className="border-t border-gray-200 my-2" />
           
           <div className="xp-menu-item">
-            <Folder className="w-5 h-5" />
-            <span className="text-sm">My Documents</span>
-          </div>
-          <div className="xp-menu-item">
             <HardDrive className="w-5 h-5" />
             <span className="text-sm">My Computer</span>
           </div>
@@ -203,10 +199,6 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           <div className="xp-menu-item">
             <Search className="w-5 h-5" />
             <span className="text-sm">Search</span>
-          </div>
-          <div className="xp-menu-item">
-            <Terminal className="w-5 h-5" />
-            <span className="text-sm">Run...</span>
           </div>
           
           <div className="border-t border-gray-200 my-2" />
