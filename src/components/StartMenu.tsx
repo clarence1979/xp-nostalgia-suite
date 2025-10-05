@@ -64,6 +64,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
   const [showPrograms, setShowPrograms] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [submenuTop, setSubmenuTop] = useState(0);
 
   useState(() => {
     const checkMobile = () => {
@@ -73,6 +74,15 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   });
+
+  const handleShowPrograms = () => {
+    const element = document.getElementById('all-programs-item');
+    if (element && !isMobile) {
+      const rect = element.getBoundingClientRect();
+      setSubmenuTop(rect.top);
+    }
+    setShowPrograms(true);
+  };
 
   return (
     <>
@@ -90,8 +100,9 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
         <div className="py-2">
           <div
             className="xp-menu-item relative"
-            onMouseEnter={() => !isMobile && setShowPrograms(true)}
+            onMouseEnter={() => !isMobile && handleShowPrograms()}
             onClick={() => isMobile && setShowPrograms(!showPrograms)}
+            id="all-programs-item"
           >
             <Folder className="w-5 h-5" />
             <span className="flex-1 text-sm">All Programs</span>
@@ -100,7 +111,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
             {showPrograms && (
               <div 
                 className={`${isMobile ? 'relative left-0 w-full' : 'fixed w-[300px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
-                style={!isMobile ? { left: '318px', bottom: '40px' } : undefined}
+                style={!isMobile ? { left: '318px', top: `${submenuTop}px` } : undefined}
                 onMouseLeave={() => !isMobile && (() => {
                   setShowPrograms(false);
                   setHoveredCategory(null);
@@ -121,7 +132,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
                       {hoveredCategory === category.name && (
                         <div 
                           className={`${isMobile ? 'relative left-0 w-full' : 'fixed w-[280px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
-                          style={!isMobile ? { left: '616px', bottom: '40px' } : undefined}
+                          style={!isMobile ? { left: '616px', top: `${submenuTop}px` } : undefined}
                           onMouseLeave={() => !isMobile && setHoveredCategory(null)}
                         >
                           <div className="py-1">
