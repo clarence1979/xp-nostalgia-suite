@@ -32,7 +32,24 @@ export const Window = ({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isMaximized, setIsMaximized] = useState(false);
   const [preMaximize, setPreMaximize] = useState({ position: initialPosition, size: initialSize });
+  const [isMobile, setIsMobile] = useState(false);
   const windowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile && !isMaximized) {
+        // Auto-maximize on mobile
+        setIsMaximized(true);
+        setPosition({ x: 0, y: 0 });
+        setSize({ width: window.innerWidth, height: window.innerHeight - 40 });
+      }
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -88,6 +105,7 @@ export const Window = ({
   }, [isDragging, isResizing, dragOffset, position, size, resizeDirection, isMaximized]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (isMobile) return; // Disable dragging on mobile
     if (onFocus) onFocus();
     const rect = windowRef.current?.getBoundingClientRect();
     if (rect) {
@@ -100,6 +118,7 @@ export const Window = ({
   };
 
   const handleResizeMouseDown = (e: React.MouseEvent, direction: string) => {
+    if (isMobile) return; // Disable resizing on mobile
     e.stopPropagation();
     setIsResizing(true);
     setResizeDirection(direction);

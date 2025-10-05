@@ -63,11 +63,21 @@ const categories: Category[] = [
 export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenuProps) => {
   const [showPrograms, setShowPrograms] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useState(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  });
 
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="fixed bottom-[40px] left-0 w-[320px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg z-50 rounded-tr-lg overflow-hidden">
+      <div className={`fixed ${isMobile ? 'bottom-[40px] left-0 right-0 max-h-[70vh]' : 'bottom-[40px] left-0 w-[320px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg z-50 rounded-tr-lg overflow-y-auto`}>
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded bg-blue-500 flex items-center justify-center">
@@ -80,7 +90,8 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
         <div className="py-2">
           <div
             className="xp-menu-item relative"
-            onMouseEnter={() => setShowPrograms(true)}
+            onMouseEnter={() => !isMobile && setShowPrograms(true)}
+            onClick={() => isMobile && setShowPrograms(!showPrograms)}
           >
             <Folder className="w-5 h-5" />
             <span className="flex-1 text-sm">All Programs</span>
@@ -88,18 +99,19 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
               
             {showPrograms && (
               <div 
-                className="fixed left-[320px] bottom-[40px] w-[300px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50"
-                onMouseLeave={() => {
+                className={`${isMobile ? 'relative left-0 w-full' : 'fixed left-[320px] bottom-[40px] w-[300px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
+                onMouseLeave={() => !isMobile && (() => {
                   setShowPrograms(false);
                   setHoveredCategory(null);
-                }}
+                })()}
               >
                 <div className="py-1">
                   {categories.map((category) => (
                     <div
                       key={category.name}
                       className="xp-menu-item whitespace-nowrap relative"
-                      onMouseEnter={() => setHoveredCategory(category.name)}
+                      onMouseEnter={() => !isMobile && setHoveredCategory(category.name)}
+                      onClick={() => isMobile && setHoveredCategory(hoveredCategory === category.name ? null : category.name)}
                     >
                       <span className="text-xl">{category.icon}</span>
                       <span className="text-sm flex-1">{category.name}</span>
@@ -107,8 +119,8 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
                         
                       {hoveredCategory === category.name && (
                         <div 
-                          className="fixed left-[620px] bottom-[40px] w-[280px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50"
-                          onMouseLeave={() => setHoveredCategory(null)}
+                          className={`${isMobile ? 'relative left-0 w-full' : 'fixed left-[620px] bottom-[40px] w-[280px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
+                          onMouseLeave={() => !isMobile && setHoveredCategory(null)}
                         >
                           <div className="py-1">
                             {category.programs.map((program) => (

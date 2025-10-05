@@ -8,6 +8,16 @@ interface TaskbarProps {
 
 export const Taskbar = ({ onStartClick, windows, onWindowClick }: TaskbarProps) => {
   const [time, setTime] = useState(new Date());
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -31,15 +41,15 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick }: TaskbarProps) 
         <span>start</span>
       </button>
 
-      {/* Quick Launch */}
-      <div className="w-px h-[32px] bg-[#0831D9]" />
+      {/* Quick Launch - hide on mobile */}
+      {!isMobile && <div className="w-px h-[32px] bg-[#0831D9]" />}
       
       {/* Window Buttons */}
       <div className="flex-1 flex gap-0.5 overflow-x-auto">
         {windows.map((window) => (
           <button
             key={window.id}
-            className={`px-3 h-[32px] min-w-[120px] max-w-[180px] text-xs text-left truncate rounded-sm border ${
+            className={`px-2 h-[32px] ${isMobile ? 'min-w-[80px] max-w-[120px]' : 'min-w-[120px] max-w-[180px]'} text-xs text-left truncate rounded-sm border ${
               window.active
                 ? 'bg-[#3C8EF3] border-white/40 text-white font-bold'
                 : 'bg-[#245EDC] border-[#0831D9] text-white hover:bg-[#2868D9]'
@@ -53,9 +63,13 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick }: TaskbarProps) 
 
       {/* System Tray */}
       <div className="w-px h-[32px] bg-[#0831D9]" />
-      <div className="flex items-center gap-2 px-3 h-[32px] bg-[#12B2E8] rounded-sm border border-[#0831D9]">
-        <span className="text-xs text-white font-bold">
-          {time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+      <div className={`flex items-center gap-2 ${isMobile ? 'px-1' : 'px-3'} h-[32px] bg-[#12B2E8] rounded-sm border border-[#0831D9]`}>
+        <span className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-white font-bold`}>
+          {time.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+          })}
         </span>
       </div>
     </div>
