@@ -19,8 +19,33 @@ interface OpenWindow {
 interface Program {
   name: string;
   url: string;
-  icon: React.ReactNode;
+  icon: string;
 }
+
+const allPrograms: Program[] = [
+  // General Tools
+  { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝' },
+  { name: 'Tool Hub', url: 'https://comprehensive-online-921b.bolt.host/', icon: '🔧' },
+  // Teacher Tools
+  { name: 'Magic Marker', url: 'https://mark-magic-ai.lovable.app/', icon: '✨' },
+  { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
+  { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊' },
+  // Secondary School Subjects
+  { name: 'Pantry Chef', url: 'https://pantrychef-ai-recipe-7nfz.bolt.host/', icon: '👨‍🍳' },
+  { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
+  { name: 'Drone Programming', url: 'https://tello-drone-voice-te-r9q2.bolt.host', icon: '🚁' },
+  { name: 'AUSLAN', url: 'https://auslan-gesture-recog-g78u.bolt.host', icon: '👋' },
+  { name: 'Voice to 3D Printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️' },
+  { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐' },
+  { name: 'Physics Simulator', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️' },
+  { name: 'Tutoring Chatbot', url: 'https://new-chat-kb4v.bolt.host/', icon: '🤖' },
+  { name: 'Math Genius', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢' },
+  { name: 'Code Class', url: 'https://new-chat-oj8v.bolt.host', icon: '💻' },
+  // Primary School
+  { name: 'Dream Tales', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚' },
+  // Classic Display
+  { name: 'Classic Display', url: 'https://ba45d991-19a1-476a-891f-59137477946c.lovable.app/', icon: '🖥️' },
+];
 
 const Index = () => {
   const [showStartMenu, setShowStartMenu] = useState(false);
@@ -115,6 +140,7 @@ const Index = () => {
       {/* Desktop Icons - hide on mobile */}
       {!isMobile && (
         <>
+          {/* System Icons */}
           <DesktopIcon
             icon={<HardDrive className="w-10 h-10 text-gray-300" />}
             label="My Computer"
@@ -145,6 +171,21 @@ const Index = () => {
             onClick={openNotepad}
             position={{ x: 20, y: 420 }}
           />
+          
+          {/* Program Icons in Grid */}
+          {allPrograms.map((program, index) => {
+            const col = Math.floor(index / 6);
+            const row = index % 6;
+            return (
+              <DesktopIcon
+                key={program.name}
+                icon={<span className="text-4xl">{program.icon}</span>}
+                label={program.name}
+                onClick={() => openProgram(program)}
+                position={{ x: 140 + col * 100, y: 20 + row * 100 }}
+              />
+            );
+          })}
         </>
       )}
 
