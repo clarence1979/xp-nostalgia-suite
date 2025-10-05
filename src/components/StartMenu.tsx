@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Folder, HardDrive, Globe, Settings, HelpCircle, Search, Terminal, LogOut, Power, ChevronRight } from 'lucide-react';
+import { User, Folder, HardDrive, Globe, Settings, HelpCircle, Search, Terminal, LogOut, Power, ChevronRight, FileText } from 'lucide-react';
 
 interface Program {
   name: string;
@@ -17,6 +17,7 @@ interface StartMenuProps {
   onClose: () => void;
   onProgramClick: (program: Program) => void;
   onNotepadClick: () => void;
+  onInfoClick: (title: string, content: React.ReactNode) => void;
 }
 
 const categories: Category[] = [
@@ -60,7 +61,11 @@ const categories: Category[] = [
   },
 ];
 
-export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenuProps) => {
+import { PrivacyContent } from './legal/PrivacyContent';
+import { TermsContent } from './legal/TermsContent';
+import { AboutContent } from './legal/AboutContent';
+
+export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick }: StartMenuProps) => {
   const [showPrograms, setShowPrograms] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -213,6 +218,39 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
           <div className="xp-menu-item">
             <Power className="w-5 h-5" />
             <span className="text-sm">Turn Off</span>
+          </div>
+          
+          <div className="border-t border-gray-200 my-2" />
+          
+          <div 
+            className="xp-menu-item"
+            onClick={() => {
+              onInfoClick('Privacy Policy', <PrivacyContent />);
+              onClose();
+            }}
+          >
+            <HelpCircle className="w-5 h-5" />
+            <span className="text-sm">Privacy Policy</span>
+          </div>
+          <div 
+            className="xp-menu-item"
+            onClick={() => {
+              onInfoClick('Terms of Use', <TermsContent />);
+              onClose();
+            }}
+          >
+            <FileText className="w-5 h-5" />
+            <span className="text-sm">Terms of Use</span>
+          </div>
+          <div 
+            className="xp-menu-item"
+            onClick={() => {
+              onInfoClick('About Teachingtools.dev', <AboutContent />);
+              onClose();
+            }}
+          >
+            <HelpCircle className="w-5 h-5" />
+            <span className="text-sm">About</span>
           </div>
         </div>
 

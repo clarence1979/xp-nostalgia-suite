@@ -161,6 +161,7 @@ const Index = () => {
           onClose={() => setShowStartMenu(false)}
           onProgramClick={openProgram}
           onNotepadClick={openNotepad}
+          onInfoClick={(title, content) => openWindow(title, content)}
         />
       )}
 
