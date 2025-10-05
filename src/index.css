@@ -2,95 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Windows XP Design System - All colors in HSL */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* XP Luna Theme Colors */
+    --background: 210 100% 97%;
+    --foreground: 0 0% 0%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* XP Window Chrome */
+    --window-border: 230 87% 45%;
+    --title-bar-start: 215 100% 45%;
+    --title-bar-end: 210 89% 62%;
+    --title-text: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* XP Start Menu */
+    --start-green: 120 48% 34%;
+    --start-green-hover: 120 48% 30%;
+    --menu-bg: 0 0% 100%;
+    --menu-highlight: 210 100% 92%;
+    --menu-sidebar: 210 89% 62%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* XP Buttons */
+    --button-face: 0 0% 93%;
+    --button-highlight: 0 0% 100%;
+    --button-shadow: 0 0% 64%;
+    --button-dark-shadow: 0 0% 25%;
+    --button-text: 0 0% 0%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* XP Desktop */
+    --desktop-icon-text: 0 0% 100%;
+    --desktop-selection: 210 100% 50% / 0.3;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* XP System Colors */
+    --primary: 215 100% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 93%;
+    --secondary-foreground: 0 0% 0%;
+    --accent: 210 100% 92%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --muted: 0 0% 85%;
+    --muted-foreground: 0 0% 35%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --border: 0 0% 64%;
+    --input: 0 0% 100%;
+    --ring: 215 100% 45%;
+    --radius: 0rem;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* XP Specific */
+    --taskbar-height: 40px;
+    --window-title-height: 28px;
   }
 }
 
@@ -100,6 +63,105 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-tahoma;
+    overflow: hidden;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="white" stroke="black" d="M0,0 L0,12 L4,8 L7,8 L11,13 L13,11 L9,6 L9,3 Z"/></svg>'), auto;
+  }
+}
+
+/* XP Window Styles */
+@layer components {
+  .xp-window {
+    @apply border-2 rounded-sm shadow-lg bg-white;
+    border-color: hsl(var(--window-border));
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .xp-title-bar {
+    @apply h-[28px] flex items-center justify-between px-1 select-none;
+    background: linear-gradient(180deg, hsl(var(--title-bar-start)) 0%, hsl(var(--title-bar-end)) 100%);
+    cursor: move;
+  }
+
+  .xp-title-bar.inactive {
+    background: linear-gradient(180deg, hsl(0 0% 70%) 0%, hsl(0 0% 85%) 100%);
+  }
+
+  .xp-button {
+    @apply px-3 py-1 border text-sm font-bold;
+    background: hsl(var(--button-face));
+    border-top: 1px solid hsl(var(--button-highlight));
+    border-left: 1px solid hsl(var(--button-highlight));
+    border-right: 1px solid hsl(var(--button-dark-shadow));
+    border-bottom: 1px solid hsl(var(--button-dark-shadow));
+    box-shadow: inset -1px -1px 0 hsl(var(--button-shadow)), inset 1px 1px 0 hsl(var(--button-highlight));
+  }
+
+  .xp-button:hover {
+    @apply brightness-105;
+  }
+
+  .xp-button:active {
+    border-top: 1px solid hsl(var(--button-dark-shadow));
+    border-left: 1px solid hsl(var(--button-dark-shadow));
+    border-right: 1px solid hsl(var(--button-highlight));
+    border-bottom: 1px solid hsl(var(--button-highlight));
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .xp-menu-item {
+    @apply px-4 py-2 flex items-center gap-3 cursor-pointer;
+  }
+
+  .xp-menu-item:hover {
+    @apply bg-[hsl(var(--menu-highlight))];
+  }
+
+  .desktop-icon {
+    @apply flex flex-col items-center justify-center w-20 p-2 gap-1 cursor-pointer select-none;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  }
+
+  .desktop-icon:hover {
+    @apply bg-[hsl(var(--desktop-selection))];
+  }
+
+  .desktop-icon.selected {
+    @apply bg-[hsl(var(--desktop-selection))];
+  }
+}
+
+/* Custom Fonts */
+@layer base {
+  @font-face {
+    font-family: 'Tahoma';
+    src: local('Tahoma'), local('Segoe UI'), local('Arial');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  .font-tahoma {
+    font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif;
+  }
+}
+
+/* Scrollbar XP Style */
+@layer utilities {
+  .xp-scrollbar::-webkit-scrollbar {
+    width: 16px;
+  }
+
+  .xp-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--button-face));
+    border: 1px solid hsl(var(--button-shadow));
+  }
+
+  .xp-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--button-face));
+    border: 1px outset hsl(var(--button-highlight));
+  }
+
+  .xp-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--button-highlight));
   }
 }
