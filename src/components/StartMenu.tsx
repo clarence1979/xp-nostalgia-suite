@@ -34,9 +34,9 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="fixed bottom-[40px] left-0 w-[800px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg z-50 flex rounded-tr-lg overflow-hidden">
+      <div className="fixed bottom-[40px] left-0 w-[540px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg z-50 flex rounded-tr-lg overflow-hidden">
         {/* Left side - white */}
-        <div className="w-[65%] bg-white">
+        <div className="w-[48%] bg-white">
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded bg-blue-500 flex items-center justify-center">
@@ -90,7 +90,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
         </div>
 
         {/* Right side - blue gradient */}
-        <div className="w-[35%] py-2" style={{ background: 'linear-gradient(180deg, hsl(210 89% 62%) 0%, hsl(215 100% 45%) 100%)' }}>
+        <div className="w-[52%] py-2" style={{ background: 'linear-gradient(180deg, hsl(210 89% 62%) 0%, hsl(215 100% 45%) 100%)' }}>
           <div className="xp-menu-item text-white hover:bg-white/20">
             <Folder className="w-5 h-5" />
             <span className="text-sm">My Documents</span>
