@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, RotateCw, Home } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCw, Home, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -23,7 +23,11 @@ export const Browser = () => {
       }
     }
 
+    // Open in new tab (many sites block iframes)
+    window.open(formattedUrl, '_blank');
+    
     setCurrentUrl(formattedUrl);
+    setUrl(formattedUrl);
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(formattedUrl);
     setHistory(newHistory);
@@ -116,14 +120,16 @@ export const Browser = () => {
       </div>
 
       {/* Browser content */}
-      <iframe
-        key={currentUrl}
-        src={currentUrl}
-        className="w-full h-full border-none"
-        title="Browser"
-        allow="camera; microphone; geolocation; fullscreen"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
-      />
+      <div className="w-full h-full flex items-center justify-center bg-muted/10">
+        <div className="text-center space-y-4 p-8">
+          <Globe className="w-16 h-16 mx-auto text-muted-foreground" />
+          <h2 className="text-xl font-semibold">Internet Explorer</h2>
+          <p className="text-sm text-muted-foreground max-w-md">
+            Enter a URL or search term above and press Go.<br />
+            Websites will open in a new tab due to modern security restrictions.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
