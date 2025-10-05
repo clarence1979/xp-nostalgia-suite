@@ -46,7 +46,7 @@ const categories: Category[] = [
       { name: 'Pantry Chef', url: 'https://pantrychef-ai-recipe-7nfz.bolt.host/', icon: '👨‍🍳' },
       { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
       { name: 'Drone Programming', url: 'https://tello-drone-voice-te-r9q2.bolt.host', icon: '🚁' },
-      { name: 'AUSLAN', url: 'https://auslan-gesture-recog-g78u.bolt.host', icon: '👋' },
+      { name: 'AUSLAN', url: 'https://auslan-vision-learn-knpa.bolt.host', icon: '👋' },
       { name: 'Voice to 3D Printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️' },
       { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐' },
       { name: 'Physics Simulator', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️' },
