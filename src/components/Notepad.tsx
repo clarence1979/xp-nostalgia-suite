@@ -1,7 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+const STORAGE_KEY = 'notepad-content';
 
 export const Notepad = () => {
-  const [content, setContent] = useState('');
+  // Load saved content from localStorage
+  const [content, setContent] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved || '';
+  });
+
+  // Auto-save content whenever it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, content);
+  }, [content]);
 
   return (
     <div className="h-full flex flex-col bg-white">
