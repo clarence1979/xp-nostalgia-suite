@@ -181,8 +181,8 @@ const Index = () => {
         
         {/* Program Icons in Grid */}
         {allPrograms.map((program, index) => {
-          const col = Math.floor(index / (isMobile ? 4 : 6));
-          const row = index % (isMobile ? 4 : 6);
+          const col = Math.floor(index / 4);
+          const row = index % 4;
           return (
             <DesktopIcon
               key={program.name}
