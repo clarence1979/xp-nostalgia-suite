@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { User, Folder, HardDrive, Globe, Settings, HelpCircle, Search, Terminal, LogOut, Power, ChevronRight, FileText } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Program {
   name: string;
@@ -70,18 +71,9 @@ import { AboutContent } from './legal/AboutContent';
 export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick }: StartMenuProps) => {
   const [showPrograms, setShowPrograms] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
   const [submenuTop, setSubmenuTop] = useState(0);
   const [categorySubmenuTop, setCategorySubmenuTop] = useState(0);
-
-  useState(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  });
 
   const handleShowPrograms = () => {
     const element = document.getElementById('all-programs-item');
@@ -103,13 +95,13 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className={`fixed ${isMobile ? 'bottom-[40px] left-0 right-0 max-h-[70vh]' : 'bottom-[40px] left-0 w-[320px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg z-50 rounded-tr-lg overflow-y-auto`}>
-        <div className="p-4 border-b border-gray-200">
+      <div className={`fixed ${isMobile ? 'inset-0 top-auto bottom-0 max-h-[80vh]' : 'bottom-[40px] left-0 w-[320px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg z-50 ${isMobile ? 'rounded-t-lg' : 'rounded-tr-lg'} overflow-y-auto`}>
+        <div className={`${isMobile ? 'p-3' : 'p-4'} border-b border-gray-200`}>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded bg-blue-500 flex items-center justify-center">
-              <User className="w-8 h-8 text-white" />
+            <div className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} rounded bg-blue-500 flex items-center justify-center`}>
+              <User className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} text-white`} />
             </div>
-            <span className="font-bold text-sm">Teachingtools.dev</span>
+            <span className={`font-bold ${isMobile ? 'text-base' : 'text-sm'}`}>Teachingtools.dev</span>
           </div>
         </div>
         
@@ -126,7 +118,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
               
             {showPrograms && (
               <div 
-                className={`${isMobile ? 'relative left-0 w-full' : 'fixed w-[300px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
+                className={`${isMobile ? 'relative left-0 w-full border-t mt-1' : 'fixed w-[300px] border-2'} bg-white border-[hsl(var(--window-border))] shadow-lg ${isMobile ? 'max-h-[50vh]' : 'max-h-[calc(100vh-100px)]'} overflow-y-auto z-50`}
                 style={!isMobile ? { left: '320px', top: `${submenuTop}px` } : undefined}
                 onMouseLeave={() => !isMobile && (() => {
                   setShowPrograms(false);
@@ -147,7 +139,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                         
                       {hoveredCategory === category.name && (
                         <div 
-                          className={`${isMobile ? 'relative left-0 w-full' : 'fixed w-[280px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[400px] overflow-y-auto z-50`}
+                          className={`${isMobile ? 'relative left-0 w-full border-t' : 'fixed w-[280px] border-2'} bg-white border-[hsl(var(--window-border))] shadow-lg ${isMobile ? 'max-h-[40vh]' : 'max-h-[400px]'} overflow-y-auto z-50`}
                           style={!isMobile ? { left: '620px', top: `${categorySubmenuTop}px` } : undefined}
                           onMouseLeave={() => !isMobile && setHoveredCategory(null)}
                         >
