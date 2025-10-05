@@ -5,8 +5,20 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 interface NotepadProps {
   password: string;
@@ -23,6 +35,13 @@ export const Notepad = ({ password }: NotepadProps) => {
   const [wordWrap, setWordWrap] = useState(true);
   const [showStatusBar, setShowStatusBar] = useState(true);
   const [fontSize, setFontSize] = useState(14);
+  const [findDialogOpen, setFindDialogOpen] = useState(false);
+  const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
+  const [gotoDialogOpen, setGotoDialogOpen] = useState(false);
+  const [findText, setFindText] = useState('');
+  const [replaceText, setReplaceText] = useState('');
+  const [gotoLineNumber, setGotoLineNumber] = useState('');
+  const [fontFamily, setFontFamily] = useState('monospace');
   const { toast } = useToast();
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -101,6 +120,21 @@ export const Notepad = ({ password }: NotepadProps) => {
     }
   };
 
+  // File menu handlers
+  const handleNew = () => {
+    if (content && confirm('Are you sure you want to clear all content?')) {
+      setContent('');
+      toast({
+        title: 'New document',
+        description: 'Content cleared',
+      });
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   // Edit menu handlers
   const handleUndo = () => {
     document.execCommand('undo');
@@ -110,9 +144,11 @@ export const Notepad = ({ password }: NotepadProps) => {
     if (textareaRef.current) {
       const start = textareaRef.current.selectionStart;
       const end = textareaRef.current.selectionEnd;
+      if (start === end) return;
       const selectedText = content.substring(start, end);
       navigator.clipboard.writeText(selectedText);
       setContent(content.substring(0, start) + content.substring(end));
+      setTimeout(() => textareaRef.current?.setSelectionRange(start, start), 0);
     }
   };
 
@@ -120,8 +156,12 @@ export const Notepad = ({ password }: NotepadProps) => {
     if (textareaRef.current) {
       const start = textareaRef.current.selectionStart;
       const end = textareaRef.current.selectionEnd;
+      if (start === end) return;
       const selectedText = content.substring(start, end);
       navigator.clipboard.writeText(selectedText);
+      toast({
+        description: 'Text copied to clipboard',
+      });
     }
   };
 
@@ -131,10 +171,27 @@ export const Notepad = ({ password }: NotepadProps) => {
       if (textareaRef.current) {
         const start = textareaRef.current.selectionStart;
         const end = textareaRef.current.selectionEnd;
-        setContent(content.substring(0, start) + text + content.substring(end));
+        const newContent = content.substring(0, start) + text + content.substring(end);
+        setContent(newContent);
+        setTimeout(() => textareaRef.current?.setSelectionRange(start + text.length, start + text.length), 0);
       }
     } catch (err) {
       console.error('Failed to read clipboard:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to access clipboard',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDelete = () => {
+    if (textareaRef.current) {
+      const start = textareaRef.current.selectionStart;
+      const end = textareaRef.current.selectionEnd;
+      if (start === end) return;
+      setContent(content.substring(0, start) + content.substring(end));
+      setTimeout(() => textareaRef.current?.setSelectionRange(start, start), 0);
     }
   };
 
@@ -142,20 +199,99 @@ export const Notepad = ({ password }: NotepadProps) => {
     textareaRef.current?.select();
   };
 
-  const handleFind = () => {
-    const searchTerm = prompt('Find:');
-    if (searchTerm && textareaRef.current) {
-      const index = content.toLowerCase().indexOf(searchTerm.toLowerCase());
-      if (index !== -1) {
-        textareaRef.current.setSelectionRange(index, index + searchTerm.length);
-        textareaRef.current.focus();
-      } else {
-        toast({
-          title: 'Not found',
-          description: `"${searchTerm}" not found in document`,
-        });
-      }
+  const handleTimeDate = () => {
+    const now = new Date();
+    const timeDate = now.toLocaleString();
+    if (textareaRef.current) {
+      const start = textareaRef.current.selectionStart;
+      const newContent = content.substring(0, start) + timeDate + content.substring(start);
+      setContent(newContent);
+      setTimeout(() => textareaRef.current?.setSelectionRange(start + timeDate.length, start + timeDate.length), 0);
     }
+  };
+
+  const handleFind = () => {
+    setFindDialogOpen(true);
+  };
+
+  const performFind = (next = false) => {
+    if (!findText || !textareaRef.current) return;
+    
+    const currentPos = next ? (textareaRef.current.selectionEnd || 0) : 0;
+    const searchContent = content.toLowerCase();
+    const searchTerm = findText.toLowerCase();
+    
+    const index = searchContent.indexOf(searchTerm, currentPos);
+    
+    if (index !== -1) {
+      textareaRef.current.setSelectionRange(index, index + findText.length);
+      textareaRef.current.focus();
+    } else {
+      toast({
+        title: 'Not found',
+        description: `Cannot find "${findText}"`,
+      });
+    }
+  };
+
+  const handleReplace = () => {
+    setReplaceDialogOpen(true);
+  };
+
+  const performReplace = () => {
+    if (!textareaRef.current || !findText) return;
+    
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    const selectedText = content.substring(start, end);
+    
+    if (selectedText.toLowerCase() === findText.toLowerCase()) {
+      const newContent = content.substring(0, start) + replaceText + content.substring(end);
+      setContent(newContent);
+      setTimeout(() => textareaRef.current?.setSelectionRange(start + replaceText.length, start + replaceText.length), 0);
+    }
+    performFind(true);
+  };
+
+  const performReplaceAll = () => {
+    if (!findText) return;
+    
+    const regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const newContent = content.replace(regex, replaceText);
+    const count = (content.match(regex) || []).length;
+    
+    setContent(newContent);
+    toast({
+      description: `Replaced ${count} occurrence${count !== 1 ? 's' : ''}`,
+    });
+  };
+
+  const handleGoTo = () => {
+    setGotoDialogOpen(true);
+  };
+
+  const performGoTo = () => {
+    const lineNum = parseInt(gotoLineNumber);
+    if (isNaN(lineNum) || lineNum < 1) return;
+    
+    const lines = content.split('\n');
+    if (lineNum > lines.length) {
+      toast({
+        title: 'Error',
+        description: `Line number is beyond the end of file (max: ${lines.length})`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    let position = 0;
+    for (let i = 0; i < lineNum - 1; i++) {
+      position += lines[i].length + 1; // +1 for newline
+    }
+    
+    textareaRef.current?.setSelectionRange(position, position);
+    textareaRef.current?.focus();
+    setGotoDialogOpen(false);
   };
 
   // Format menu handlers
@@ -163,21 +299,31 @@ export const Notepad = ({ password }: NotepadProps) => {
     setWordWrap(!wordWrap);
   };
 
-  const increaseFontSize = () => {
-    setFontSize(prev => Math.min(prev + 2, 32));
-  };
-
-  const decreaseFontSize = () => {
-    setFontSize(prev => Math.max(prev - 2, 8));
-  };
-
-  const resetFontSize = () => {
-    setFontSize(14);
+  const handleFont = () => {
+    const fonts = ['monospace', 'sans-serif', 'serif', 'Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'];
+    const currentIndex = fonts.indexOf(fontFamily);
+    const nextIndex = (currentIndex + 1) % fonts.length;
+    setFontFamily(fonts[nextIndex]);
+    toast({
+      description: `Font changed to ${fonts[nextIndex]}`,
+    });
   };
 
   // View menu handlers
   const toggleStatusBar = () => {
     setShowStatusBar(!showStatusBar);
+  };
+
+  const handleZoomIn = () => {
+    setFontSize(prev => Math.min(prev + 2, 48));
+  };
+
+  const handleZoomOut = () => {
+    setFontSize(prev => Math.max(prev - 2, 8));
+  };
+
+  const handleZoomReset = () => {
+    setFontSize(14);
   };
 
   // Calculate line and column for status bar
@@ -236,9 +382,13 @@ export const Notepad = ({ password }: NotepadProps) => {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48 bg-white dark:bg-gray-800 z-50">
+            <DropdownMenuItem onClick={handleNew}>New</DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSave} disabled={isSaving}>
               {isSaving ? 'Saving...' : 'Save'}
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handlePrint}>Print...</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         
@@ -250,11 +400,19 @@ export const Notepad = ({ password }: NotepadProps) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48 bg-white dark:bg-gray-800 z-50">
             <DropdownMenuItem onClick={handleUndo}>Undo</DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleCut}>Cut</DropdownMenuItem>
             <DropdownMenuItem onClick={handleCopy}>Copy</DropdownMenuItem>
             <DropdownMenuItem onClick={handlePaste}>Paste</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleSelectAll}>Select All</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleFind}>Find...</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => performFind(true)}>Find Next</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleReplace}>Replace...</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleGoTo}>Go To...</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSelectAll}>Select All</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleTimeDate}>Time/Date</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -268,9 +426,7 @@ export const Notepad = ({ password }: NotepadProps) => {
             <DropdownMenuItem onClick={toggleWordWrap}>
               {wordWrap ? '✓ ' : ''}Word Wrap
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={increaseFontSize}>Font Size +</DropdownMenuItem>
-            <DropdownMenuItem onClick={decreaseFontSize}>Font Size -</DropdownMenuItem>
-            <DropdownMenuItem onClick={resetFontSize}>Reset Font Size</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleFont}>Font...</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -281,6 +437,10 @@ export const Notepad = ({ password }: NotepadProps) => {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48 bg-white dark:bg-gray-800 z-50">
+            <DropdownMenuItem onClick={handleZoomIn}>Zoom In</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleZoomOut}>Zoom Out</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleZoomReset}>Restore Default Zoom</DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={toggleStatusBar}>
               {showStatusBar ? '✓ ' : ''}Status Bar
             </DropdownMenuItem>
@@ -297,9 +457,10 @@ export const Notepad = ({ password }: NotepadProps) => {
         <>
           <textarea
             ref={textareaRef}
-            className="flex-1 p-2 text-sm font-mono resize-none outline-none xp-scrollbar"
+            className="flex-1 p-2 text-sm resize-none outline-none xp-scrollbar"
             style={{
               fontSize: `${fontSize}px`,
+              fontFamily: fontFamily,
               whiteSpace: wordWrap ? 'pre-wrap' : 'pre',
               overflowWrap: wordWrap ? 'break-word' : 'normal',
               overflowX: wordWrap ? 'hidden' : 'auto'
@@ -311,12 +472,96 @@ export const Notepad = ({ password }: NotepadProps) => {
           
           {/* Status Bar */}
           {showStatusBar && (
-            <div className="flex justify-end items-center px-2 py-1 bg-[hsl(var(--button-face))] border-t border-[hsl(var(--button-shadow))] text-xs">
+            <div className="flex justify-between items-center px-2 py-1 bg-[hsl(var(--button-face))] border-t border-[hsl(var(--button-shadow))] text-xs">
               <span>Ln {getLineAndColumn().line}, Col {getLineAndColumn().col}</span>
+              <span>Zoom: {Math.round((fontSize / 14) * 100)}%</span>
             </div>
           )}
         </>
       )}
+
+      {/* Find Dialog */}
+      <Dialog open={findDialogOpen} onOpenChange={setFindDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Find</DialogTitle>
+            <DialogDescription>Enter text to search for</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="find-text">Find what:</Label>
+              <Input
+                id="find-text"
+                value={findText}
+                onChange={(e) => setFindText(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && performFind()}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => performFind()}>Find Next</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Replace Dialog */}
+      <Dialog open={replaceDialogOpen} onOpenChange={setReplaceDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Replace</DialogTitle>
+            <DialogDescription>Find and replace text</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="replace-find">Find what:</Label>
+              <Input
+                id="replace-find"
+                value={findText}
+                onChange={(e) => setFindText(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="replace-with">Replace with:</Label>
+              <Input
+                id="replace-with"
+                value={replaceText}
+                onChange={(e) => setReplaceText(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => performFind()}>Find Next</Button>
+            <Button variant="outline" onClick={performReplace}>Replace</Button>
+            <Button onClick={performReplaceAll}>Replace All</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Go To Dialog */}
+      <Dialog open={gotoDialogOpen} onOpenChange={setGotoDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Go To Line</DialogTitle>
+            <DialogDescription>Enter line number</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="goto-line">Line number:</Label>
+              <Input
+                id="goto-line"
+                type="number"
+                min="1"
+                value={gotoLineNumber}
+                onChange={(e) => setGotoLineNumber(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && performGoTo()}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={performGoTo}>Go To</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
