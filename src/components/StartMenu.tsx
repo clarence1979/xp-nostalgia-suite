@@ -26,6 +26,7 @@ const programs: Program[] = [
   { name: 'Adaptive Math Tutor', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢' },
   { name: 'Mark Magic AI', url: 'https://mark-magic-ai.lovable.app/', icon: '✨' },
   { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
+  { name: 'Pantry Chef', url: 'https://pantrychef-ai-recipe-7nfz.bolt.host/', icon: '👨‍🍳' },
 ];
 
 export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenuProps) => {
