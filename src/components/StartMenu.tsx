@@ -56,12 +56,12 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
               <ChevronRight className="w-4 h-4" />
               
               {showPrograms && (
-                <div className="absolute left-full top-0 w-96 bg-white border-2 border-[hsl(var(--window-border))] shadow-lg ml-1">
+                <div className="absolute left-full top-0 min-w-max bg-white border-2 border-[hsl(var(--window-border))] shadow-lg ml-1">
                   <div className="py-1">
                     {programs.map((program) => (
                       <div
                         key={program.name}
-                        className="xp-menu-item"
+                        className="xp-menu-item whitespace-nowrap"
                         onClick={() => {
                           onProgramClick(program);
                           onClose();
@@ -73,7 +73,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
                     ))}
                     <div className="border-t border-gray-200 my-1" />
                     <div
-                      className="xp-menu-item"
+                      className="xp-menu-item whitespace-nowrap"
                       onClick={() => {
                         onNotepadClick();
                         onClose();
