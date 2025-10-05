@@ -118,18 +118,69 @@ const Index = () => {
   };
 
   const openNotepad = () => {
-    // Password prompt with instructions
-    const password = prompt('Enter password to access Notepad:\n\nPVCC123 - View-only access\nPVCC321 - Full write access');
+    // Create a custom password dialog
+    const passwordDialog = document.createElement('div');
+    passwordDialog.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #ECE9D8;
+      border: 3px solid;
+      border-color: #FFFFFF #808080 #808080 #FFFFFF;
+      padding: 8px;
+      z-index: 10000;
+      font-family: 'Tahoma', sans-serif;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    `;
     
-    if (password) {
-      if (password === 'PVCC123' || password === 'PVCC321') {
-        setValidatedPassword(password);
-        const accessType = password === 'PVCC321' ? 'Full Access' : 'View Only';
-        openWindow(`Untitled - Notepad (${accessType})`, <Notepad password={password} />, <FileText className="w-4 h-4" />);
-      } else {
-        alert('Incorrect password. Access denied.\n\nValid passwords:\nPVCC123 - View-only access\nPVCC321 - Full write access');
+    passwordDialog.innerHTML = `
+      <div style="background: #0054E3; color: white; padding: 3px 5px; margin: -8px -8px 8px -8px; font-weight: bold; font-size: 11px;">
+        Enter Password
+      </div>
+      <div style="padding: 10px; font-size: 11px;">
+        <div style="margin-bottom: 8px;">Enter password to access Notepad:</div>
+        <div style="margin-bottom: 8px; color: #666;">
+          PVCC123 - View-only access<br/>
+          PVCC321 - Full write access
+        </div>
+        <input type="password" id="notepad-password" style="width: 100%; padding: 3px; border: 1px solid #7F9DB9; font-size: 11px; margin-bottom: 10px;" />
+        <div style="text-align: right;">
+          <button id="password-ok" style="background: #ECE9D8; border: 1px solid; border-color: #FFFFFF #808080 #808080 #FFFFFF; padding: 3px 12px; margin-right: 5px; font-size: 11px; cursor: pointer;">OK</button>
+          <button id="password-cancel" style="background: #ECE9D8; border: 1px solid; border-color: #FFFFFF #808080 #808080 #FFFFFF; padding: 3px 12px; font-size: 11px; cursor: pointer;">Cancel</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(passwordDialog);
+    
+    const input = document.getElementById('notepad-password') as HTMLInputElement;
+    const okBtn = document.getElementById('password-ok');
+    const cancelBtn = document.getElementById('password-cancel');
+    
+    input.focus();
+    
+    const handleSubmit = () => {
+      const password = input.value;
+      document.body.removeChild(passwordDialog);
+      
+      if (password) {
+        if (password === 'PVCC123' || password === 'PVCC321') {
+          setValidatedPassword(password);
+          const accessType = password === 'PVCC321' ? 'Full Access' : 'View Only';
+          openWindow(`Untitled - Notepad (${accessType})`, <Notepad password={password} />, <FileText className="w-4 h-4" />);
+        } else {
+          alert('Incorrect password. Access denied.\n\nValid passwords:\nPVCC123 - View-only access\nPVCC321 - Full write access');
+        }
       }
-    }
+    };
+    
+    okBtn?.addEventListener('click', handleSubmit);
+    cancelBtn?.addEventListener('click', () => document.body.removeChild(passwordDialog));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSubmit();
+      if (e.key === 'Escape') document.body.removeChild(passwordDialog);
+    });
   };
 
   if (isLoading) {
