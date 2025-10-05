@@ -140,10 +140,6 @@ const Index = () => {
       </div>
       <div style="padding: 10px; font-size: 11px;">
         <div style="margin-bottom: 8px;">Enter password to access Notepad:</div>
-        <div style="margin-bottom: 8px; color: #666;">
-          PVCC123 - View-only access<br/>
-          PVCC321 - Full write access
-        </div>
         <input type="password" id="notepad-password" style="width: 100%; padding: 3px; border: 1px solid #7F9DB9; font-size: 11px; margin-bottom: 10px;" />
         <div style="text-align: right;">
           <button id="password-ok" style="background: #ECE9D8; border: 1px solid; border-color: #FFFFFF #808080 #808080 #FFFFFF; padding: 3px 12px; margin-right: 5px; font-size: 11px; cursor: pointer;">OK</button>
