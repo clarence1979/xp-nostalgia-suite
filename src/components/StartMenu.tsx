@@ -50,6 +50,7 @@ const categories: Category[] = [
       { name: 'Physics Simulator', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️' },
       { name: 'Tutoring Chatbot', url: 'https://new-chat-kb4v.bolt.host/', icon: '🤖' },
       { name: 'Math Genius', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢' },
+      { name: 'Code Class', url: 'https://new-chat-oj8v.bolt.host', icon: '💻' },
     ]
   },
   {
