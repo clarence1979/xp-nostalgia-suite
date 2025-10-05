@@ -70,6 +70,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [submenuTop, setSubmenuTop] = useState(0);
+  const [categorySubmenuTop, setCategorySubmenuTop] = useState(0);
 
   useState(() => {
     const checkMobile = () => {
@@ -87,6 +88,14 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
       setSubmenuTop(rect.top);
     }
     setShowPrograms(true);
+  };
+
+  const handleCategoryHover = (categoryName: string, event: React.MouseEvent) => {
+    if (!isMobile) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      setCategorySubmenuTop(rect.top);
+    }
+    setHoveredCategory(categoryName);
   };
 
   return (
@@ -127,7 +136,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                     <div
                       key={category.name}
                       className="xp-menu-item whitespace-nowrap relative"
-                      onMouseEnter={() => !isMobile && setHoveredCategory(category.name)}
+                      onMouseEnter={(e) => !isMobile ? handleCategoryHover(category.name, e) : null}
                       onClick={() => isMobile && setHoveredCategory(hoveredCategory === category.name ? null : category.name)}
                     >
                       <span className="text-xl">{category.icon}</span>
@@ -137,7 +146,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                       {hoveredCategory === category.name && (
                         <div 
                           className={`${isMobile ? 'relative left-0 w-full' : 'fixed w-[280px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
-                          style={!isMobile ? { left: '620px', top: `${submenuTop}px` } : undefined}
+                          style={!isMobile ? { left: '620px', top: `${categorySubmenuTop}px` } : undefined}
                           onMouseLeave={() => !isMobile && setHoveredCategory(null)}
                         >
                           <div className="py-1">
