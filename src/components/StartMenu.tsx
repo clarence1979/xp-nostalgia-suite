@@ -82,17 +82,19 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
             <div
               className="xp-menu-item relative"
               onMouseEnter={() => setShowPrograms(true)}
-              onMouseLeave={() => {
-                setShowPrograms(false);
-                setHoveredCategory(null);
-              }}
             >
               <Folder className="w-5 h-5" />
               <span className="flex-1 text-sm">All Programs</span>
               <ChevronRight className="w-4 h-4" />
               
               {showPrograms && (
-                <div className="fixed left-[540px] bottom-[40px] w-[300px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50">
+                <div 
+                  className="fixed left-[540px] bottom-[40px] w-[300px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50"
+                  onMouseLeave={() => {
+                    setShowPrograms(false);
+                    setHoveredCategory(null);
+                  }}
+                >
                   <div className="py-1">
                     {categories.map((category) => (
                       <div
@@ -105,7 +107,10 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
                         <ChevronRight className="w-4 h-4" />
                         
                         {hoveredCategory === category.name && (
-                          <div className="fixed left-[840px] bottom-[40px] w-[280px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50">
+                          <div 
+                            className="fixed left-[840px] bottom-[40px] w-[280px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50"
+                            onMouseLeave={() => setHoveredCategory(null)}
+                          >
                             <div className="py-1">
                               {category.programs.map((program) => (
                                 <div
