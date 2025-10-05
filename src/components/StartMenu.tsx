@@ -87,7 +87,10 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
   const handleCategoryHover = (categoryName: string, event: React.MouseEvent) => {
     if (!isMobile) {
       const rect = event.currentTarget.getBoundingClientRect();
-      setCategorySubmenuTop(rect.top);
+      const parentRect = document.getElementById('all-programs-submenu')?.getBoundingClientRect();
+      if (parentRect) {
+        setCategorySubmenuTop(rect.top - parentRect.top);
+      }
     }
     setHoveredCategory(categoryName);
   };
@@ -117,7 +120,9 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           </div>
               
           {showPrograms && (
-            <div className={`${isMobile ? 'pl-4 pb-2' : 'fixed w-[300px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[calc(100vh-100px)]'} overflow-y-auto z-50`}
+            <div 
+              id="all-programs-submenu"
+              className={`${isMobile ? 'pl-4 pb-2' : 'fixed w-[300px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[calc(100vh-100px)]'} overflow-y-auto z-50`}
               style={!isMobile ? { left: '320px', top: `${submenuTop}px` } : undefined}
               onMouseLeave={() => !isMobile && (() => {
                 setShowPrograms(false);
@@ -139,8 +144,8 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                         
                     {hoveredCategory === category.name && (
                       <div 
-                        className={`${isMobile ? 'pl-6 pb-2 bg-gray-50' : 'fixed w-[280px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[400px]'} overflow-y-auto z-50`}
-                        style={!isMobile ? { left: '620px', top: `${categorySubmenuTop}px` } : undefined}
+                        className={`${isMobile ? 'pl-6 pb-2 bg-gray-50' : 'absolute w-[280px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[400px]'} overflow-y-auto z-50`}
+                        style={!isMobile ? { left: '300px', top: `${categorySubmenuTop}px` } : undefined}
                         onMouseLeave={() => !isMobile && setHoveredCategory(null)}
                       >
                         <div className="py-1">
