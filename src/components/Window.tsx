@@ -129,7 +129,7 @@ export const Window = ({
         top: position.y,
         width: size.width,
         height: size.height,
-        zIndex: active ? 1000 : 999,
+        zIndex: active ? 100 : 10,
       }}
       onClick={onFocus}
     >
