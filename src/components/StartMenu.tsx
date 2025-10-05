@@ -4,7 +4,13 @@ import { User, Folder, HardDrive, Globe, Settings, HelpCircle, Search, Terminal,
 interface Program {
   name: string;
   url: string;
-  icon: React.ReactNode;
+  icon: string;
+}
+
+interface Category {
+  name: string;
+  icon: string;
+  programs: Program[];
 }
 
 interface StartMenuProps {
@@ -13,24 +19,50 @@ interface StartMenuProps {
   onNotepadClick: () => void;
 }
 
-const programs: Program[] = [
-  { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝' },
-  { name: 'Historical Figure Chat', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
-  { name: 'DreamTales Bedtime Stories', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚' },
-  { name: 'Tello Drone Voice Control', url: 'https://tello-drone-voice-te-r9q2.bolt.host', icon: '🚁' },
-  { name: 'Auslan Gesture Recognition', url: 'https://auslan-gesture-recog-g78u.bolt.host', icon: '👋' },
-  { name: 'Voice to 3D Print', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️' },
-  { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐' },
-  { name: 'Interactive 3D Physics', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️' },
-  { name: 'Educational Chatbot', url: 'https://educational-chatbot-vtkh.bolt.host/', icon: '🤖' },
-  { name: 'Adaptive Math Tutor', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢' },
-  { name: 'Mark Magic AI', url: 'https://mark-magic-ai.lovable.app/', icon: '✨' },
-  { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
-  { name: 'Pantry Chef', url: 'https://pantrychef-ai-recipe-7nfz.bolt.host/', icon: '👨‍🍳' },
+const categories: Category[] = [
+  {
+    name: 'General Tools',
+    icon: '🛠️',
+    programs: [
+      { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝' },
+      { name: 'Tool Hub', url: 'https://comprehensive-online-921b.bolt.host/', icon: '🔧' },
+    ]
+  },
+  {
+    name: 'Teacher Tools',
+    icon: '👨‍🏫',
+    programs: [
+      { name: 'Magic Marker', url: 'https://mark-magic-ai.lovable.app/', icon: '✨' },
+      { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
+      { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊' },
+    ]
+  },
+  {
+    name: 'Secondary School Subjects',
+    icon: '🎓',
+    programs: [
+      { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
+      { name: 'Drone Programming', url: 'https://tello-drone-voice-te-r9q2.bolt.host', icon: '🚁' },
+      { name: 'AUSLAN', url: 'https://auslan-gesture-recog-g78u.bolt.host', icon: '👋' },
+      { name: 'Voice to 3D Printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️' },
+      { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐' },
+      { name: 'Physics Simulator', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️' },
+      { name: 'Tutoring Chatbot', url: 'https://educational-chatbot-vtkh.bolt.host/', icon: '🤖' },
+      { name: 'Math Genius', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢' },
+    ]
+  },
+  {
+    name: 'Primary School',
+    icon: '🏫',
+    programs: [
+      { name: 'Dream Tales', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚' },
+    ]
+  },
 ];
 
 export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenuProps) => {
   const [showPrograms, setShowPrograms] = useState(false);
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
   return (
     <>
@@ -50,26 +82,47 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
             <div
               className="xp-menu-item relative"
               onMouseEnter={() => setShowPrograms(true)}
-              onMouseLeave={() => setShowPrograms(false)}
+              onMouseLeave={() => {
+                setShowPrograms(false);
+                setHoveredCategory(null);
+              }}
             >
               <Folder className="w-5 h-5" />
               <span className="flex-1 text-sm">All Programs</span>
               <ChevronRight className="w-4 h-4" />
               
               {showPrograms && (
-                <div className="absolute left-full bottom-0 w-[500px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50" style={{ marginBottom: '-60px' }}>
+                <div className="absolute left-full bottom-0 w-[300px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50" style={{ marginBottom: '-60px' }}>
                   <div className="py-1">
-                    {programs.map((program) => (
+                    {categories.map((category) => (
                       <div
-                        key={program.name}
-                        className="xp-menu-item whitespace-nowrap"
-                        onClick={() => {
-                          onProgramClick(program);
-                          onClose();
-                        }}
+                        key={category.name}
+                        className="xp-menu-item whitespace-nowrap relative"
+                        onMouseEnter={() => setHoveredCategory(category.name)}
                       >
-                        <span className="text-xl">{program.icon}</span>
-                        <span className="text-sm">{program.name}</span>
+                        <span className="text-xl">{category.icon}</span>
+                        <span className="text-sm flex-1">{category.name}</span>
+                        <ChevronRight className="w-4 h-4" />
+                        
+                        {hoveredCategory === category.name && (
+                          <div className="absolute left-full top-0 w-[280px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50">
+                            <div className="py-1">
+                              {category.programs.map((program) => (
+                                <div
+                                  key={program.name}
+                                  className="xp-menu-item whitespace-nowrap"
+                                  onClick={() => {
+                                    onProgramClick(program);
+                                    onClose();
+                                  }}
+                                >
+                                  <span className="text-xl">{program.icon}</span>
+                                  <span className="text-sm">{program.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                     <div className="border-t border-gray-200 my-1" />
