@@ -7,9 +7,20 @@ const corsHeaders = {
 };
 
 const NOTEPAD_ID = '00000000-0000-0000-0000-000000000001';
-// Password is hashed to make it less obvious in code
-// This is the hash of "PVCC123" - still not perfect security, but better than plaintext
-const VALID_PASSWORD = 'PVCC123';
+
+// Password constants - stored server-side for security
+const VIEW_ONLY_PASSWORD = 'PVCC123';
+const WRITE_ACCESS_PASSWORD = 'PVCC321';
+
+// Helper function to validate password and return access level
+function validatePassword(password: string): { valid: boolean; accessLevel: 'view' | 'write' | null } {
+  if (password === WRITE_ACCESS_PASSWORD) {
+    return { valid: true, accessLevel: 'write' };
+  } else if (password === VIEW_ONLY_PASSWORD) {
+    return { valid: true, accessLevel: 'view' };
+  }
+  return { valid: false, accessLevel: null };
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -26,11 +37,13 @@ serve(async (req) => {
 
     const { password, action, content } = await req.json();
 
-    // Validate password
-    if (password !== VALID_PASSWORD) {
+    // Validate password and get access level
+    const { valid, accessLevel } = validatePassword(password);
+    
+    if (!valid) {
       console.log('Invalid password attempt');
       return new Response(
-        JSON.stringify({ error: 'Invalid password' }),
+        JSON.stringify({ error: 'Access denied: Invalid password' }),
         { 
           status: 401, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -38,7 +51,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Notepad ${action} request with valid password`);
+    console.log(`Notepad ${action} request with ${accessLevel} access`);
 
     // Handle GET request (read content)
     if (action === 'get') {
@@ -60,7 +73,10 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ content: data.content }),
+        JSON.stringify({ 
+          content: data.content,
+          accessLevel: accessLevel 
+        }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
@@ -69,6 +85,18 @@ serve(async (req) => {
 
     // Handle UPDATE request (save content)
     if (action === 'update') {
+      // Check if user has write access
+      if (accessLevel !== 'write') {
+        console.log('Write access denied for view-only user');
+        return new Response(
+          JSON.stringify({ error: 'Access denied: View-only access. Use password PVCC321 for write access.' }),
+          { 
+            status: 403, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
       if (content === undefined) {
         return new Response(
           JSON.stringify({ error: 'Content is required for update' }),

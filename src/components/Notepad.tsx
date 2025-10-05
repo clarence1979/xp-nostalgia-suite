@@ -42,9 +42,12 @@ export const Notepad = ({ password }: NotepadProps) => {
   const [replaceText, setReplaceText] = useState('');
   const [gotoLineNumber, setGotoLineNumber] = useState('');
   const [fontFamily, setFontFamily] = useState('monospace');
+  const [accessLevel, setAccessLevel] = useState<'view' | 'write'>('view');
   const { toast } = useToast();
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const isReadOnly = accessLevel === 'view';
 
   // Load content from database via edge function
   useEffect(() => {
@@ -66,6 +69,14 @@ export const Notepad = ({ password }: NotepadProps) => {
           });
         } else if (data) {
           setContent(data.content || '');
+          setAccessLevel(data.accessLevel || 'view');
+          
+          if (data.accessLevel === 'view') {
+            toast({
+              title: 'View-only access',
+              description: 'You have read-only access to this notepad',
+            });
+          }
         }
       } catch (err) {
         console.error('Failed to load notepad:', err);
@@ -84,6 +95,16 @@ export const Notepad = ({ password }: NotepadProps) => {
 
   // Manual save function
   const handleSave = async () => {
+    if (isReadOnly) {
+      toast({
+        title: 'Access denied',
+        description: 'You have view-only access. Use password PVCC321 for write access.',
+        variant: 'destructive',
+      });
+      setFileMenuOpen(false);
+      return;
+    }
+
     setIsSaving(true);
     try {
       const { error } = await supabase.functions.invoke('notepad', {
@@ -98,7 +119,7 @@ export const Notepad = ({ password }: NotepadProps) => {
         console.error('Error saving notepad:', error);
         toast({
           title: 'Error',
-          description: 'Failed to save notepad content',
+          description: error.message || 'Failed to save notepad content',
           variant: 'destructive',
         });
       } else {
@@ -340,7 +361,7 @@ export const Notepad = ({ password }: NotepadProps) => {
 
   // Auto-save content to database via edge function with debouncing
   useEffect(() => {
-    if (isLoading) return; // Don't save during initial load
+    if (isLoading || isReadOnly) return; // Don't save during initial load or if read-only
 
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
@@ -369,7 +390,7 @@ export const Notepad = ({ password }: NotepadProps) => {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [content, isLoading, password]);
+  }, [content, isLoading, isReadOnly, password]);
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -382,10 +403,10 @@ export const Notepad = ({ password }: NotepadProps) => {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48 bg-white dark:bg-gray-800 z-50">
-            <DropdownMenuItem onClick={handleNew}>New</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleNew} disabled={isReadOnly}>New</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSave} disabled={isSaving}>
-              {isSaving ? 'Saving...' : 'Save'}
+            <DropdownMenuItem onClick={handleSave} disabled={isSaving || isReadOnly}>
+              {isSaving ? 'Saving...' : isReadOnly ? 'Save (Read-only)' : 'Save'}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handlePrint}>Print...</DropdownMenuItem>
@@ -399,20 +420,20 @@ export const Notepad = ({ password }: NotepadProps) => {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48 bg-white dark:bg-gray-800 z-50">
-            <DropdownMenuItem onClick={handleUndo}>Undo</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleUndo} disabled={isReadOnly}>Undo</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleCut}>Cut</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleCut} disabled={isReadOnly}>Cut</DropdownMenuItem>
             <DropdownMenuItem onClick={handleCopy}>Copy</DropdownMenuItem>
-            <DropdownMenuItem onClick={handlePaste}>Paste</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
+            <DropdownMenuItem onClick={handlePaste} disabled={isReadOnly}>Paste</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete} disabled={isReadOnly}>Delete</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleFind}>Find...</DropdownMenuItem>
             <DropdownMenuItem onClick={() => performFind(true)}>Find Next</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleReplace}>Replace...</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleReplace} disabled={isReadOnly}>Replace...</DropdownMenuItem>
             <DropdownMenuItem onClick={handleGoTo}>Go To...</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSelectAll}>Select All</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleTimeDate}>Time/Date</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleTimeDate} disabled={isReadOnly}>Time/Date</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -463,17 +484,25 @@ export const Notepad = ({ password }: NotepadProps) => {
               fontFamily: fontFamily,
               whiteSpace: wordWrap ? 'pre-wrap' : 'pre',
               overflowWrap: wordWrap ? 'break-word' : 'normal',
-              overflowX: wordWrap ? 'hidden' : 'auto'
+              overflowX: wordWrap ? 'hidden' : 'auto',
+              backgroundColor: isReadOnly ? '#f5f5f5' : 'white',
+              cursor: isReadOnly ? 'not-allowed' : 'text'
             }}
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Type here..."
+            onChange={(e) => !isReadOnly && setContent(e.target.value)}
+            placeholder={isReadOnly ? 'View-only mode - Use password PVCC321 for write access' : 'Type here...'}
+            readOnly={isReadOnly}
           />
           
           {/* Status Bar */}
           {showStatusBar && (
             <div className="flex justify-between items-center px-2 py-1 bg-[hsl(var(--button-face))] border-t border-[hsl(var(--button-shadow))] text-xs">
-              <span>Ln {getLineAndColumn().line}, Col {getLineAndColumn().col}</span>
+              <div className="flex gap-4">
+                <span>Ln {getLineAndColumn().line}, Col {getLineAndColumn().col}</span>
+                <span className={isReadOnly ? 'text-orange-600 font-semibold' : 'text-green-600'}>
+                  {isReadOnly ? '🔒 Read-only' : '✓ Writable'}
+                </span>
+              </div>
               <span>Zoom: {Math.round((fontSize / 14) * 100)}%</span>
             </div>
           )}

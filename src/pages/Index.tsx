@@ -118,15 +118,16 @@ const Index = () => {
   };
 
   const openNotepad = () => {
-    // Password prompt
-    const password = prompt('Enter password to access Notepad:');
+    // Password prompt with instructions
+    const password = prompt('Enter password to access Notepad:\n\nPVCC123 - View-only access\nPVCC321 - Full write access');
     
     if (password) {
-      if (password === 'PVCC123') {
+      if (password === 'PVCC123' || password === 'PVCC321') {
         setValidatedPassword(password);
-        openWindow('Untitled - Notepad', <Notepad password={password} />, <FileText className="w-4 h-4" />);
+        const accessType = password === 'PVCC321' ? 'Full Access' : 'View Only';
+        openWindow(`Untitled - Notepad (${accessType})`, <Notepad password={password} />, <FileText className="w-4 h-4" />);
       } else {
-        alert('Incorrect password. Access denied.');
+        alert('Incorrect password. Access denied.\n\nValid passwords:\nPVCC123 - View-only access\nPVCC321 - Full write access');
       }
     }
   };
