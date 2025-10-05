@@ -14,6 +14,7 @@ interface StartMenuProps {
 }
 
 const programs: Program[] = [
+  { name: 'Classic Display', url: 'https://ba45d991-19a1-476a-891f-59137477946c.lovable.app/', icon: '🖥️' },
   { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝' },
   { name: 'Historical Figure Chat', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
   { name: 'DreamTales Bedtime Stories', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚' },
