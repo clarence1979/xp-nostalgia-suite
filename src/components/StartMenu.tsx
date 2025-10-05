@@ -14,7 +14,6 @@ interface StartMenuProps {
 }
 
 const programs: Program[] = [
-  { name: 'Classic Display', url: 'https://ba45d991-19a1-476a-891f-59137477946c.lovable.app/', icon: '🖥️' },
   { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝' },
   { name: 'Historical Figure Chat', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
   { name: 'DreamTales Bedtime Stories', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚' },
@@ -86,6 +85,16 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
                   </div>
                 </div>
               )}
+            </div>
+            <div
+              className="xp-menu-item"
+              onClick={() => {
+                onProgramClick({ name: 'Classic Display', url: 'https://ba45d991-19a1-476a-891f-59137477946c.lovable.app/', icon: '🖥️' });
+                onClose();
+              }}
+            >
+              <span className="text-xl">🖥️</span>
+              <span className="text-sm">Classic Display</span>
             </div>
           </div>
         </div>
