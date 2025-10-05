@@ -101,6 +101,7 @@ const Index = () => {
         src={program.url}
         className="w-full h-full border-none"
         title={program.name}
+        allow="camera; microphone; geolocation; fullscreen"
       />,
       <span className="text-base">{program.icon}</span>
     );
