@@ -48,7 +48,7 @@ const categories: Category[] = [
       { name: 'Voice to 3D Printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️' },
       { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐' },
       { name: 'Physics Simulator', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️' },
-      { name: 'Tutoring Chatbot', url: 'https://educational-chatbot-vtkh.bolt.host/', icon: '🤖' },
+      { name: 'Tutoring Chatbot', url: 'https://new-chat-kb4v.bolt.host/', icon: '🤖' },
       { name: 'Math Genius', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢' },
     ]
   },
