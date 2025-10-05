@@ -28,27 +28,52 @@ export const Window = ({
   const [size, setSize] = useState(initialSize);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [resizeDirection, setResizeDirection] = useState('');
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [preMaximize, setPreMaximize] = useState({ position: initialPosition, size: initialSize });
   const windowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
+      if (isDragging && !isMaximized) {
         setPosition({
           x: e.clientX - dragOffset.x,
           y: e.clientY - dragOffset.y,
         });
       }
       if (isResizing) {
-        const newWidth = Math.max(300, e.clientX - position.x);
-        const newHeight = Math.max(200, e.clientY - position.y);
+        let newWidth = size.width;
+        let newHeight = size.height;
+        let newX = position.x;
+        let newY = position.y;
+
+        if (resizeDirection.includes('e')) {
+          newWidth = Math.max(300, e.clientX - position.x);
+        }
+        if (resizeDirection.includes('s')) {
+          newHeight = Math.max(200, e.clientY - position.y);
+        }
+        if (resizeDirection.includes('w')) {
+          const delta = e.clientX - position.x;
+          newWidth = Math.max(300, size.width - delta);
+          newX = position.x + delta;
+        }
+        if (resizeDirection.includes('n')) {
+          const delta = e.clientY - position.y;
+          newHeight = Math.max(200, size.height - delta);
+          newY = position.y + delta;
+        }
+
         setSize({ width: newWidth, height: newHeight });
+        setPosition({ x: newX, y: newY });
       }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsResizing(false);
+      setResizeDirection('');
     };
 
     if (isDragging || isResizing) {
@@ -60,7 +85,7 @@ export const Window = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, dragOffset, position]);
+  }, [isDragging, isResizing, dragOffset, position, size, resizeDirection, isMaximized]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (onFocus) onFocus();
@@ -74,9 +99,25 @@ export const Window = ({
     }
   };
 
-  const handleResizeMouseDown = (e: React.MouseEvent) => {
+  const handleResizeMouseDown = (e: React.MouseEvent, direction: string) => {
     e.stopPropagation();
     setIsResizing(true);
+    setResizeDirection(direction);
+  };
+
+  const handleMaximize = () => {
+    if (isMaximized) {
+      // Restore
+      setPosition(preMaximize.position);
+      setSize(preMaximize.size);
+      setIsMaximized(false);
+    } else {
+      // Maximize
+      setPreMaximize({ position, size });
+      setPosition({ x: 0, y: 0 });
+      setSize({ width: window.innerWidth, height: window.innerHeight - 40 }); // 40px for taskbar
+      setIsMaximized(true);
+    }
   };
 
   return (
@@ -116,6 +157,7 @@ export const Window = ({
             className="w-5 h-5 flex items-center justify-center bg-[hsl(var(--button-face))] border border-white hover:brightness-105 active:brightness-95"
             onClick={(e) => {
               e.stopPropagation();
+              handleMaximize();
             }}
           >
             <Square className="w-2.5 h-2.5" />
@@ -133,10 +175,47 @@ export const Window = ({
       </div>
       <div className="h-[calc(100%-28px)] overflow-hidden bg-white relative">
         {children}
-        <div
-          className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"
-          onMouseDown={handleResizeMouseDown}
-        />
+        
+        {/* Resize handles - only show when not maximized */}
+        {!isMaximized && (
+          <>
+            {/* Corner handles */}
+            <div
+              className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'se')}
+            />
+            <div
+              className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'ne')}
+            />
+            <div
+              className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'nw')}
+            />
+            <div
+              className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
+            />
+            
+            {/* Edge handles */}
+            <div
+              className="absolute top-0 left-4 right-4 h-1 cursor-n-resize"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'n')}
+            />
+            <div
+              className="absolute bottom-0 left-4 right-4 h-1 cursor-s-resize"
+              onMouseDown={(e) => handleResizeMouseDown(e, 's')}
+            />
+            <div
+              className="absolute left-0 top-4 bottom-4 w-1 cursor-w-resize"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'w')}
+            />
+            <div
+              className="absolute right-0 top-4 bottom-4 w-1 cursor-e-resize"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'e')}
+            />
+          </>
+        )}
       </div>
     </div>
   );
