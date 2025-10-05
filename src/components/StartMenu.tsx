@@ -92,7 +92,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
               <ChevronRight className="w-4 h-4" />
               
               {showPrograms && (
-                <div className="absolute left-full bottom-0 w-[300px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50" style={{ marginBottom: '-60px' }}>
+                <div className="fixed left-[540px] bottom-[40px] w-[300px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50">
                   <div className="py-1">
                     {categories.map((category) => (
                       <div
@@ -105,7 +105,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
                         <ChevronRight className="w-4 h-4" />
                         
                         {hoveredCategory === category.name && (
-                          <div className="absolute left-full top-0 w-[280px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50">
+                          <div className="fixed left-[840px] bottom-[40px] w-[280px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50">
                             <div className="py-1">
                               {category.programs.map((program) => (
                                 <div
