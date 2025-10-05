@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import logo from '@/assets/cla_sol.png';
 
 interface TaskbarProps {
   onStartClick: () => void;
@@ -63,6 +64,21 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick }: TaskbarProps) 
 
       {/* System Tray */}
       <div className="w-px h-[32px] bg-[#0831D9]" />
+      
+      {/* Logo */}
+      <a 
+        href="https://clarence.guru" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="flex items-center h-[32px] px-2 hover:bg-white/10 rounded-sm transition-colors"
+      >
+        <img 
+          src={logo} 
+          alt="Clarence's Solutions" 
+          className={isMobile ? 'h-6' : 'h-7'}
+        />
+      </a>
+      
       <div className={`flex items-center gap-2 ${isMobile ? 'px-1' : 'px-3'} h-[32px] bg-[#12B2E8] rounded-sm border border-[#0831D9]`}>
         <span className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-white font-bold`}>
           {time.toLocaleTimeString('en-US', { 
