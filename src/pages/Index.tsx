@@ -4,6 +4,7 @@ import { StartMenu } from '@/components/StartMenu';
 import { Taskbar } from '@/components/Taskbar';
 import { DesktopIcon } from '@/components/DesktopIcon';
 import { Notepad } from '@/components/Notepad';
+import { Browser } from '@/components/Browser';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -154,7 +155,7 @@ const Index = () => {
         <DesktopIcon
           icon={<Globe className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-400`} />}
           label="Internet Explorer"
-          onClick={() => openWindow('Internet Explorer', <div className="p-4">Internet Explorer</div>, <Globe className="w-4 h-4" />)}
+          onClick={() => openWindow('Internet Explorer', <Browser />, <Globe className="w-4 h-4" />)}
           position={isMobile ? { x: 10, y: 250 } : { x: 20, y: 320 }}
         />
         <DesktopIcon
