@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Window } from '@/components/Window';
 import { StartMenu } from '@/components/StartMenu';
 import { Taskbar } from '@/components/Taskbar';
 import { DesktopIcon } from '@/components/DesktopIcon';
 import { Notepad } from '@/components/Notepad';
 import { Browser } from '@/components/Browser';
+import { LoadingScreen } from '@/components/LoadingScreen';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -54,7 +55,15 @@ const Index = () => {
   const [windows, setWindows] = useState<OpenWindow[]>([]);
   const [nextWindowId, setNextWindowId] = useState(1);
   const [validatedPassword, setValidatedPassword] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const openWindow = (title: string, content: React.ReactNode, icon?: React.ReactNode) => {
     const id = `window-${nextWindowId}`;
@@ -121,6 +130,10 @@ const Index = () => {
       }
     }
   };
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div
