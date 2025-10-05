@@ -57,7 +57,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
               <ChevronRight className="w-4 h-4" />
               
               {showPrograms && (
-                <div className="absolute left-full top-0 w-[500px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg">
+                <div className="absolute left-full bottom-0 w-[500px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[600px] overflow-y-auto">
                   <div className="py-1">
                     {programs.map((program) => (
                       <div
