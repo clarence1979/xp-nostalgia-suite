@@ -116,7 +116,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
             {showPrograms && (
               <div 
                 className={`${isMobile ? 'relative left-0 w-full' : 'fixed w-[300px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
-                style={!isMobile ? { left: '318px', top: `${submenuTop}px` } : undefined}
+                style={!isMobile ? { left: '320px', top: `${submenuTop}px` } : undefined}
                 onMouseLeave={() => !isMobile && (() => {
                   setShowPrograms(false);
                   setHoveredCategory(null);
@@ -137,7 +137,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                       {hoveredCategory === category.name && (
                         <div 
                           className={`${isMobile ? 'relative left-0 w-full' : 'fixed w-[280px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
-                          style={!isMobile ? { left: '616px', top: `${submenuTop}px` } : undefined}
+                          style={!isMobile ? { left: '620px', top: `${submenuTop}px` } : undefined}
                           onMouseLeave={() => !isMobile && setHoveredCategory(null)}
                         >
                           <div className="py-1">
