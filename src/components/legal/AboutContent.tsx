@@ -54,9 +54,10 @@ export const AboutContent = () => {
           <h2 className="text-lg font-semibold mb-2">Support & Contact</h2>
           <p className="text-gray-700">
             Need help or have questions?<br />
-            <strong>Email:</strong> support@teachingtools.dev<br />
-            <strong>Technical Support:</strong> Available during school hours (AEST/AEDT)<br />
-            <strong>Feedback:</strong> We welcome your suggestions at feedback@teachingtools.dev
+            <strong>Contact:</strong>{' '}
+            <a href="https://clarence.guru/#contact" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              https://clarence.guru/#contact
+            </a>
           </p>
         </section>
 
