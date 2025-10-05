@@ -95,77 +95,76 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className={`fixed ${isMobile ? 'inset-0 top-auto bottom-0 max-h-[80vh]' : 'bottom-[40px] left-0 w-[320px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg z-50 ${isMobile ? 'rounded-t-lg' : 'rounded-tr-lg'} overflow-y-auto`}>
-        <div className={`${isMobile ? 'p-3' : 'p-4'} border-b border-gray-200`}>
+      <div className={`fixed ${isMobile ? 'inset-x-0 bottom-0 max-h-[85vh]' : 'bottom-[40px] left-0 w-[320px]'} bg-white ${isMobile ? 'border-t-2' : 'border-2'} border-[hsl(var(--window-border))] shadow-lg z-50 ${isMobile ? 'rounded-t-xl' : 'rounded-tr-lg'} flex flex-col`}>
+        <div className={`${isMobile ? 'p-4' : 'p-4'} border-b border-gray-200 flex-shrink-0`}>
           <div className="flex items-center gap-3">
-            <div className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} rounded bg-blue-500 flex items-center justify-center`}>
-              <User className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} text-white`} />
+            <div className={`${isMobile ? 'w-12 h-12' : 'w-12 h-12'} rounded bg-blue-500 flex items-center justify-center`}>
+              <User className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} text-white`} />
             </div>
-            <span className={`font-bold ${isMobile ? 'text-base' : 'text-sm'}`}>Teachingtools.dev</span>
+            <span className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'}`}>Teachingtools.dev</span>
           </div>
         </div>
         
-        <div className="py-2">
+        <div className={`py-2 overflow-y-auto flex-1 ${isMobile ? 'px-2' : ''}`}>
           <div
-            className="xp-menu-item relative"
-            onMouseEnter={() => !isMobile && handleShowPrograms()}
-            onClick={() => isMobile && setShowPrograms(!showPrograms)}
+            className={`xp-menu-item ${isMobile ? 'text-base py-3' : ''}`}
+            onClick={() => setShowPrograms(!showPrograms)}
             id="all-programs-item"
           >
-            <Folder className="w-5 h-5" />
-            <span className="flex-1 text-sm">All Programs</span>
-            <ChevronRight className="w-4 h-4" />
-              
-            {showPrograms && (
-              <div 
-                className={`${isMobile ? 'relative left-0 w-full border-t mt-1' : 'fixed w-[300px] border-2'} bg-white border-[hsl(var(--window-border))] shadow-lg ${isMobile ? 'max-h-[50vh]' : 'max-h-[calc(100vh-100px)]'} overflow-y-auto z-50`}
-                style={!isMobile ? { left: '320px', top: `${submenuTop}px` } : undefined}
-                onMouseLeave={() => !isMobile && (() => {
-                  setShowPrograms(false);
-                  setHoveredCategory(null);
-                })()}
-              >
-                <div className="py-1">
-                  {categories.map((category) => (
-                    <div
-                      key={category.name}
-                      className="xp-menu-item whitespace-nowrap relative"
-                      onMouseEnter={(e) => !isMobile ? handleCategoryHover(category.name, e) : null}
-                      onClick={() => isMobile && setHoveredCategory(hoveredCategory === category.name ? null : category.name)}
-                    >
-                      <span className="text-xl">{category.icon}</span>
-                      <span className="text-sm flex-1">{category.name}</span>
-                      <ChevronRight className="w-4 h-4" />
-                        
-                      {hoveredCategory === category.name && (
-                        <div 
-                          className={`${isMobile ? 'relative left-0 w-full border-t' : 'fixed w-[280px] border-2'} bg-white border-[hsl(var(--window-border))] shadow-lg ${isMobile ? 'max-h-[40vh]' : 'max-h-[400px]'} overflow-y-auto z-50`}
-                          style={!isMobile ? { left: '620px', top: `${categorySubmenuTop}px` } : undefined}
-                          onMouseLeave={() => !isMobile && setHoveredCategory(null)}
-                        >
-                          <div className="py-1">
-                            {category.programs.map((program) => (
-                              <div
-                                key={program.name}
-                                className="xp-menu-item whitespace-nowrap"
-                                onClick={() => {
-                                  onProgramClick(program);
-                                  onClose();
-                                }}
-                              >
-                                <span className="text-xl">{program.icon}</span>
-                                <span className="text-sm">{program.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <Folder className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'}`} />
+            <span className={`flex-1 ${isMobile ? 'text-base' : 'text-sm'}`}>All Programs</span>
+            <ChevronRight className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} ${showPrograms ? 'rotate-90' : ''} transition-transform`} />
           </div>
+              
+          {showPrograms && (
+            <div className={`${isMobile ? 'pl-4 pb-2' : 'fixed w-[300px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[calc(100vh-100px)]'} overflow-y-auto z-50`}
+              style={!isMobile ? { left: '320px', top: `${submenuTop}px` } : undefined}
+              onMouseLeave={() => !isMobile && (() => {
+                setShowPrograms(false);
+                setHoveredCategory(null);
+              })()}
+            >
+              <div className="py-1">
+                {categories.map((category) => (
+                  <div key={category.name}>
+                    <div
+                      className={`xp-menu-item ${isMobile ? 'text-base py-3' : 'whitespace-nowrap'} relative`}
+                      onMouseEnter={(e) => !isMobile ? handleCategoryHover(category.name, e) : null}
+                      onClick={() => setHoveredCategory(hoveredCategory === category.name ? null : category.name)}
+                    >
+                      <span className={isMobile ? 'text-2xl' : 'text-xl'}>{category.icon}</span>
+                      <span className={`${isMobile ? 'text-base' : 'text-sm'} flex-1`}>{category.name}</span>
+                      <ChevronRight className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} ${hoveredCategory === category.name ? 'rotate-90' : ''} transition-transform`} />
+                    </div>
+                        
+                    {hoveredCategory === category.name && (
+                      <div 
+                        className={`${isMobile ? 'pl-6 pb-2 bg-gray-50' : 'fixed w-[280px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[400px]'} overflow-y-auto z-50`}
+                        style={!isMobile ? { left: '620px', top: `${categorySubmenuTop}px` } : undefined}
+                        onMouseLeave={() => !isMobile && setHoveredCategory(null)}
+                      >
+                        <div className="py-1">
+                          {category.programs.map((program) => (
+                            <div
+                              key={program.name}
+                              className={`xp-menu-item ${isMobile ? 'text-base py-3 whitespace-normal' : 'whitespace-nowrap'}`}
+                              onClick={() => {
+                                onProgramClick(program);
+                                onClose();
+                              }}
+                            >
+                              <span className={isMobile ? 'text-2xl' : 'text-xl'}>{program.icon}</span>
+                              <span className={isMobile ? 'text-base' : 'text-sm'}>{program.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           
           <div
             className="xp-menu-item"
