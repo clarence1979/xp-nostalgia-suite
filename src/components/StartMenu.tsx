@@ -125,17 +125,6 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
                         )}
                       </div>
                     ))}
-                    <div className="border-t border-gray-200 my-1" />
-                    <div
-                      className="xp-menu-item whitespace-nowrap"
-                      onClick={() => {
-                        onNotepadClick();
-                        onClose();
-                      }}
-                    >
-                      <span className="text-xl">📄</span>
-                      <span className="text-sm">Notepad</span>
-                    </div>
                   </div>
                 </div>
               )}
