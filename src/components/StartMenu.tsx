@@ -212,17 +212,6 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           
           <div className="border-t border-gray-200 my-2" />
           
-          <div className="xp-menu-item">
-            <LogOut className="w-5 h-5" />
-            <span className="text-sm">Log Off</span>
-          </div>
-          <div className="xp-menu-item">
-            <Power className="w-5 h-5" />
-            <span className="text-sm">Turn Off</span>
-          </div>
-          
-          <div className="border-t border-gray-200 my-2" />
-          
           <div 
             className="xp-menu-item"
             onClick={() => {
