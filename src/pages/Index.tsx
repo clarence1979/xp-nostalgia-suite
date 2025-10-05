@@ -6,6 +6,7 @@ import { DesktopIcon } from '@/components/DesktopIcon';
 import { Notepad } from '@/components/Notepad';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface OpenWindow {
   id: string;
@@ -52,16 +53,7 @@ const Index = () => {
   const [windows, setWindows] = useState<OpenWindow[]>([]);
   const [nextWindowId, setNextWindowId] = useState(1);
   const [validatedPassword, setValidatedPassword] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useState(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  });
+  const isMobile = useIsMobile();
 
   const openWindow = (title: string, content: React.ReactNode, icon?: React.ReactNode) => {
     const id = `window-${nextWindowId}`;
@@ -137,57 +129,58 @@ const Index = () => {
         backgroundPosition: 'center',
       }}
     >
-      {/* Desktop Icons - hide on mobile */}
-      {!isMobile && (
-        <>
-          {/* System Icons */}
-          <DesktopIcon
-            icon={<HardDrive className="w-10 h-10 text-gray-300" />}
-            label="My Computer"
-            onClick={() => openWindow('My Computer', <div className="p-4">My Computer</div>, <HardDrive className="w-4 h-4" />)}
-            position={{ x: 20, y: 20 }}
-          />
-          <DesktopIcon
-            icon={<Folder className="w-10 h-10 text-yellow-300" />}
-            label="My Documents"
-            onClick={() => openWindow('My Documents', <div className="p-4">My Documents</div>, <Folder className="w-4 h-4" />)}
-            position={{ x: 20, y: 120 }}
-          />
-          <DesktopIcon
-            icon={<Trash2 className="w-10 h-10 text-gray-300" />}
-            label="Recycle Bin"
-            onClick={() => openWindow('Recycle Bin', <div className="p-4">Recycle Bin is empty</div>, <Trash2 className="w-4 h-4" />)}
-            position={{ x: 20, y: 220 }}
-          />
-          <DesktopIcon
-            icon={<Globe className="w-10 h-10 text-blue-400" />}
-            label="Internet Explorer"
-            onClick={() => openWindow('Internet Explorer', <div className="p-4">Internet Explorer</div>, <Globe className="w-4 h-4" />)}
-            position={{ x: 20, y: 320 }}
-          />
-          <DesktopIcon
-            icon={<FileText className="w-10 h-10 text-blue-300" />}
-            label="Notepad"
-            onClick={openNotepad}
-            position={{ x: 20, y: 420 }}
-          />
-          
-          {/* Program Icons in Grid */}
-          {allPrograms.map((program, index) => {
-            const col = Math.floor(index / 6);
-            const row = index % 6;
-            return (
-              <DesktopIcon
-                key={program.name}
-                icon={<span className="text-4xl">{program.icon}</span>}
-                label={program.name}
-                onClick={() => openProgram(program)}
-                position={{ x: 140 + col * 100, y: 20 + row * 100 }}
-              />
-            );
-          })}
-        </>
-      )}
+      {/* Desktop Icons */}
+      <>
+        {/* System Icons */}
+        <DesktopIcon
+          icon={<HardDrive className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />}
+          label="My Computer"
+          onClick={() => openWindow('My Computer', <div className="p-4">My Computer</div>, <HardDrive className="w-4 h-4" />)}
+          position={isMobile ? { x: 10, y: 10 } : { x: 20, y: 20 }}
+        />
+        <DesktopIcon
+          icon={<Folder className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-yellow-300`} />}
+          label="My Documents"
+          onClick={() => openWindow('My Documents', <div className="p-4">My Documents</div>, <Folder className="w-4 h-4" />)}
+          position={isMobile ? { x: 10, y: 90 } : { x: 20, y: 120 }}
+        />
+        <DesktopIcon
+          icon={<Trash2 className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />}
+          label="Recycle Bin"
+          onClick={() => openWindow('Recycle Bin', <div className="p-4">Recycle Bin is empty</div>, <Trash2 className="w-4 h-4" />)}
+          position={isMobile ? { x: 10, y: 170 } : { x: 20, y: 220 }}
+        />
+        <DesktopIcon
+          icon={<Globe className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-400`} />}
+          label="Internet Explorer"
+          onClick={() => openWindow('Internet Explorer', <div className="p-4">Internet Explorer</div>, <Globe className="w-4 h-4" />)}
+          position={isMobile ? { x: 10, y: 250 } : { x: 20, y: 320 }}
+        />
+        <DesktopIcon
+          icon={<FileText className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-300`} />}
+          label="Notepad"
+          onClick={openNotepad}
+          position={isMobile ? { x: 10, y: 330 } : { x: 20, y: 420 }}
+        />
+        
+        {/* Program Icons in Grid */}
+        {allPrograms.map((program, index) => {
+          const col = Math.floor(index / (isMobile ? 4 : 6));
+          const row = index % (isMobile ? 4 : 6);
+          return (
+            <DesktopIcon
+              key={program.name}
+              icon={<span className={isMobile ? 'text-3xl' : 'text-4xl'}>{program.icon}</span>}
+              label={program.name}
+              onClick={() => openProgram(program)}
+              position={isMobile 
+                ? { x: 95 + col * 85, y: 10 + row * 80 } 
+                : { x: 140 + col * 100, y: 20 + row * 100 }
+              }
+            />
+          );
+        })}
+      </>
 
       {/* Open Windows */}
       {windows
