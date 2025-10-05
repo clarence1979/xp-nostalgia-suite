@@ -93,8 +93,10 @@ export const TermsContent = () => {
         <section>
           <h2 className="text-lg font-semibold mb-2">11. Contact Information</h2>
           <p className="text-gray-700">
-            For questions about these terms, contact:<br />
-            Email: support@teachingtools.dev
+            For questions about these terms, visit:<br />
+            <a href="https://clarence.guru/#contact" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              https://clarence.guru/#contact
+            </a>
           </p>
         </section>
       </div>
