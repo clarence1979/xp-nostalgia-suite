@@ -34,7 +34,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="fixed bottom-[40px] left-0 w-[400px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg z-50 flex rounded-tr-lg overflow-hidden">
+      <div className="fixed bottom-[40px] left-0 w-[800px] bg-white border-2 border-[hsl(var(--window-border))] shadow-lg z-50 flex rounded-tr-lg overflow-hidden">
         {/* Left side - white */}
         <div className="w-[60%] bg-white">
           <div className="p-4 border-b border-gray-200">
