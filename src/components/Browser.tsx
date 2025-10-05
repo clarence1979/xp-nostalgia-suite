@@ -9,6 +9,7 @@ export const Browser = () => {
   const [history, setHistory] = useState<string[]>(['about:blank']);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [iframeError, setIframeError] = useState(false);
 
   const navigate = (newUrl: string) => {
     let formattedUrl = newUrl.trim();
@@ -28,6 +29,7 @@ export const Browser = () => {
     }
 
     // Try to load in iframe, but most sites will block this
+    setIframeError(false);
     setCurrentUrl(formattedUrl);
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(formattedUrl);
@@ -157,15 +159,51 @@ export const Browser = () => {
             </p>
           </div>
         </div>
+      ) : iframeError ? (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
+          <div className="text-center space-y-6 p-8 max-w-2xl">
+            <Globe className="w-20 h-20 mx-auto text-red-500" />
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Cannot Display Page</h1>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              This website cannot be displayed in the browser due to security restrictions.
+            </p>
+            <Button 
+              onClick={() => window.open(currentUrl, '_blank')}
+              size="lg"
+              className="px-8"
+            >
+              Open in New Tab Instead
+            </Button>
+          </div>
+        </div>
       ) : (
-        <iframe
-          key={currentUrl}
-          src={currentUrl}
-          className="w-full h-full border-none"
-          title="Browser"
-          allow="camera; microphone; geolocation; fullscreen"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
-        />
+        <>
+          <iframe
+            key={currentUrl}
+            src={currentUrl}
+            className="w-full h-full border-none"
+            title="Browser"
+            allow="camera; microphone; geolocation; fullscreen"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
+            onError={() => setIframeError(true)}
+          />
+          {/* Fallback detection for CSP errors that don't trigger onError */}
+          <iframe
+            key={`detector-${currentUrl}`}
+            src={currentUrl}
+            className="hidden"
+            title="Browser detector"
+            onLoad={(e) => {
+              try {
+                const iframe = e.target as HTMLIFrameElement;
+                iframe.contentWindow?.document;
+              } catch {
+                setIframeError(true);
+              }
+            }}
+            onError={() => setIframeError(true)}
+          />
+        </>
       )}
     </div>
   );
