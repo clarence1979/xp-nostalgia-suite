@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export const Browser = () => {
-  const [url, setUrl] = useState('https://www.google.com');
-  const [currentUrl, setCurrentUrl] = useState('https://www.google.com');
-  const [history, setHistory] = useState<string[]>(['https://www.google.com']);
+  const [url, setUrl] = useState('https://duckduckgo.com');
+  const [currentUrl, setCurrentUrl] = useState('https://duckduckgo.com');
+  const [history, setHistory] = useState<string[]>(['https://duckduckgo.com']);
   const [historyIndex, setHistoryIndex] = useState(0);
 
   const navigate = (newUrl: string) => {
@@ -18,16 +18,12 @@ export const Browser = () => {
       if (formattedUrl.includes('.') || formattedUrl.startsWith('localhost')) {
         formattedUrl = 'https://' + formattedUrl;
       } else {
-        // Otherwise, search on Google
-        formattedUrl = `https://www.google.com/search?q=${encodeURIComponent(formattedUrl)}`;
+        // Otherwise, search on DuckDuckGo
+        formattedUrl = `https://duckduckgo.com/?q=${encodeURIComponent(formattedUrl)}`;
       }
     }
 
-    // Open in new tab (many sites block iframes)
-    window.open(formattedUrl, '_blank');
-    
     setCurrentUrl(formattedUrl);
-    setUrl(formattedUrl);
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(formattedUrl);
     setHistory(newHistory);
@@ -62,8 +58,8 @@ export const Browser = () => {
   };
 
   const goHome = () => {
-    navigate('https://www.google.com');
-    setUrl('https://www.google.com');
+    navigate('https://duckduckgo.com');
+    setUrl('https://duckduckgo.com');
   };
 
   return (
@@ -120,16 +116,14 @@ export const Browser = () => {
       </div>
 
       {/* Browser content */}
-      <div className="w-full h-full flex items-center justify-center bg-muted/10">
-        <div className="text-center space-y-4 p-8">
-          <Globe className="w-16 h-16 mx-auto text-muted-foreground" />
-          <h2 className="text-xl font-semibold">Internet Explorer</h2>
-          <p className="text-sm text-muted-foreground max-w-md">
-            Enter a URL or search term above and press Go.<br />
-            Websites will open in a new tab due to modern security restrictions.
-          </p>
-        </div>
-      </div>
+      <iframe
+        key={currentUrl}
+        src={currentUrl}
+        className="w-full h-full border-none"
+        title="Browser"
+        allow="camera; microphone; geolocation; fullscreen"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
+      />
     </div>
   );
 };
