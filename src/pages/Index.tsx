@@ -26,6 +26,7 @@ const Index = () => {
   const [showStartMenu, setShowStartMenu] = useState(false);
   const [windows, setWindows] = useState<OpenWindow[]>([]);
   const [nextWindowId, setNextWindowId] = useState(1);
+  const [validatedPassword, setValidatedPassword] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useState(() => {
@@ -92,27 +93,13 @@ const Index = () => {
     // Password prompt
     const password = prompt('Enter password to access Notepad:');
     
-    // SHA-256 hash of "PVCC123" - prevents password from being visible in code
-    const validPasswordHash = 'e8c5a8c4c5d5a0e8f5c5d5a0e8f5c5d5a0e8f5c5d5a0e8f5c5d5a0e8f5c5d5';
-    
-    // Simple hash function for comparison
-    const hashPassword = async (pass: string) => {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(pass);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    };
-    
     if (password) {
-      hashPassword(password).then(hash => {
-        // Check if password is "PVCC123" by comparing hashes
-        if (password === 'PVCC123') {
-          openWindow('Untitled - Notepad', <Notepad />, <FileText className="w-4 h-4" />);
-        } else {
-          alert('Incorrect password. Access denied.');
-        }
-      });
+      if (password === 'PVCC123') {
+        setValidatedPassword(password);
+        openWindow('Untitled - Notepad', <Notepad password={password} />, <FileText className="w-4 h-4" />);
+      } else {
+        alert('Incorrect password. Access denied.');
+      }
     }
   };
 
