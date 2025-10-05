@@ -99,7 +99,8 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
               
             {showPrograms && (
               <div 
-                className={`${isMobile ? 'relative left-0 w-full' : 'fixed left-[320px] bottom-[40px] w-[300px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
+                className={`${isMobile ? 'relative left-0 w-full' : 'fixed w-[300px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
+                style={!isMobile ? { left: '318px', bottom: '40px' } : undefined}
                 onMouseLeave={() => !isMobile && (() => {
                   setShowPrograms(false);
                   setHoveredCategory(null);
@@ -119,7 +120,8 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick }: StartMenu
                         
                       {hoveredCategory === category.name && (
                         <div 
-                          className={`${isMobile ? 'relative left-0 w-full' : 'fixed left-[620px] bottom-[40px] w-[280px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
+                          className={`${isMobile ? 'relative left-0 w-full' : 'fixed w-[280px]'} bg-white border-2 border-[hsl(var(--window-border))] shadow-lg max-h-[calc(100vh-100px)] overflow-y-auto z-50`}
+                          style={!isMobile ? { left: '616px', bottom: '40px' } : undefined}
                           onMouseLeave={() => !isMobile && setHoveredCategory(null)}
                         >
                           <div className="py-1">
