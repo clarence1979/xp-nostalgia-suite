@@ -166,7 +166,7 @@ const Index = () => {
           const accessType = password === 'PVCC321' ? 'Full Access' : 'View Only';
           openWindow(`Untitled - Notepad (${accessType})`, <Notepad password={password} />, <FileText className="w-4 h-4" />);
         } else {
-          alert('Incorrect password. Access denied.\n\nValid passwords:\nPVCC123 - View-only access\nPVCC321 - Full write access');
+          alert('Incorrect password. Access denied.');
         }
       }
     };
