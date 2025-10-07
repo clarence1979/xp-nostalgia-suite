@@ -65,7 +65,45 @@ const categories: Category[] = [
   {
     name: 'Shortcuts',
     icon: '🔗',
-    programs: []
+    programs: [
+      // Games and Entertainment
+      { name: 'Lost Gamer', url: 'https://lostgamer.io', icon: '🎮' },
+      { name: 'Classic Minecraft', url: 'https://classic.minecraft.net/', icon: '⛏️' },
+      
+      // AI 2D Drawing Tools
+      { name: 'Auto Draw', url: 'https://autodraw.com', icon: '✏️' },
+      { name: 'Quick Draw', url: 'https://quickdraw.withgoogle.com/', icon: '✍️' },
+      { name: 'Sketches to Animations', url: 'https://sketch.metademolab.com/', icon: '🎨' },
+      { name: 'Sketchpad', url: 'https://sketch.io/sketchpad/', icon: '🖌️' },
+      
+      // 3D Drawing Tools
+      { name: 'Spline', url: 'https://app.spline.design/generate', icon: '🎲' },
+      { name: 'Tinkercad', url: 'https://tinkercad.com', icon: '🔷' },
+      { name: 'Poly Cam', url: 'https://poly.cam/tools/photogrammetry', icon: '📸' },
+      
+      // Space Debris Visualisation
+      { name: 'Leo Labs', url: 'https://platform.leolabs.space/visualization', icon: '🛸' },
+      { name: 'Stuff In Space', url: 'https://stuffin.space/', icon: '🌌' },
+      
+      // Learn Coding
+      { name: 'Code Wars', url: 'https://www.codewars.com/', icon: '⚔️' },
+      { name: 'Coddy.tech', url: 'https://coddy.tech', icon: '💾' },
+      { name: 'Code Craft', url: 'https://craft.buzzcoder.com/?lesson=python', icon: '🔨' },
+      { name: 'Trinket', url: 'https://trinket.io', icon: '🔺' },
+      { name: 'REPL', url: 'https://repl.it', icon: '⌨️' },
+      
+      // Learn Hacking and Cybersecurity
+      { name: 'Be Internet Awesome', url: 'https://beinternetawesome.withgoogle.com/en_au/interland/', icon: '🛡️' },
+      { name: 'Phishing Quiz', url: 'https://phishingquiz.withgoogle.com/', icon: '🎣' },
+      { name: 'Get Bad News', url: 'https://www.getbadnews.com/en/intro', icon: '📰' },
+      { name: 'Lab Ex', url: 'https://labex.io/learn', icon: '🧪' },
+      { name: 'K7 Cyber', url: 'https://kc7cyber.com/', icon: '🔐' },
+      { name: 'Try Hack Me', url: 'https://tryhackme.com/', icon: '🎯' },
+      
+      // General Productivity Tools
+      { name: 'Toy Maker', url: 'https://thetoymaker.com/', icon: '🧸' },
+      { name: 'Home to Life', url: 'https://Home.by.me', icon: '🏠' },
+    ]
   },
 ];
 
