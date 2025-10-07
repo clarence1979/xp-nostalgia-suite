@@ -62,6 +62,11 @@ const categories: Category[] = [
       { name: 'Dream Tales', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚' },
     ]
   },
+  {
+    name: 'Shortcuts',
+    icon: '🔗',
+    programs: []
+  },
 ];
 
 import { PrivacyContent } from './legal/PrivacyContent';
