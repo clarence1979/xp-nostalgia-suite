@@ -8,10 +8,17 @@ interface Program {
   icon: string;
 }
 
-interface Category {
+interface SubCategory {
   name: string;
   icon: string;
   programs: Program[];
+}
+
+interface Category {
+  name: string;
+  icon: string;
+  programs?: Program[];
+  subcategories?: SubCategory[];
 }
 
 interface StartMenuProps {
@@ -65,44 +72,73 @@ const categories: Category[] = [
   {
     name: 'Shortcuts',
     icon: '🔗',
-    programs: [
-      // Games and Entertainment
-      { name: 'Lost Gamer', url: 'https://lostgamer.io', icon: '🎮' },
-      { name: 'Classic Minecraft', url: 'https://classic.minecraft.net/', icon: '⛏️' },
-      
-      // AI 2D Drawing Tools
-      { name: 'Auto Draw', url: 'https://autodraw.com', icon: '✏️' },
-      { name: 'Quick Draw', url: 'https://quickdraw.withgoogle.com/', icon: '✍️' },
-      { name: 'Sketches to Animations', url: 'https://sketch.metademolab.com/', icon: '🎨' },
-      { name: 'Sketchpad', url: 'https://sketch.io/sketchpad/', icon: '🖌️' },
-      
-      // 3D Drawing Tools
-      { name: 'Spline', url: 'https://app.spline.design/generate', icon: '🎲' },
-      { name: 'Tinkercad', url: 'https://tinkercad.com', icon: '🔷' },
-      { name: 'Poly Cam', url: 'https://poly.cam/tools/photogrammetry', icon: '📸' },
-      
-      // Space Debris Visualisation
-      { name: 'Leo Labs', url: 'https://platform.leolabs.space/visualization', icon: '🛸' },
-      { name: 'Stuff In Space', url: 'https://stuffin.space/', icon: '🌌' },
-      
-      // Learn Coding
-      { name: 'Code Wars', url: 'https://www.codewars.com/', icon: '⚔️' },
-      { name: 'Coddy.tech', url: 'https://coddy.tech', icon: '💾' },
-      { name: 'Code Craft', url: 'https://craft.buzzcoder.com/?lesson=python', icon: '🔨' },
-      { name: 'Trinket', url: 'https://trinket.io', icon: '🔺' },
-      { name: 'REPL', url: 'https://repl.it', icon: '⌨️' },
-      
-      // Learn Hacking and Cybersecurity
-      { name: 'Be Internet Awesome', url: 'https://beinternetawesome.withgoogle.com/en_au/interland/', icon: '🛡️' },
-      { name: 'Phishing Quiz', url: 'https://phishingquiz.withgoogle.com/', icon: '🎣' },
-      { name: 'Get Bad News', url: 'https://www.getbadnews.com/en/intro', icon: '📰' },
-      { name: 'Lab Ex', url: 'https://labex.io/learn', icon: '🧪' },
-      { name: 'K7 Cyber', url: 'https://kc7cyber.com/', icon: '🔐' },
-      { name: 'Try Hack Me', url: 'https://tryhackme.com/', icon: '🎯' },
-      
-      // General Productivity Tools
-      { name: 'Toy Maker', url: 'https://thetoymaker.com/', icon: '🧸' },
-      { name: 'Home to Life', url: 'https://Home.by.me', icon: '🏠' },
+    subcategories: [
+      {
+        name: 'Games and Entertainment',
+        icon: '🎮',
+        programs: [
+          { name: 'Lost Gamer', url: 'https://lostgamer.io', icon: '🎮' },
+          { name: 'Classic Minecraft', url: 'https://classic.minecraft.net/', icon: '⛏️' },
+        ]
+      },
+      {
+        name: 'AI 2D Drawing Tools',
+        icon: '✏️',
+        programs: [
+          { name: 'Auto Draw', url: 'https://autodraw.com', icon: '✏️' },
+          { name: 'Quick Draw', url: 'https://quickdraw.withgoogle.com/', icon: '✍️' },
+          { name: 'Sketches to Animations', url: 'https://sketch.metademolab.com/', icon: '🎨' },
+          { name: 'Sketchpad', url: 'https://sketch.io/sketchpad/', icon: '🖌️' },
+        ]
+      },
+      {
+        name: '3D Drawing Tools',
+        icon: '🎲',
+        programs: [
+          { name: 'Spline', url: 'https://app.spline.design/generate', icon: '🎲' },
+          { name: 'Tinkercad', url: 'https://tinkercad.com', icon: '🔷' },
+          { name: 'Poly Cam', url: 'https://poly.cam/tools/photogrammetry', icon: '📸' },
+        ]
+      },
+      {
+        name: 'Space Debris Visualisation',
+        icon: '🛸',
+        programs: [
+          { name: 'Leo Labs', url: 'https://platform.leolabs.space/visualization', icon: '🛸' },
+          { name: 'Stuff In Space', url: 'https://stuffin.space/', icon: '🌌' },
+        ]
+      },
+      {
+        name: 'Learn Coding',
+        icon: '💻',
+        programs: [
+          { name: 'Code Wars', url: 'https://www.codewars.com/', icon: '⚔️' },
+          { name: 'Coddy.tech', url: 'https://coddy.tech', icon: '💾' },
+          { name: 'Code Craft', url: 'https://craft.buzzcoder.com/?lesson=python', icon: '🔨' },
+          { name: 'Trinket', url: 'https://trinket.io', icon: '🔺' },
+          { name: 'REPL', url: 'https://repl.it', icon: '⌨️' },
+        ]
+      },
+      {
+        name: 'Learn Hacking and Cybersecurity',
+        icon: '🛡️',
+        programs: [
+          { name: 'Be Internet Awesome', url: 'https://beinternetawesome.withgoogle.com/en_au/interland/', icon: '🛡️' },
+          { name: 'Phishing Quiz', url: 'https://phishingquiz.withgoogle.com/', icon: '🎣' },
+          { name: 'Get Bad News', url: 'https://www.getbadnews.com/en/intro', icon: '📰' },
+          { name: 'Lab Ex', url: 'https://labex.io/learn', icon: '🧪' },
+          { name: 'K7 Cyber', url: 'https://kc7cyber.com/', icon: '🔐' },
+          { name: 'Try Hack Me', url: 'https://tryhackme.com/', icon: '🎯' },
+        ]
+      },
+      {
+        name: 'General Productivity Tools',
+        icon: '🔧',
+        programs: [
+          { name: 'Toy Maker', url: 'https://thetoymaker.com/', icon: '🧸' },
+          { name: 'Home to Life', url: 'https://Home.by.me', icon: '🏠' },
+        ]
+      },
     ]
   },
 ];
@@ -114,9 +150,11 @@ import { AboutContent } from './legal/AboutContent';
 export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick }: StartMenuProps) => {
   const [showPrograms, setShowPrograms] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [hoveredSubcategory, setHoveredSubcategory] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [submenuTop, setSubmenuTop] = useState(0);
   const [categorySubmenuTop, setCategorySubmenuTop] = useState(0);
+  const [subcategorySubmenuTop, setSubcategorySubmenuTop] = useState(0);
 
   const handleShowPrograms = () => {
     const element = document.getElementById('all-programs-item');
@@ -125,6 +163,14 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
       setSubmenuTop(rect.top);
     }
     setShowPrograms(true);
+  };
+
+  const handleSubcategoryHover = (subcategoryName: string, event: React.MouseEvent) => {
+    if (!isMobile) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      setSubcategorySubmenuTop(rect.top);
+    }
+    setHoveredSubcategory(subcategoryName);
   };
 
   const handleCategoryHover = (categoryName: string, event: React.MouseEvent) => {
@@ -165,6 +211,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
               onMouseLeave={() => !isMobile && (() => {
                 setShowPrograms(false);
                 setHoveredCategory(null);
+                setHoveredSubcategory(null);
               })()}
             >
               <div className="py-1">
@@ -187,19 +234,61 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                         onMouseLeave={() => !isMobile && setHoveredCategory(null)}
                       >
                         <div className="py-1">
-                          {category.programs.map((program) => (
-                            <div
-                              key={program.name}
-                              className={`xp-menu-item ${isMobile ? 'text-base py-3 whitespace-normal' : 'whitespace-nowrap'}`}
-                              onClick={() => {
-                                onProgramClick(program);
-                                onClose();
-                              }}
-                            >
-                              <span className={isMobile ? 'text-2xl' : 'text-xl'}>{program.icon}</span>
-                              <span className={isMobile ? 'text-base' : 'text-sm'}>{program.name}</span>
-                            </div>
-                          ))}
+                          {category.subcategories ? (
+                            // Render subcategories
+                            category.subcategories.map((subcategory) => (
+                              <div key={subcategory.name}>
+                                <div
+                                  className={`xp-menu-item ${isMobile ? 'text-base py-3' : 'whitespace-nowrap'} relative`}
+                                  onMouseEnter={(e) => !isMobile ? handleSubcategoryHover(subcategory.name, e) : null}
+                                  onClick={() => setHoveredSubcategory(hoveredSubcategory === subcategory.name ? null : subcategory.name)}
+                                >
+                                  <span className={isMobile ? 'text-2xl' : 'text-xl'}>{subcategory.icon}</span>
+                                  <span className={`${isMobile ? 'text-base' : 'text-sm'} flex-1`}>{subcategory.name}</span>
+                                  <ChevronRight className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} ${hoveredSubcategory === subcategory.name ? 'rotate-90' : ''} transition-transform`} />
+                                </div>
+                                
+                                {hoveredSubcategory === subcategory.name && (
+                                  <div 
+                                    className={`${isMobile ? 'pl-6 pb-2 bg-gray-100' : 'fixed w-[280px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[400px]'} overflow-y-auto z-50`}
+                                    style={!isMobile ? { left: '900px', top: `${subcategorySubmenuTop}px` } : undefined}
+                                    onMouseLeave={() => !isMobile && setHoveredSubcategory(null)}
+                                  >
+                                    <div className="py-1">
+                                      {subcategory.programs.map((program) => (
+                                        <div
+                                          key={program.name}
+                                          className={`xp-menu-item ${isMobile ? 'text-base py-3 whitespace-normal' : 'whitespace-nowrap'}`}
+                                          onClick={() => {
+                                            onProgramClick(program);
+                                            onClose();
+                                          }}
+                                        >
+                                          <span className={isMobile ? 'text-2xl' : 'text-xl'}>{program.icon}</span>
+                                          <span className={isMobile ? 'text-base' : 'text-sm'}>{program.name}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            // Render programs directly (for categories without subcategories)
+                            category.programs?.map((program) => (
+                              <div
+                                key={program.name}
+                                className={`xp-menu-item ${isMobile ? 'text-base py-3 whitespace-normal' : 'whitespace-nowrap'}`}
+                                onClick={() => {
+                                  onProgramClick(program);
+                                  onClose();
+                                }}
+                              >
+                                <span className={isMobile ? 'text-2xl' : 'text-xl'}>{program.icon}</span>
+                                <span className={isMobile ? 'text-base' : 'text-sm'}>{program.name}</span>
+                              </div>
+                            ))
+                          )}
                         </div>
                       </div>
                     )}
