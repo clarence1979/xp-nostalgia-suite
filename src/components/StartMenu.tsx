@@ -131,6 +131,8 @@ const categories: Category[] = [
           { name: 'Lab Ex', url: 'https://labex.io/learn', icon: '🧪' },
           { name: 'K7 Cyber', url: 'https://kc7cyber.com/', icon: '🔐' },
           { name: 'Try Hack Me', url: 'https://tryhackme.com/', icon: '🎯' },
+          { name: 'Cyber City', url: 'https://cybergamesuk.com/cyber-city', icon: '🏙️' },
+          { name: 'Texting Simulator', url: 'https://cybergamesuk.com/texting-simulator', icon: '💬' },
         ]
       },
       {
