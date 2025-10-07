@@ -79,6 +79,8 @@ const categories: Category[] = [
         programs: [
           { name: 'Lost Gamer', url: 'https://lostgamer.io', icon: '🎮' },
           { name: 'Classic Minecraft', url: 'https://classic.minecraft.net/', icon: '⛏️' },
+          { name: 'Fake It till you make it', url: 'https://www.fakeittomakeitgame.com/', icon: '🎭' },
+          { name: 'TV Garden', url: 'https://tv.garden/', icon: '📺' },
         ]
       },
       {
