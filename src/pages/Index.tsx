@@ -7,7 +7,7 @@ import { Notepad } from '@/components/Notepad';
 import { Browser } from '@/components/Browser';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
-import { HardDrive, Folder, Trash2, Globe, FileText } from 'lucide-react';
+import { HardDrive, Folder, Trash2, Globe, FileText, Code } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface OpenWindow {
@@ -224,6 +224,12 @@ const Index = () => {
           label="Notepad"
           onClick={openNotepad}
           position={isMobile ? { x: 10, y: 330 } : { x: 20, y: 420 }}
+        />
+        <DesktopIcon
+          icon={<Code className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-500`} />}
+          label="Visual Studio Code"
+          onClick={() => window.open('https://vscode.dev/', '_blank')}
+          position={isMobile ? { x: 10, y: 410 } : { x: 20, y: 520 }}
         />
         
         {/* Program Icons in Grid */}
