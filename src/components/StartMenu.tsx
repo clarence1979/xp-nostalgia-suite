@@ -156,6 +156,23 @@ const categories: Category[] = [
       { name: 'Build Your own CPU', url: 'https://nandgame.com/', icon: '⚡' },
     ]
   },
+  {
+    name: 'Cybersafety',
+    icon: '🔒',
+    programs: [
+      { name: 'Digital Footprint Scanner', url: 'https://www.malwarebytes.com/digital-footprint-app', icon: '👣' },
+      { name: 'Password Strength Checker', url: 'https://bitwarden.com/password-strength/', icon: '🔑' },
+      { name: 'Data Breach Checker', url: 'https://databreach.com/', icon: '🚨' },
+      { name: 'Be Internet Awesome', url: 'https://beinternetawesome.withgoogle.com/en_au/interland/', icon: '🛡️' },
+      { name: 'Spot the Troll', url: 'https://spotthetroll.org/start', icon: '🧌' },
+      { name: 'Phishing Quiz', url: 'https://phishingquiz.withgoogle.com/', icon: '🎣' },
+      { name: 'Get Bad News', url: 'https://www.getbadnews.com/en/intro', icon: '📰' },
+      { name: 'Cat Park', url: 'https://www.catpark.game/', icon: '🐱' },
+      { name: 'Fake Wifi', url: 'https://cybergamesuk.com/rogue-wifi', icon: '📡' },
+      { name: 'Cyber-City', url: 'https://cybergamesuk.com/cyber-city', icon: '🏙️' },
+      { name: 'Pranx', url: 'https://pranx.com', icon: '😈' },
+    ]
+  },
 ];
 
 import { PrivacyContent } from './legal/PrivacyContent';
