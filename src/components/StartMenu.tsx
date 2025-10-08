@@ -173,6 +173,13 @@ const categories: Category[] = [
       { name: 'Pranx', url: 'https://pranx.com', icon: '😈' },
     ]
   },
+  {
+    name: 'Tools for Teachers',
+    icon: '👩‍🏫',
+    programs: [
+      { name: 'Class Tools', url: 'https://www.classtools.net/', icon: '🎯' },
+    ]
+  },
 ];
 
 import { PrivacyContent } from './legal/PrivacyContent';
