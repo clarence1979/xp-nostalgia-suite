@@ -282,6 +282,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                         className={`${isMobile ? 'pl-6 pb-2 bg-gray-50' : 'fixed w-[280px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[400px]'} overflow-y-auto z-50`}
                         style={!isMobile ? { left: '620px', top: `${categorySubmenuTop}px` } : undefined}
                         onMouseLeave={() => !isMobile && setHoveredCategory(null)}
+                        onMouseEnter={() => !isMobile && setHoveredCategory(category.name)}
                       >
                         <div className="py-1">
                           {category.subcategories ? (
