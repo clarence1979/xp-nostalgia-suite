@@ -232,10 +232,10 @@ const Index = () => {
           position={isMobile ? { x: 10, y: 410 } : { x: 20, y: 520 }}
         />
         
-        {/* Program Icons in Grid */}
+        {/* Program Icons in Grid - adjusted for better visibility */}
         {allPrograms.map((program, index) => {
-          const col = Math.floor(index / 8);
-          const row = index % 8;
+          const col = Math.floor(index / 6); // Changed from 8 to 6 rows
+          const row = index % 6;
           return (
             <DesktopIcon
               key={program.name}
