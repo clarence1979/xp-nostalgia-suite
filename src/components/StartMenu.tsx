@@ -174,6 +174,23 @@ const categories: Category[] = [
       { name: 'Pranx', url: 'https://pranx.com', icon: '😈' },
     ]
   },
+  {
+    name: 'Learn Hacking and Cybersecurity',
+    icon: '🛡️',
+    programs: [
+      { name: 'Grabify', url: 'https://grabify.org', icon: '🔗' },
+      { name: 'Immersive Labs', url: 'https://immersivelabs.online/signin', icon: '🧪' },
+      { name: 'Lab Ex', url: 'https://labex.io/learn', icon: '⚗️' },
+      { name: 'K7 Cyber (Learn SQL)', url: 'https://kc7cyber.com/', icon: '🔐' },
+      { name: 'Try Hack Me', url: 'https://tryhackme.com/', icon: '🎯' },
+      { name: 'Cyber Mission', url: 'https://www.cybermission.tech/game', icon: '🎮' },
+      { name: 'Texting Simulator', url: 'https://cybergamesuk.com/texting-simulator', icon: '💬' },
+      { name: 'How to rob a bank', url: 'https://cyberskillslive.com/activity/how-to-rob-a-bank/', icon: '🏦' },
+      { name: 'Cracking 1 Million Passwords', url: 'https://legacy.cyberskillslesson.com/lesson1/', icon: '🔓' },
+      { name: 'How to steal a pizza', url: 'https://report.cyberskillslesson.com/', icon: '🍕' },
+      { name: 'How to Solve a murder', url: 'https://forensics.cyberskillslesson.com/', icon: '🔍' },
+    ]
+  },
 ];
 
 import { PrivacyContent } from './legal/PrivacyContent';
