@@ -44,6 +44,7 @@ const categories: Category[] = [
       { name: 'Magic Marker', url: 'https://mark-magic-ai.lovable.app/', icon: '✨' },
       { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
       { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊' },
+      { name: 'Class Tools', url: 'https://www.classtools.net/', icon: '🎯' },
     ]
   },
   {
@@ -171,13 +172,6 @@ const categories: Category[] = [
       { name: 'Fake Wifi', url: 'https://cybergamesuk.com/rogue-wifi', icon: '📡' },
       { name: 'Cyber-City', url: 'https://cybergamesuk.com/cyber-city', icon: '🏙️' },
       { name: 'Pranx', url: 'https://pranx.com', icon: '😈' },
-    ]
-  },
-  {
-    name: 'Tools for Teachers',
-    icon: '👩‍🏫',
-    programs: [
-      { name: 'Class Tools', url: 'https://www.classtools.net/', icon: '🎯' },
     ]
   },
 ];
