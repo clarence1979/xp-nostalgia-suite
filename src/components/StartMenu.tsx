@@ -145,6 +145,14 @@ const categories: Category[] = [
       },
     ]
   },
+  {
+    name: 'Learn Computer Hardware',
+    icon: '🖥️',
+    programs: [
+      { name: 'Build your own Computer in 3D', url: 'https://buildcores.com/', icon: '💻' },
+      { name: 'Build Your own CPU', url: 'https://nandgame.com/', icon: '⚡' },
+    ]
+  },
 ];
 
 import { PrivacyContent } from './legal/PrivacyContent';
