@@ -119,6 +119,9 @@ const categories: Category[] = [
           { name: 'Code Craft', url: 'https://craft.buzzcoder.com/?lesson=python', icon: '🔨' },
           { name: 'Trinket', url: 'https://trinket.io', icon: '🔺' },
           { name: 'REPL', url: 'https://repl.it', icon: '⌨️' },
+          { name: 'Grok Academy', url: 'https://groklearning.com', icon: '📖' },
+          { name: 'Visual Studio Code', url: 'https://vscode.dev/', icon: '🔵' },
+          { name: 'GitHub', url: 'https://github.com/', icon: '🐙' },
         ]
       },
       {
