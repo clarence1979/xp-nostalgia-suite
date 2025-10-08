@@ -306,13 +306,19 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                                     onMouseLeave={() => !isMobile && setHoveredSubcategory(null)}
                                   >
                                     <div className="py-1">
-                                      {subcategory.programs.map((program) => (
+                                       {subcategory.programs.map((program) => (
                                         <div
                                           key={program.name}
                                           className={`xp-menu-item ${isMobile ? 'text-base py-3 whitespace-normal' : 'whitespace-nowrap'}`}
                                           onClick={() => {
-                                            onProgramClick(program);
-                                            onClose();
+                                            // Open VS Code directly in new tab since it blocks iframes
+                                            if (program.name === 'Visual Studio Code') {
+                                              window.open(program.url, '_blank');
+                                              onClose();
+                                            } else {
+                                              onProgramClick(program);
+                                              onClose();
+                                            }
                                           }}
                                         >
                                           <span className={isMobile ? 'text-2xl' : 'text-xl'}>{program.icon}</span>
@@ -331,8 +337,14 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                                 key={program.name}
                                 className={`xp-menu-item ${isMobile ? 'text-base py-3 whitespace-normal' : 'whitespace-nowrap'}`}
                                 onClick={() => {
-                                  onProgramClick(program);
-                                  onClose();
+                                  // Open VS Code directly in new tab since it blocks iframes
+                                  if (program.name === 'Visual Studio Code') {
+                                    window.open(program.url, '_blank');
+                                    onClose();
+                                  } else {
+                                    onProgramClick(program);
+                                    onClose();
+                                  }
                                 }}
                               >
                                 <span className={isMobile ? 'text-2xl' : 'text-xl'}>{program.icon}</span>
