@@ -71,8 +71,8 @@ const categories: Category[] = [
     ]
   },
   {
-    name: 'Shortcuts',
-    icon: '🔗',
+    name: 'Programs from the internet',
+    icon: '🌐',
     subcategories: [
       {
         name: 'Games and Entertainment',
@@ -126,17 +126,45 @@ const categories: Category[] = [
         ]
       },
       {
+        name: 'Learn Computer Hardware',
+        icon: '🖥️',
+        programs: [
+          { name: 'Build your own Computer in 3D', url: 'https://buildcores.com/', icon: '💻' },
+          { name: 'Build Your own CPU', url: 'https://nandgame.com/', icon: '⚡' },
+        ]
+      },
+      {
+        name: 'Cybersafety',
+        icon: '🔒',
+        programs: [
+          { name: 'Digital Footprint Scanner', url: 'https://www.malwarebytes.com/digital-footprint-app', icon: '👣' },
+          { name: 'Password Strength Checker', url: 'https://bitwarden.com/password-strength/', icon: '🔑' },
+          { name: 'Data Breach Checker', url: 'https://databreach.com/', icon: '🚨' },
+          { name: 'Be Internet Awesome', url: 'https://beinternetawesome.withgoogle.com/en_au/interland/', icon: '🛡️' },
+          { name: 'Spot the Troll', url: 'https://spotthetroll.org/start', icon: '🧌' },
+          { name: 'Phishing Quiz', url: 'https://phishingquiz.withgoogle.com/', icon: '🎣' },
+          { name: 'Get Bad News', url: 'https://www.getbadnews.com/en/intro', icon: '📰' },
+          { name: 'Cat Park', url: 'https://www.catpark.game/', icon: '🐱' },
+          { name: 'Fake Wifi', url: 'https://cybergamesuk.com/rogue-wifi', icon: '📡' },
+          { name: 'Cyber-City', url: 'https://cybergamesuk.com/cyber-city', icon: '🏙️' },
+          { name: 'Pranx', url: 'https://pranx.com', icon: '😈' },
+        ]
+      },
+      {
         name: 'Learn Hacking and Cybersecurity',
         icon: '🛡️',
         programs: [
-          { name: 'Be Internet Awesome', url: 'https://beinternetawesome.withgoogle.com/en_au/interland/', icon: '🛡️' },
-          { name: 'Phishing Quiz', url: 'https://phishingquiz.withgoogle.com/', icon: '🎣' },
-          { name: 'Get Bad News', url: 'https://www.getbadnews.com/en/intro', icon: '📰' },
-          { name: 'Lab Ex', url: 'https://labex.io/learn', icon: '🧪' },
-          { name: 'K7 Cyber', url: 'https://kc7cyber.com/', icon: '🔐' },
+          { name: 'Grabify', url: 'https://grabify.org', icon: '🔗' },
+          { name: 'Immersive Labs', url: 'https://immersivelabs.online/signin', icon: '🧪' },
+          { name: 'Lab Ex', url: 'https://labex.io/learn', icon: '⚗️' },
+          { name: 'K7 Cyber (Learn SQL)', url: 'https://kc7cyber.com/', icon: '🔐' },
           { name: 'Try Hack Me', url: 'https://tryhackme.com/', icon: '🎯' },
-          { name: 'Cyber City', url: 'https://cybergamesuk.com/cyber-city', icon: '🏙️' },
+          { name: 'Cyber Mission', url: 'https://www.cybermission.tech/game', icon: '🎮' },
           { name: 'Texting Simulator', url: 'https://cybergamesuk.com/texting-simulator', icon: '💬' },
+          { name: 'How to rob a bank', url: 'https://cyberskillslive.com/activity/how-to-rob-a-bank/', icon: '🏦' },
+          { name: 'Cracking 1 Million Passwords', url: 'https://legacy.cyberskillslesson.com/lesson1/', icon: '🔓' },
+          { name: 'How to steal a pizza', url: 'https://report.cyberskillslesson.com/', icon: '🍕' },
+          { name: 'How to Solve a murder', url: 'https://forensics.cyberskillslesson.com/', icon: '🔍' },
         ]
       },
       {
@@ -147,48 +175,6 @@ const categories: Category[] = [
           { name: 'Home to Life', url: 'https://Home.by.me', icon: '🏠' },
         ]
       },
-    ]
-  },
-  {
-    name: 'Learn Computer Hardware',
-    icon: '🖥️',
-    programs: [
-      { name: 'Build your own Computer in 3D', url: 'https://buildcores.com/', icon: '💻' },
-      { name: 'Build Your own CPU', url: 'https://nandgame.com/', icon: '⚡' },
-    ]
-  },
-  {
-    name: 'Cybersafety',
-    icon: '🔒',
-    programs: [
-      { name: 'Digital Footprint Scanner', url: 'https://www.malwarebytes.com/digital-footprint-app', icon: '👣' },
-      { name: 'Password Strength Checker', url: 'https://bitwarden.com/password-strength/', icon: '🔑' },
-      { name: 'Data Breach Checker', url: 'https://databreach.com/', icon: '🚨' },
-      { name: 'Be Internet Awesome', url: 'https://beinternetawesome.withgoogle.com/en_au/interland/', icon: '🛡️' },
-      { name: 'Spot the Troll', url: 'https://spotthetroll.org/start', icon: '🧌' },
-      { name: 'Phishing Quiz', url: 'https://phishingquiz.withgoogle.com/', icon: '🎣' },
-      { name: 'Get Bad News', url: 'https://www.getbadnews.com/en/intro', icon: '📰' },
-      { name: 'Cat Park', url: 'https://www.catpark.game/', icon: '🐱' },
-      { name: 'Fake Wifi', url: 'https://cybergamesuk.com/rogue-wifi', icon: '📡' },
-      { name: 'Cyber-City', url: 'https://cybergamesuk.com/cyber-city', icon: '🏙️' },
-      { name: 'Pranx', url: 'https://pranx.com', icon: '😈' },
-    ]
-  },
-  {
-    name: 'Learn Hacking and Cybersecurity',
-    icon: '🛡️',
-    programs: [
-      { name: 'Grabify', url: 'https://grabify.org', icon: '🔗' },
-      { name: 'Immersive Labs', url: 'https://immersivelabs.online/signin', icon: '🧪' },
-      { name: 'Lab Ex', url: 'https://labex.io/learn', icon: '⚗️' },
-      { name: 'K7 Cyber (Learn SQL)', url: 'https://kc7cyber.com/', icon: '🔐' },
-      { name: 'Try Hack Me', url: 'https://tryhackme.com/', icon: '🎯' },
-      { name: 'Cyber Mission', url: 'https://www.cybermission.tech/game', icon: '🎮' },
-      { name: 'Texting Simulator', url: 'https://cybergamesuk.com/texting-simulator', icon: '💬' },
-      { name: 'How to rob a bank', url: 'https://cyberskillslive.com/activity/how-to-rob-a-bank/', icon: '🏦' },
-      { name: 'Cracking 1 Million Passwords', url: 'https://legacy.cyberskillslesson.com/lesson1/', icon: '🔓' },
-      { name: 'How to steal a pizza', url: 'https://report.cyberskillslesson.com/', icon: '🍕' },
-      { name: 'How to Solve a murder', url: 'https://forensics.cyberskillslesson.com/', icon: '🔍' },
     ]
   },
 ];
