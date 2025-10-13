@@ -56,6 +56,8 @@ const Index = () => {
   const [nextWindowId, setNextWindowId] = useState(1);
   const [validatedPassword, setValidatedPassword] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [theme, setTheme] = useState<'xp' | 'kali'>('xp');
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -64,6 +66,31 @@ const Index = () => {
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    // Update body class for theme
+    if (theme === 'kali') {
+      document.body.classList.add('kali-theme');
+      document.body.classList.remove('xp-theme');
+    } else {
+      document.body.classList.add('xp-theme');
+      document.body.classList.remove('kali-theme');
+    }
+  }, [theme]);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleClick = () => {
+    setContextMenu(null);
+  };
+
+  const switchTheme = () => {
+    setTheme(theme === 'xp' ? 'kali' : 'xp');
+    setContextMenu(null);
+  };
 
   const openWindow = (title: string, content: React.ReactNode, icon?: React.ReactNode) => {
     const id = `window-${nextWindowId}`;
@@ -187,10 +214,13 @@ const Index = () => {
     <div
       className="w-screen h-screen relative overflow-hidden"
       style={{
-        backgroundImage: `url(${blissWallpaper})`,
+        backgroundImage: theme === 'xp' ? `url(${blissWallpaper})` : 'none',
+        backgroundColor: theme === 'kali' ? '#1a1a1a' : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
+      onContextMenu={handleContextMenu}
+      onClick={handleClick}
     >
       {/* Desktop Icons */}
       <>
@@ -289,6 +319,29 @@ const Index = () => {
         }))}
         onWindowClick={focusWindow}
       />
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <div
+          className="fixed bg-background border-2 shadow-lg z-50 min-w-[200px] py-1"
+          style={{
+            left: contextMenu.x,
+            top: contextMenu.y,
+            borderColor: theme === 'kali' ? 'hsl(var(--kali-border))' : 'hsl(var(--border))',
+            background: theme === 'kali' ? 'hsl(var(--kali-menu-bg))' : 'hsl(var(--menu-bg))',
+          }}
+        >
+          <button
+            onClick={switchTheme}
+            className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors"
+            style={{
+              color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))',
+            }}
+          >
+            Switch to {theme === 'xp' ? 'Kali Desktop' : 'Windows XP Desktop'}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
