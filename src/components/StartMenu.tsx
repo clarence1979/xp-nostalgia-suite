@@ -220,13 +220,24 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
   return (
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className={`fixed ${isMobile ? 'inset-x-0 bottom-0 max-h-[85vh]' : 'bottom-[40px] left-0 w-[320px]'} bg-white ${isMobile ? 'border-t-2' : 'border-2'} border-[hsl(var(--window-border))] shadow-lg z-50 ${isMobile ? 'rounded-t-xl' : 'rounded-tr-lg'} flex flex-col`}>
-        <div className={`${isMobile ? 'p-4' : 'p-4'} border-b border-gray-200 flex-shrink-0`}>
+      <div className={`fixed ${isMobile ? 'inset-x-0 bottom-0 max-h-[85vh]' : 'bottom-[40px] left-0 w-[320px]'} ${isMobile ? 'border-t-2' : 'border-2'} shadow-lg z-50 ${isMobile ? 'rounded-t-xl' : 'rounded-tr-lg'} flex flex-col`}
+        style={{
+          background: 'hsl(var(--menu-bg))',
+          borderColor: 'hsl(var(--window-border))',
+        }}
+      >
+        <div className={`${isMobile ? 'p-4' : 'p-4'} flex-shrink-0`}
+          style={{
+            borderBottom: '1px solid hsl(var(--border))',
+          }}
+        >
           <div className="flex items-center gap-3">
-            <div className={`${isMobile ? 'w-12 h-12' : 'w-12 h-12'} rounded bg-blue-500 flex items-center justify-center`}>
-              <User className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} text-white`} />
+            <div className={`${isMobile ? 'w-12 h-12' : 'w-12 h-12'} rounded flex items-center justify-center`}
+              style={{ background: 'hsl(var(--primary))' }}
+            >
+              <User className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'}`} style={{ color: 'hsl(var(--primary-foreground))' }} />
             </div>
-            <span className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'}`}>Teachingtools.dev</span>
+            <span className={`font-bold ${isMobile ? 'text-lg' : 'text-sm'}`} style={{ color: 'hsl(var(--foreground))' }}>Teachingtools.dev</span>
           </div>
         </div>
         
@@ -242,8 +253,13 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           </div>
               
           {showPrograms && (
-            <div className={`${isMobile ? 'pl-4 pb-2' : 'fixed w-[300px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[calc(100vh-100px)]'} overflow-y-auto z-50`}
-              style={!isMobile ? { left: '320px', top: `${submenuTop}px` } : undefined}
+            <div className={`${isMobile ? 'pl-4 pb-2' : 'fixed w-[300px] border-2'} ${isMobile ? '' : 'shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[calc(100vh-100px)]'} overflow-y-auto z-50`}
+              style={{
+                background: 'hsl(var(--menu-bg))',
+                borderColor: isMobile ? 'transparent' : 'hsl(var(--window-border))',
+                left: !isMobile ? '320px' : undefined,
+                top: !isMobile ? `${submenuTop}px` : undefined,
+              }}
               onMouseLeave={() => !isMobile && (() => {
                 setShowPrograms(false);
                 setHoveredCategory(null);
@@ -265,8 +281,13 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                         
                     {hoveredCategory === category.name && (
                       <div 
-                        className={`${isMobile ? 'pl-6 pb-2 bg-gray-50' : 'fixed w-[280px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[400px]'} overflow-y-auto z-50`}
-                        style={!isMobile ? { left: '620px', top: `${categorySubmenuTop}px` } : undefined}
+                        className={`${isMobile ? 'pl-6 pb-2 bg-gray-50' : 'fixed w-[280px] border-2'} ${isMobile ? '' : 'shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[400px]'} overflow-y-auto z-50`}
+                        style={{
+                          background: isMobile ? 'hsl(var(--muted))' : 'hsl(var(--menu-bg))',
+                          borderColor: isMobile ? 'transparent' : 'hsl(var(--window-border))',
+                          left: !isMobile ? '620px' : undefined,
+                          top: !isMobile ? `${categorySubmenuTop}px` : undefined,
+                        }}
                         onMouseLeave={() => !isMobile && setHoveredCategory(null)}
                         onMouseEnter={() => !isMobile && setHoveredCategory(category.name)}
                       >
@@ -287,8 +308,13 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                                 
                                 {hoveredSubcategory === subcategory.name && (
                                   <div 
-                                    className={`${isMobile ? 'pl-6 pb-2 bg-gray-100' : 'fixed w-[280px] border-2'} bg-white ${isMobile ? '' : 'border-[hsl(var(--window-border))] shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[400px]'} overflow-y-auto z-50`}
-                                    style={!isMobile ? { left: '900px', top: `${subcategorySubmenuTop}px` } : undefined}
+                                    className={`${isMobile ? 'pl-6 pb-2 bg-gray-100' : 'fixed w-[280px] border-2'} ${isMobile ? '' : 'shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[400px]'} overflow-y-auto z-50`}
+                                    style={{
+                                      background: isMobile ? 'hsl(var(--accent))' : 'hsl(var(--menu-bg))',
+                                      borderColor: isMobile ? 'transparent' : 'hsl(var(--window-border))',
+                                      left: !isMobile ? '900px' : undefined,
+                                      top: !isMobile ? `${subcategorySubmenuTop}px` : undefined,
+                                    }}
                                     onMouseLeave={() => !isMobile && setHoveredSubcategory(null)}
                                   >
                                     <div className="py-1">
