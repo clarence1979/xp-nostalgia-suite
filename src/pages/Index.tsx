@@ -7,6 +7,7 @@ import { Notepad } from '@/components/Notepad';
 import { Browser } from '@/components/Browser';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
+import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText, Code } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -214,8 +215,7 @@ const Index = () => {
     <div
       className="w-screen h-screen relative overflow-hidden"
       style={{
-        backgroundImage: theme === 'xp' ? `url(${blissWallpaper})` : 'none',
-        backgroundColor: theme === 'kali' ? '#1a1a1a' : undefined,
+        backgroundImage: theme === 'xp' ? `url(${blissWallpaper})` : `url(${kaliWallpaper})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
