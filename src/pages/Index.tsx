@@ -35,7 +35,7 @@ const allPrograms: Program[] = [
   { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
   { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊' },
   // Secondary School Subjects
-  { name: 'Pantry Chef', url: 'https://pantrychef-ai-recipe-7nfz.bolt.host/', icon: '👨‍🍳' },
+  { name: 'Pantry Chef', url: 'https://chef.bolt.host/', icon: '👨‍🍳' },
   { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
   { name: 'Drone Programming', url: 'https://tello-drone-voice-te-r9q2.bolt.host', icon: '🚁' },
   { name: 'AUSLAN', url: 'https://auslan-vision-learn-knpa.bolt.host', icon: '👋' },
