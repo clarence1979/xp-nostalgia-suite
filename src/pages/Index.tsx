@@ -31,7 +31,7 @@ const allPrograms: Program[] = [
   { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝' },
   { name: 'Tool Hub', url: 'https://comprehensive-online-921b.bolt.host/', icon: '🔧' },
   // Teacher Tools
-  { name: 'Magic Marker', url: 'https://mark-magic-ai.lovable.app/', icon: '✨' },
+  { name: 'Magic Marker', url: 'https://magicmarker.bolt.host', icon: '✨' },
   { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
   { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊' },
   // Secondary School Subjects
