@@ -34,7 +34,7 @@ const categories: Category[] = [
     icon: '🛠️',
     programs: [
       { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝' },
-      { name: 'Tool Hub', url: 'https://comprehensive-online-921b.bolt.host/', icon: '🔧' },
+      { name: 'Tool Hub', url: 'https://tools.bolt.host', icon: '🔧' },
     ]
   },
   {
