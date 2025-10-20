@@ -8,7 +8,6 @@ import { Browser } from '@/components/Browser';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
-import quizMasterIcon from '@/assets/quiz-master-icon.png';
 import { HardDrive, Folder, Trash2, Globe, FileText, Code } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -35,7 +34,7 @@ const allPrograms: Program[] = [
   { name: 'Magic Marker', url: 'https://magicmarker.bolt.host', icon: '✨' },
   { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
   { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊' },
-  { name: 'Quiz Master Pro', url: 'https://quizpro.bolt.host', icon: quizMasterIcon },
+  { name: 'Quiz Master Pro', url: 'https://quizpro.bolt.host', icon: '📋' },
   // Secondary School Subjects
   { name: 'Pantry Chef', url: 'https://chef.bolt.host/', icon: '👨‍🍳' },
   { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
@@ -268,17 +267,10 @@ const Index = () => {
         {allPrograms.map((program, index) => {
           const col = Math.floor(index / 6); // Changed from 8 to 6 rows
           const row = index % 6;
-          const isImage = typeof program.icon === 'string' && program.icon.startsWith('/');
           return (
             <DesktopIcon
               key={program.name}
-              icon={
-                isImage || (typeof program.icon !== 'string') ? (
-                  <img src={program.icon as string} alt={program.name} className={isMobile ? 'w-12 h-12' : 'w-16 h-16'} />
-                ) : (
-                  <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{program.icon}</span>
-                )
-              }
+              icon={<span className={isMobile ? 'text-3xl' : 'text-4xl'}>{program.icon}</span>}
               label={program.name}
               onClick={() => openProgram(program)}
               position={isMobile 

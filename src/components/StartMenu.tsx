@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { User, Folder, HardDrive, Globe, Settings, HelpCircle, Search, Terminal, LogOut, Power, ChevronRight, FileText } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import quizMasterIcon from '@/assets/quiz-master-icon.png';
 
 interface Program {
   name: string;
@@ -45,7 +44,7 @@ const categories: Category[] = [
       { name: 'Magic Marker', url: 'https://magicmarker.bolt.host', icon: '✨' },
       { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
       { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊' },
-      { name: 'Quiz Master Pro', url: 'https://quizpro.bolt.host', icon: quizMasterIcon },
+      { name: 'Quiz Master Pro', url: 'https://quizpro.bolt.host', icon: '📋' },
       { name: 'Class Tools', url: 'https://www.classtools.net/', icon: '🎯' },
     ]
   },
@@ -361,11 +360,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
                                   }
                                 }}
                               >
-                                {typeof program.icon === 'string' && program.icon.startsWith('/') ? (
-                                  <img src={program.icon} alt={program.name} className={isMobile ? 'w-6 h-6' : 'w-5 h-5'} />
-                                ) : (
-                                  <span className={isMobile ? 'text-2xl' : 'text-xl'}>{program.icon}</span>
-                                )}
+                                <span className={isMobile ? 'text-2xl' : 'text-xl'}>{program.icon}</span>
                                 <span className={isMobile ? 'text-base' : 'text-sm'}>{program.name}</span>
                               </div>
                             ))
