@@ -24,32 +24,33 @@ interface Program {
   name: string;
   url: string;
   icon: string;
+  description: string;
 }
 
 const allPrograms: Program[] = [
   // General Tools
-  { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝' },
-  { name: 'Tool Hub', url: 'https://tools.bolt.host', icon: '🔧' },
+  { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝', description: 'Takes dictation notes up to 45 minutes and generates study notes in PDF, customized to suit age range of audience' },
+  { name: 'Tool Hub', url: 'https://tools.bolt.host', icon: '🔧', description: 'Various Tools for File manipulation' },
   // Teacher Tools
-  { name: 'Magic Marker', url: 'https://magicmarker.bolt.host', icon: '✨' },
-  { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
-  { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊' },
-  { name: 'Quiz Master Pro', url: 'https://quizpro.bolt.host', icon: '📋' },
+  { name: 'Magic Marker', url: 'https://magicmarker.bolt.host', icon: '✨', description: 'Allows teachers to upload student assessments (hand-written or digital) and mark it either with a preset marking scheme or generated one. Gives constructive feedback in PDF' },
+  { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅', description: 'Helps teachers stay organised by using AI Agents (Beta)' },
+  { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊', description: 'Helps recognise student emotions to determine if they are concentrating' },
+  { name: 'Quiz Master Pro', url: 'https://quizpro.bolt.host', icon: '📋', description: 'Enables teachers to create Quizzes from uploaded PDF, Word or pictures and auto-generate answers. Lockdown mode will be enabled for students to take the quiz. Results are instantly available.' },
   // Secondary School Subjects
-  { name: 'Pantry Chef', url: 'https://chef.bolt.host/', icon: '👨‍🍳' },
-  { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
-  { name: 'Drone Programming', url: 'https://tello-drone-voice-te-r9q2.bolt.host', icon: '🚁' },
-  { name: 'AUSLAN', url: 'https://auslan.bolt.host', icon: '👋' },
-  { name: 'Voice to 3D Printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️' },
-  { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐' },
-  { name: 'Physics Simulator', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️' },
-  { name: 'Tutoring Chatbot', url: 'https://new-chat-kb4v.bolt.host/', icon: '🤖' },
-  { name: 'Math Genius', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢' },
-  { name: 'Code Class', url: 'https://new-chat-oj8v.bolt.host', icon: '💻' },
+  { name: 'Pantry Chef', url: 'https://chef.bolt.host/', icon: '👨‍🍳', description: 'Suggests food that you can cook based on what is available in your pantry. Also gives steps and has a grocery list. The Food scientist analyses existing dishes and tells you how to make them.' },
+  { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭', description: 'Talk to your favorite historical character. You can upload information or allow it to research information about the character of your choice.' },
+  { name: 'Drone Programming', url: 'https://tello-drone-voice-te-r9q2.bolt.host', icon: '🚁', description: 'Flies the Tello Drone via Scratch Blocks, Python and natural speech (voice and typed text)' },
+  { name: 'AUSLAN', url: 'https://auslan.bolt.host', icon: '👋', description: 'Australian Sign Language Learning Program' },
+  { name: 'Voice to 3D Printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️', description: 'Inputs voice or text to generate an STL for 3D printing' },
+  { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐', description: 'Determines where you are, and does a trace to the target website from your location. Teaches you how the internet works.' },
+  { name: 'Physics Simulator', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️', description: 'Simulates movements of balls and other objects and draws graphs to explain concepts in physics.' },
+  { name: 'Tutoring Chatbot', url: 'https://new-chat-kb4v.bolt.host/', icon: '🤖', description: 'Students can ask any questions about academic subjects.' },
+  { name: 'Math Genius', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢', description: 'Allow students from Years 7-10 to learn Maths using AI. Customises questions based on student interest and ability.' },
+  { name: 'Code Class', url: 'https://new-chat-oj8v.bolt.host', icon: '💻', description: 'Teaches Coding - teachers can assign coding homework from here.' },
   // Primary School
-  { name: 'Dream Tales', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚' },
+  { name: 'Dream Tales', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚', description: 'Generates unique stories every time using the age, gender and interest of the child using AI.' },
   // Classic Display
-  { name: 'Classic Display', url: 'https://ba45d991-19a1-476a-891f-59137477946c.lovable.app/', icon: '🖥️' },
+  { name: 'Classic Display', url: 'https://ba45d991-19a1-476a-891f-59137477946c.lovable.app/', icon: '🖥️', description: 'Classic view of all available programs' },
 ];
 
 const Index = () => {
@@ -273,10 +274,11 @@ const Index = () => {
               icon={<span className={isMobile ? 'text-3xl' : 'text-4xl'}>{program.icon}</span>}
               label={program.name}
               onClick={() => openProgram(program)}
-              position={isMobile 
-                ? { x: 95 + col * 85, y: 10 + row * 80 } 
+              position={isMobile
+                ? { x: 95 + col * 85, y: 10 + row * 80 }
                 : { x: 140 + col * 100, y: 20 + row * 100 }
               }
+              description={program.description}
             />
           );
         })}
