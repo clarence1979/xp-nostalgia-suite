@@ -213,7 +213,13 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
   const handleCategoryHover = (categoryName: string, event: React.MouseEvent) => {
     if (!isMobile) {
       const rect = event.currentTarget.getBoundingClientRect();
-      setCategorySubmenuTop(rect.top);
+      const allProgramsElement = document.getElementById('all-programs-item');
+      if (allProgramsElement) {
+        const allProgramsRect = allProgramsElement.getBoundingClientRect();
+        setCategorySubmenuTop(allProgramsRect.bottom);
+      } else {
+        setCategorySubmenuTop(rect.top);
+      }
     }
     setHoveredCategory(categoryName);
   };
