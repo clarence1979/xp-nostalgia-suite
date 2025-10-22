@@ -39,7 +39,7 @@ const allPrograms: Program[] = [
   // Secondary School Subjects
   { name: 'Pantry Chef', url: 'https://chef.bolt.host/', icon: '👨‍🍳', description: 'Suggests food that you can cook based on what is available in your pantry. Also gives steps and has a grocery list. The Food scientist analyses existing dishes and tells you how to make them.' },
   { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭', description: 'Talk to your favorite historical character. You can upload information or allow it to research information about the character of your choice.' },
-  { name: 'Drone Programming', url: 'https://tello-drone-voice-te-r9q2.bolt.host', icon: '🚁', description: 'Flies the Tello Drone via Scratch Blocks, Python and natural speech (voice and typed text)' },
+  { name: 'Drone Programming', url: 'https://drone.teachingtools.dev/', icon: '🚁', description: 'Flies the Tello Drone via Scratch Blocks, Python and natural speech (voice and typed text)' },
   { name: 'AUSLAN', url: 'https://auslan.bolt.host', icon: '👋', description: 'Australian Sign Language Learning Program' },
   { name: 'Voice to 3D Printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️', description: 'Inputs voice or text to generate an STL for 3D printing' },
   { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐', description: 'Determines where you are, and does a trace to the target website from your location. Teaches you how the internet works.' },
