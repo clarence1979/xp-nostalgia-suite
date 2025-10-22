@@ -334,6 +334,7 @@ const Index = () => {
           active: w.active,
         }))}
         onWindowClick={focusWindow}
+        theme={theme}
       />
 
       {/* Context Menu */}
