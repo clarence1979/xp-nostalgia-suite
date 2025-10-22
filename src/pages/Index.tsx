@@ -135,6 +135,11 @@ const Index = () => {
   };
 
   const openProgram = (program: Program) => {
+    if (program.name === 'Drone Programming') {
+      window.open(program.url, '_blank');
+      return;
+    }
+
     openWindow(
       program.name,
       <iframe
