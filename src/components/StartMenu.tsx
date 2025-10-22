@@ -26,6 +26,8 @@ interface StartMenuProps {
   onProgramClick: (program: Program) => void;
   onNotepadClick: () => void;
   onInfoClick: (title: string, content: React.ReactNode) => void;
+  theme: 'xp' | 'kali';
+  onThemeToggle: () => void;
 }
 
 const categories: Category[] = [
@@ -184,7 +186,7 @@ import { PrivacyContent } from './legal/PrivacyContent';
 import { TermsContent } from './legal/TermsContent';
 import { AboutContent } from './legal/AboutContent';
 
-export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick }: StartMenuProps) => {
+export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle }: StartMenuProps) => {
   const [showPrograms, setShowPrograms] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [hoveredSubcategory, setHoveredSubcategory] = useState<string | null>(null);
@@ -377,12 +379,12 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           <div
             className="xp-menu-item"
             onClick={() => {
-              onProgramClick({ name: 'Classic Display', url: 'https://ba45d991-19a1-476a-891f-59137477946c.lovable.app/', icon: '🖥️' });
+              onThemeToggle();
               onClose();
             }}
           >
-            <span className="text-xl">🖥️</span>
-            <span className="text-sm">Classic Display</span>
+            <span className="text-xl">{theme === 'xp' ? '🐉' : '🖥️'}</span>
+            <span className="text-sm">{theme === 'xp' ? 'Kali Linux Display' : 'Windows Display'}</span>
           </div>
           
           <div className="border-t border-gray-200 my-2" />

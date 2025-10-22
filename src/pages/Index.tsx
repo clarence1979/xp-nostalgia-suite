@@ -49,8 +49,6 @@ const allPrograms: Program[] = [
   { name: 'Code Class', url: 'https://new-chat-oj8v.bolt.host', icon: '💻', description: 'Teaches Coding - teachers can assign coding homework from here.' },
   // Primary School
   { name: 'Dream Tales', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚', description: 'Generates unique stories every time using the age, gender and interest of the child using AI.' },
-  // Classic Display
-  { name: 'Classic Display', url: 'https://ba45d991-19a1-476a-891f-59137477946c.lovable.app/', icon: '🖥️', description: 'Classic view of all available programs' },
 ];
 
 const Index = () => {
@@ -270,8 +268,16 @@ const Index = () => {
         />
         
         {/* Program Icons in Grid - adjusted for better visibility */}
+        <DesktopIcon
+          icon={<span className={isMobile ? 'text-3xl' : 'text-4xl'}>{theme === 'xp' ? '🐉' : '🖥️'}</span>}
+          label={theme === 'xp' ? 'Kali Linux Display' : 'Windows Display'}
+          onClick={() => setTheme(theme === 'xp' ? 'kali' : 'xp')}
+          position={isMobile ? { x: 10, y: 490 } : { x: 20, y: 620 }}
+          description={theme === 'xp' ? 'Switch to Kali Linux theme' : 'Switch to Windows XP theme'}
+        />
+
         {allPrograms.map((program, index) => {
-          const col = Math.floor(index / 6); // Changed from 8 to 6 rows
+          const col = Math.floor(index / 6);
           const row = index % 6;
           return (
             <DesktopIcon
@@ -314,6 +320,8 @@ const Index = () => {
           onProgramClick={openProgram}
           onNotepadClick={openNotepad}
           onInfoClick={(title, content) => openWindow(title, content)}
+          theme={theme}
+          onThemeToggle={switchTheme}
         />
       )}
 
