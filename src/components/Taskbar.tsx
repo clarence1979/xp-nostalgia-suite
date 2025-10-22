@@ -64,35 +64,49 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick }: TaskbarProps) 
 
       {/* System Tray */}
       <div className="w-px h-[32px] bg-[#0831D9]" />
-      
+
+      {/* Email Address */}
+      {!isMobile && (
+        <a
+          href="mailto:clarence.guru.bring446@passmail.net"
+          className="flex items-center h-[32px] px-2 hover:bg-white/10 rounded-sm transition-colors"
+          title="Contact via email"
+        >
+          <span className="text-[11px] text-white font-tahoma">
+            clarence.guru.bring446@passmail.net
+          </span>
+        </a>
+      )}
+
       {/* PayPal Donate Button */}
-      <form 
-        action="https://www.paypal.com/donate" 
-        method="post" 
+      <form
+        action="https://www.paypal.com/donate"
+        method="post"
         target="_top"
         className="flex items-center h-[32px] px-1"
       >
         <input type="hidden" name="hosted_button_id" value="PSXE6LDM3ZJDC" />
-        <input 
-          type="image" 
-          src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif" 
-          name="submit" 
-          title="PayPal - The safer, easier way to pay online!" 
+        <input
+          type="image"
+          src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif"
+          name="submit"
+          title="PayPal - The safer, easier way to pay online!"
           alt="Donate with PayPal button"
           className={`${isMobile ? 'h-5' : 'h-6'} hover:opacity-80 transition-opacity`}
         />
       </form>
-      
+
       {/* Logo */}
-      <a 
-        href="https://clarence.guru" 
-        target="_blank" 
+      <a
+        href="https://clarence.guru/#contact"
+        target="_blank"
         rel="noopener noreferrer"
         className="flex items-center h-[32px] px-2 hover:bg-white/10 rounded-sm transition-colors"
+        title="Contact Clarence"
       >
-        <img 
-          src={logo} 
-          alt="Clarence's Solutions" 
+        <img
+          src={logo}
+          alt="Clarence's Solutions"
           className={isMobile ? 'h-6' : 'h-7'}
         />
       </a>
