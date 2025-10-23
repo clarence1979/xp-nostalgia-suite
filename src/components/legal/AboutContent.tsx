@@ -71,7 +71,7 @@ export const AboutContent = () => {
           <h2 className="text-lg font-semibold mb-2">Version Information</h2>
           <p className="text-gray-700">
             Platform Version: 1.0.0<br />
-            Last Updated: January 2025<br />
+            Last Updated: October 2025<br />
             © 2025 Teachingtools.dev - All Rights Reserved
           </p>
         </section>
