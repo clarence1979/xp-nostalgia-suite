@@ -1,14 +1,20 @@
+import logo from '@/assets/cla_sol.png';
+
 export const AboutContent = () => {
   return (
     <div className="p-6 overflow-y-auto h-full bg-white">
-      <h1 className="text-2xl font-bold mb-4">About Teachingtools.dev</h1>
-      
+      <div className="flex items-center gap-3 mb-4">
+        <img src={logo} alt="Clarence's Solutions" className="h-12" />
+        <h1 className="text-2xl font-bold">About Teaching Tools</h1>
+      </div>
+
       <div className="space-y-4 text-sm">
         <section>
-          <h2 className="text-lg font-semibold mb-2">Our Mission</h2>
+          <h2 className="text-lg font-semibold mb-2">Made by Teachers, for Teachers</h2>
           <p className="text-gray-700">
-            Teachingtools.dev is dedicated to empowering Australian educators with innovative, AI-powered 
-            educational tools that enhance teaching and learning experiences across primary and secondary schools.
+            Teaching Tools is created by experienced educators who understand the daily challenges of teaching.
+            We're dedicated to empowering Australian teachers with innovative, AI-powered educational tools
+            that enhance teaching and learning experiences across primary and secondary schools.
           </p>
         </section>
 

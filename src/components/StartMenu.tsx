@@ -435,10 +435,10 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
             <FileText className="w-5 h-5" />
             <span className="text-sm">Terms of Use</span>
           </div>
-          <div 
+          <div
             className="xp-menu-item"
             onClick={() => {
-              onInfoClick('About Teachingtools.dev', <AboutContent />);
+              onInfoClick('About Teaching Tools', <AboutContent />);
               onClose();
             }}
           >
