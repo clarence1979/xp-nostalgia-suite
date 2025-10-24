@@ -49,6 +49,7 @@ const allPrograms: Program[] = [
   { name: 'Code Class', url: 'https://new-chat-oj8v.bolt.host', icon: '💻', description: 'Teaches Coding - teachers can assign coding homework from here.' },
   // Primary School
   { name: 'Dream Tales', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚', description: 'Generates unique stories every time using the age, gender and interest of the child using AI.' },
+  { name: 'MP3 Player', url: 'https://mp3.bolt.host/', icon: '🎵', description: 'Play your favorite music' },
 ];
 
 const Index = () => {
