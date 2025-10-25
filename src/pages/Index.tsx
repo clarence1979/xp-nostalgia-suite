@@ -134,19 +134,38 @@ const Index = () => {
   };
 
   const openProgram = (program: Program) => {
-    if (program.name === 'Drone Programming') {
+    if (program.name === 'Drone Programming' || program.name === 'Tool Hub') {
       window.open(program.url, '_blank');
       return;
     }
 
     openWindow(
       program.name,
-      <iframe
-        src={program.url}
-        className="w-full h-full border-none"
-        title={program.name}
-        allow="camera; microphone; geolocation; fullscreen"
-      />,
+      <div className="w-full h-full relative">
+        <iframe
+          src={program.url}
+          className="w-full h-full border-none"
+          title={program.name}
+          allow="camera; microphone; geolocation; fullscreen"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
+          onError={(e) => {
+            console.error(`Failed to load ${program.name}:`, e);
+            const iframe = e.target as HTMLIFrameElement;
+            iframe.style.display = 'none';
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-900';
+            errorDiv.innerHTML = `
+              <div class="text-center p-8">
+                <p class="text-lg mb-4">Cannot load ${program.name} in window</p>
+                <button onclick="window.open('${program.url}', '_blank')" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                  Open in New Tab
+                </button>
+              </div>
+            `;
+            iframe.parentElement?.appendChild(errorDiv);
+          }}
+        />
+      </div>,
       <span className="text-base">{program.icon}</span>
     );
   };
