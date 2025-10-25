@@ -171,10 +171,19 @@ const Index = () => {
   };
 
   const openProgram = (program: Program) => {
+    const apiKey = apiKeyStorage.get();
+    let urlWithApiKey = program.url;
+
+    if (apiKey) {
+      const url = new URL(program.url);
+      url.searchParams.set('apiKey', apiKey);
+      urlWithApiKey = url.toString();
+    }
+
     openWindow(
       program.name,
       <iframe
-        src={program.url}
+        src={urlWithApiKey}
         className="w-full h-full border-none"
         title={program.name}
         allow="*"
