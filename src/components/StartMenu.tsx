@@ -57,7 +57,7 @@ const categories: Category[] = [
     name: 'Secondary School Subjects',
     icon: '🎓',
     programs: [
-      { name: 'Pantry Chef', url: 'https://chef.bolt.host/', icon: '👨‍🍳' },
+      { name: 'Pantry Chef', url: 'https://chef.bolt.host', icon: '👨‍🍳' },
       { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
       { name: 'Drone Programming', url: 'https://drone.teachingtools.dev/', icon: '🚁' },
       { name: 'AUSLAN', url: 'https://auslan.bolt.host', icon: '👋' },
