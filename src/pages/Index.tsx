@@ -6,14 +6,10 @@ import { DesktopIcon } from '@/components/DesktopIcon';
 import { Notepad } from '@/components/Notepad';
 import { Browser } from '@/components/Browser';
 import { LoadingScreen } from '@/components/LoadingScreen';
-import { ApiKeyLogin } from '@/components/ApiKeyLogin';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText, Code } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
 interface OpenWindow {
   id: string;
@@ -24,22 +20,6 @@ interface OpenWindow {
   icon?: React.ReactNode;
 }
 
-interface DesktopIconData {
-  id: string;
-  name: string;
-  icon: string;
-  description: string;
-  url: string | null;
-  icon_type: 'system' | 'program' | 'theme';
-  position_x: number;
-  position_y: number;
-  position_x_mobile: number | null;
-  position_y_mobile: number | null;
-  category: string | null;
-  open_behavior: 'window' | 'new_tab' | 'special';
-  sort_order: number;
-}
-
 interface Program {
   name: string;
   url: string;
@@ -47,50 +27,47 @@ interface Program {
   description: string;
 }
 
+const allPrograms: Program[] = [
+  // General Tools
+  { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝', description: 'Takes dictation notes up to 45 minutes and generates study notes in PDF, customized to suit age range of audience' },
+  { name: 'Tool Hub', url: 'https://tools.bolt.host', icon: '🔧', description: 'Various Tools for File manipulation' },
+  // Teacher Tools
+  { name: 'Magic Marker', url: 'https://magicmarker.bolt.host', icon: '✨', description: 'Allows teachers to upload student assessments (hand-written or digital) and mark it either with a preset marking scheme or generated one. Gives constructive feedback in PDF' },
+  { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅', description: 'Helps teachers stay organised by using AI Agents (Beta)' },
+  { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊', description: 'Helps recognise student emotions to determine if they are concentrating' },
+  { name: 'Quiz Master Pro', url: 'https://quizpro.bolt.host', icon: '📋', description: 'Enables teachers to create Quizzes from uploaded PDF, Word or pictures and auto-generate answers. Lockdown mode will be enabled for students to take the quiz. Results are instantly available.' },
+  // Secondary School Subjects
+  { name: 'Pantry Chef', url: 'https://chef.bolt.host/', icon: '👨‍🍳', description: 'Suggests food that you can cook based on what is available in your pantry. Also gives steps and has a grocery list. The Food scientist analyses existing dishes and tells you how to make them.' },
+  { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭', description: 'Talk to your favorite historical character. You can upload information or allow it to research information about the character of your choice.' },
+  { name: 'Drone Programming', url: 'https://drone.teachingtools.dev/', icon: '🚁', description: 'Flies the Tello Drone via Scratch Blocks, Python and natural speech (voice and typed text)' },
+  { name: 'AUSLAN', url: 'https://auslan.bolt.host', icon: '👋', description: 'Australian Sign Language Learning Program' },
+  { name: 'Voice to 3D Printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️', description: 'Inputs voice or text to generate an STL for 3D printing' },
+  { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐', description: 'Determines where you are, and does a trace to the target website from your location. Teaches you how the internet works.' },
+  { name: 'Physics Simulator', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️', description: 'Simulates movements of balls and other objects and draws graphs to explain concepts in physics.' },
+  { name: 'Tutoring Chatbot', url: 'https://new-chat-kb4v.bolt.host/', icon: '🤖', description: 'Students can ask any questions about academic subjects.' },
+  { name: 'Math Genius', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢', description: 'Allow students from Years 7-10 to learn Maths using AI. Customises questions based on student interest and ability.' },
+  { name: 'Code Class', url: 'https://new-chat-oj8v.bolt.host', icon: '💻', description: 'Teaches Coding - teachers can assign coding homework from here.' },
+  // Primary School
+  { name: 'Dream Tales', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚', description: 'Generates unique stories every time using the age, gender and interest of the child using AI.' },
+  { name: 'MP3 Player', url: 'https://mp3.bolt.host/', icon: '🎵', description: 'Play your favorite music' },
+];
+
 const Index = () => {
   const [showStartMenu, setShowStartMenu] = useState(false);
   const [windows, setWindows] = useState<OpenWindow[]>([]);
   const [nextWindowId, setNextWindowId] = useState(1);
   const [validatedPassword, setValidatedPassword] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showApiKeyLogin, setShowApiKeyLogin] = useState(false);
-  const [apiKey, setApiKey] = useState<string | null>(null);
   const [theme, setTheme] = useState<'xp' | 'kali'>('xp');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
-  const [desktopIcons, setDesktopIcons] = useState<DesktopIconData[]>([]);
-  const [iconsLoading, setIconsLoading] = useState(true);
   const isMobile = useIsMobile();
-  const { toast } = useToast();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-      const savedApiKey = apiKeyStorage.get();
-      if (savedApiKey) {
-        setApiKey(savedApiKey);
-      }
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    const staticIcons: DesktopIconData[] = [
-      { id: '1', name: 'My Computer', icon: 'HardDrive', description: 'View system resources', url: null, icon_type: 'system', position_x: 20, position_y: 20, position_x_mobile: 10, position_y_mobile: 10, category: null, open_behavior: 'special', sort_order: 1 },
-      { id: '2', name: 'My Documents', icon: 'Folder', description: 'Your personal files', url: null, icon_type: 'system', position_x: 20, position_y: 110, position_x_mobile: 10, position_y_mobile: 110, category: null, open_behavior: 'special', sort_order: 2 },
-      { id: '3', name: 'Recycle Bin', icon: 'Trash2', description: 'Deleted items', url: null, icon_type: 'system', position_x: 20, position_y: 200, position_x_mobile: 10, position_y_mobile: 200, category: null, open_behavior: 'special', sort_order: 3 },
-      { id: '4', name: 'Internet Explorer', icon: 'Globe', description: 'Browse the web', url: null, icon_type: 'system', position_x: 20, position_y: 290, position_x_mobile: 10, position_y_mobile: 290, category: null, open_behavior: 'special', sort_order: 4 },
-      { id: '5', name: 'Notepad', icon: 'FileText', description: 'Text editor', url: null, icon_type: 'system', position_x: 20, position_y: 380, position_x_mobile: 10, position_y_mobile: 380, category: null, open_behavior: 'special', sort_order: 5 },
-      { id: '6', name: 'Theme Toggle', icon: '🐉', description: 'Switch theme', url: null, icon_type: 'theme', position_x: 20, position_y: 470, position_x_mobile: 10, position_y_mobile: 470, category: null, open_behavior: 'special', sort_order: 6 },
-      { id: '7', name: 'AI Note Taker', icon: '📝', description: 'AI-powered note taking application', url: 'https://ai-note-taker-app-1476.bolt.host', icon_type: 'program', position_x: 120, position_y: 20, position_x_mobile: 110, position_y_mobile: 10, category: 'General Tools', open_behavior: 'window', sort_order: 7 },
-      { id: '8', name: 'Magic Marker', icon: '✨', description: 'AI grading assistant for teachers', url: 'https://magicmarker.bolt.host', icon_type: 'program', position_x: 120, position_y: 110, position_x_mobile: 110, position_y_mobile: 110, category: 'Teacher Tools', open_behavior: 'window', sort_order: 8 },
-      { id: '9', name: 'Quiz Master Pro', icon: '📋', description: 'Create and manage quizzes', url: 'https://quizpro.bolt.host', icon_type: 'program', position_x: 120, position_y: 200, position_x_mobile: 110, position_y_mobile: 200, category: 'Teacher Tools', open_behavior: 'window', sort_order: 9 },
-      { id: '10', name: 'Tutoring Chatbot', icon: '🤖', description: 'AI-powered tutoring assistant', url: 'https://new-chat-kb4v.bolt.host/', icon_type: 'program', position_x: 120, position_y: 290, position_x_mobile: 110, position_y_mobile: 290, category: 'Secondary School', open_behavior: 'window', sort_order: 10 },
-      { id: '11', name: 'Code Class', icon: '💻', description: 'Learn coding with AI assistance', url: 'https://new-chat-oj8v.bolt.host', icon_type: 'program', position_x: 120, position_y: 380, position_x_mobile: 110, position_y_mobile: 380, category: 'Secondary School', open_behavior: 'window', sort_order: 11 },
-      { id: '12', name: 'Math Genius', icon: '🔢', description: 'Advanced adaptive mathematics learning', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon_type: 'program', position_x: 120, position_y: 470, position_x_mobile: 110, position_y_mobile: 470, category: 'Secondary School', open_behavior: 'window', sort_order: 12 },
-    ];
-    setDesktopIcons(staticIcons);
-    setIconsLoading(false);
-  }, [toast]);
 
   useEffect(() => {
     // Update body class for theme
@@ -157,7 +134,7 @@ const Index = () => {
   };
 
   const openProgram = (program: Program) => {
-    if (program.name === 'Drone Programming' || program.name === 'Visual Studio Code') {
+    if (program.name === 'Drone Programming') {
       window.open(program.url, '_blank');
       return;
     }
@@ -168,92 +145,10 @@ const Index = () => {
         src={program.url}
         className="w-full h-full border-none"
         title={program.name}
-        allow="camera *; microphone *; geolocation *; fullscreen *; payment *; usb *; accelerometer *; gyroscope *; magnetometer *; display-capture *; clipboard-read *; clipboard-write *; web-share *; autoplay *; encrypted-media *; picture-in-picture *; midi *"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation"
+        allow="camera; microphone; geolocation; fullscreen"
       />,
       <span className="text-base">{program.icon}</span>
     );
-  };
-
-  const handleIconClick = (icon: DesktopIconData) => {
-    if (icon.icon_type === 'system') {
-      switch (icon.name) {
-        case 'My Computer':
-          openWindow('My Computer', <div className="p-4">My Computer</div>, <HardDrive className="w-4 h-4" />);
-          break;
-        case 'My Documents':
-          openWindow('My Documents', <div className="p-4">My Documents</div>, <Folder className="w-4 h-4" />);
-          break;
-        case 'Recycle Bin':
-          openWindow('Recycle Bin', <div className="p-4">Recycle Bin is empty</div>, <Trash2 className="w-4 h-4" />);
-          break;
-        case 'Internet Explorer':
-          openWindow('Internet Explorer', <Browser />, <Globe className="w-4 h-4" />);
-          break;
-        case 'Notepad':
-          openNotepad();
-          break;
-      }
-    } else if (icon.icon_type === 'theme') {
-      switchTheme();
-    } else if (icon.icon_type === 'program' && icon.url) {
-      openProgram({
-        name: icon.name,
-        url: icon.url,
-        icon: icon.icon,
-        description: icon.description
-      });
-    }
-  };
-
-  const getIconComponent = (iconName: string) => {
-    const iconMap: Record<string, React.ReactNode> = {
-      'HardDrive': <HardDrive className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />,
-      'Folder': <Folder className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-yellow-300`} />,
-      'Trash2': <Trash2 className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />,
-      'Globe': <Globe className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-400`} />,
-      'FileText': <FileText className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-300`} />,
-      'Code': <Code className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-500`} />,
-    };
-
-    return iconMap[iconName] || <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{iconName}</span>;
-  };
-
-  const handleApiKeyLogin = (key: string) => {
-    apiKeyStorage.save(key);
-    setApiKey(key);
-    setShowApiKeyLogin(false);
-    toast({
-      title: 'Success',
-      description: 'API key saved successfully',
-    });
-  };
-
-  const handleApiKeyCancel = () => {
-    setShowApiKeyLogin(false);
-  };
-
-  const handleLogout = () => {
-    const confirmLogout = window.confirm(
-      'Are you sure you want to logout?\n\nThis will clear your stored API key from local storage. You will need to enter it again to use AI-powered programs.'
-    );
-
-    if (confirmLogout) {
-      apiKeyStorage.clear();
-      setApiKey(null);
-      toast({
-        title: 'Logged out',
-        description: 'Your API key has been cleared from local storage',
-      });
-    }
-  };
-
-  const handleApiKeyIconClick = () => {
-    if (apiKey) {
-      handleLogout();
-    } else {
-      setShowApiKeyLogin(true);
-    }
   };
 
   const openNotepad = () => {
@@ -317,10 +212,6 @@ const Index = () => {
     return <LoadingScreen />;
   }
 
-  if (showApiKeyLogin) {
-    return <ApiKeyLogin onLogin={handleApiKeyLogin} onCancel={handleApiKeyCancel} />;
-  }
-
   return (
     <div
       className="w-screen h-screen relative overflow-hidden"
@@ -333,37 +224,72 @@ const Index = () => {
       onClick={handleClick}
     >
       {/* Desktop Icons */}
-      {!iconsLoading && (
-        <>
-          {desktopIcons.map((icon) => {
-            const displayLabel = icon.icon_type === 'theme'
-              ? (theme === 'xp' ? 'Kali Linux Display' : 'Windows Display')
-              : icon.name;
+      <>
+        {/* System Icons */}
+        <DesktopIcon
+          icon={<HardDrive className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />}
+          label="My Computer"
+          onClick={() => openWindow('My Computer', <div className="p-4">My Computer</div>, <HardDrive className="w-4 h-4" />)}
+          position={isMobile ? { x: 10, y: 10 } : { x: 20, y: 20 }}
+        />
+        <DesktopIcon
+          icon={<Folder className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-yellow-300`} />}
+          label="My Documents"
+          onClick={() => openWindow('My Documents', <div className="p-4">My Documents</div>, <Folder className="w-4 h-4" />)}
+          position={isMobile ? { x: 10, y: 90 } : { x: 20, y: 120 }}
+        />
+        <DesktopIcon
+          icon={<Trash2 className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />}
+          label="Recycle Bin"
+          onClick={() => openWindow('Recycle Bin', <div className="p-4">Recycle Bin is empty</div>, <Trash2 className="w-4 h-4" />)}
+          position={isMobile ? { x: 10, y: 170 } : { x: 20, y: 220 }}
+        />
+        <DesktopIcon
+          icon={<Globe className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-400`} />}
+          label="Internet Explorer"
+          onClick={() => openWindow('Internet Explorer', <Browser />, <Globe className="w-4 h-4" />)}
+          position={isMobile ? { x: 10, y: 250 } : { x: 20, y: 320 }}
+        />
+        <DesktopIcon
+          icon={<FileText className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-300`} />}
+          label="Notepad"
+          onClick={openNotepad}
+          position={isMobile ? { x: 10, y: 330 } : { x: 20, y: 420 }}
+        />
+        <DesktopIcon
+          icon={<Code className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-500`} />}
+          label="Visual Studio Code"
+          onClick={() => window.open('https://vscode.dev/', '_blank')}
+          position={isMobile ? { x: 10, y: 410 } : { x: 20, y: 520 }}
+        />
+        
+        {/* Program Icons in Grid - adjusted for better visibility */}
+        <DesktopIcon
+          icon={<span className={isMobile ? 'text-3xl' : 'text-4xl'}>{theme === 'xp' ? '🐉' : '🖥️'}</span>}
+          label={theme === 'xp' ? 'Kali Linux Display' : 'Windows Display'}
+          onClick={() => setTheme(theme === 'xp' ? 'kali' : 'xp')}
+          position={isMobile ? { x: 10, y: 490 } : { x: 20, y: 620 }}
+          description={theme === 'xp' ? 'Switch to Kali Linux theme' : 'Switch to Windows XP theme'}
+        />
 
-            const displayDescription = icon.icon_type === 'theme'
-              ? (theme === 'xp' ? 'Switch to Kali Linux theme' : 'Switch to Windows XP theme')
-              : icon.description;
-
-            const displayIcon = icon.icon_type === 'theme'
-              ? (theme === 'xp' ? '🐉' : '🖥️')
-              : icon.icon;
-
-            return (
-              <DesktopIcon
-                key={icon.id}
-                icon={getIconComponent(displayIcon)}
-                label={displayLabel}
-                onClick={() => handleIconClick(icon)}
-                position={isMobile
-                  ? { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y }
-                  : { x: icon.position_x, y: icon.position_y }
-                }
-                description={displayDescription}
-              />
-            );
-          })}
-        </>
-      )}
+        {allPrograms.map((program, index) => {
+          const col = Math.floor(index / 6);
+          const row = index % 6;
+          return (
+            <DesktopIcon
+              key={program.name}
+              icon={<span className={isMobile ? 'text-3xl' : 'text-4xl'}>{program.icon}</span>}
+              label={program.name}
+              onClick={() => openProgram(program)}
+              position={isMobile
+                ? { x: 95 + col * 85, y: 10 + row * 80 }
+                : { x: 140 + col * 100, y: 20 + row * 100 }
+              }
+              description={program.description}
+            />
+          );
+        })}
+      </>
 
       {/* Open Windows */}
       {windows
@@ -392,9 +318,6 @@ const Index = () => {
           onInfoClick={(title, content) => openWindow(title, content)}
           theme={theme}
           onThemeToggle={switchTheme}
-          onLogout={handleLogout}
-          hasApiKey={apiKey !== null}
-          programs={[]}
         />
       )}
 
@@ -408,8 +331,6 @@ const Index = () => {
         }))}
         onWindowClick={focusWindow}
         theme={theme}
-        hasApiKey={apiKey !== null}
-        onApiKeyClick={handleApiKeyIconClick}
       />
 
       {/* Context Menu */}

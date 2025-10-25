@@ -1,17 +1,14 @@
 import { useState, useEffect } from 'react';
 import logo from '@/assets/cla_sol.png';
-import { Key } from 'lucide-react';
 
 interface TaskbarProps {
   onStartClick: () => void;
   windows: Array<{ id: string; title: string; active: boolean }>;
   onWindowClick: (id: string) => void;
   theme: 'xp' | 'kali';
-  hasApiKey?: boolean;
-  onApiKeyClick?: () => void;
 }
 
-export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey = false, onApiKeyClick }: TaskbarProps) => {
+export const Taskbar = ({ onStartClick, windows, onWindowClick, theme }: TaskbarProps) => {
   const [time, setTime] = useState(new Date());
   const [isMobile, setIsMobile] = useState(false);
 
@@ -104,23 +101,6 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey
 
       {/* System Tray */}
       <div className="w-px h-[32px]" style={{ background: theme === 'xp' ? '#0831D9' : 'hsl(180 100% 30%)' }} />
-
-      {/* API Key Status Icon */}
-      {onApiKeyClick && (
-        <button
-          onClick={onApiKeyClick}
-          className="flex items-center justify-center h-[32px] px-2 hover:bg-white/10 rounded-sm transition-colors"
-          title={hasApiKey ? 'API Key configured (click to logout)' : 'Click to configure API Key'}
-        >
-          <Key
-            className="w-4 h-4"
-            style={{
-              color: hasApiKey ? '#00ff00' : '#ff0000',
-              filter: hasApiKey ? 'drop-shadow(0 0 2px #00ff00)' : 'drop-shadow(0 0 2px #ff0000)'
-            }}
-          />
-        </button>
-      )}
 
       {/* Email Address */}
       {!isMobile && (
