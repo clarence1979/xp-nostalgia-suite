@@ -74,31 +74,16 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    const loadDesktopIcons = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('desktop_icons')
-          .select('*')
-          .order('sort_order', { ascending: true });
-
-        if (error) {
-          console.error('Error loading desktop icons:', error);
-          toast({
-            title: 'Error',
-            description: 'Failed to load desktop icons',
-            variant: 'destructive',
-          });
-        } else if (data) {
-          setDesktopIcons(data);
-        }
-      } catch (err) {
-        console.error('Failed to load desktop icons:', err);
-      } finally {
-        setIconsLoading(false);
-      }
-    };
-
-    loadDesktopIcons();
+    const staticIcons: DesktopIconData[] = [
+      { id: '1', name: 'My Computer', icon: 'HardDrive', description: 'View system resources', url: null, icon_type: 'system', position_x: 20, position_y: 20, position_x_mobile: 10, position_y_mobile: 10, category: null, open_behavior: 'special', sort_order: 1 },
+      { id: '2', name: 'My Documents', icon: 'Folder', description: 'Your personal files', url: null, icon_type: 'system', position_x: 20, position_y: 110, position_x_mobile: 10, position_y_mobile: 110, category: null, open_behavior: 'special', sort_order: 2 },
+      { id: '3', name: 'Recycle Bin', icon: 'Trash2', description: 'Deleted items', url: null, icon_type: 'system', position_x: 20, position_y: 200, position_x_mobile: 10, position_y_mobile: 200, category: null, open_behavior: 'special', sort_order: 3 },
+      { id: '4', name: 'Internet Explorer', icon: 'Globe', description: 'Browse the web', url: null, icon_type: 'system', position_x: 20, position_y: 290, position_x_mobile: 10, position_y_mobile: 290, category: null, open_behavior: 'special', sort_order: 4 },
+      { id: '5', name: 'Notepad', icon: 'FileText', description: 'Text editor', url: null, icon_type: 'system', position_x: 20, position_y: 380, position_x_mobile: 10, position_y_mobile: 380, category: null, open_behavior: 'special', sort_order: 5 },
+      { id: '6', name: 'Theme Toggle', icon: '🐉', description: 'Switch theme', url: null, icon_type: 'theme', position_x: 20, position_y: 470, position_x_mobile: 10, position_y_mobile: 470, category: null, open_behavior: 'special', sort_order: 6 },
+    ];
+    setDesktopIcons(staticIcons);
+    setIconsLoading(false);
   }, [toast]);
 
   useEffect(() => {
@@ -166,7 +151,7 @@ const Index = () => {
   };
 
   const openProgram = (program: Program) => {
-    if (program.name === 'Drone Programming') {
+    if (program.name === 'Drone Programming' || program.name === 'Visual Studio Code') {
       window.open(program.url, '_blank');
       return;
     }
@@ -202,28 +187,9 @@ const Index = () => {
         case 'Notepad':
           openNotepad();
           break;
-        case 'Visual Studio Code':
-          window.open('https://vscode.dev/', '_blank');
-          break;
       }
     } else if (icon.icon_type === 'theme') {
       switchTheme();
-    } else if (icon.icon_type === 'program' && icon.url) {
-      if (icon.open_behavior === 'new_tab') {
-        window.open(icon.url, '_blank');
-      } else {
-        openWindow(
-          icon.name,
-          <iframe
-            src={icon.url}
-            className="w-full h-full border-none"
-            title={icon.name}
-            allow="camera *; microphone *; geolocation *; fullscreen *; payment *; usb *; accelerometer *; gyroscope *; magnetometer *; display-capture *; clipboard-read *; clipboard-write *; web-share *; autoplay *; encrypted-media *; picture-in-picture *; midi *"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation"
-          />,
-          <span className="text-base">{icon.icon}</span>
-        );
-      }
     }
   };
 
@@ -408,29 +374,14 @@ const Index = () => {
       {showStartMenu && (
         <StartMenu
           onClose={() => setShowStartMenu(false)}
-          onProgramClick={(program) => {
-            const iconData = desktopIcons.find(icon => icon.name === program.name && icon.icon_type === 'program');
-            if (iconData) {
-              handleIconClick(iconData);
-            } else {
-              openProgram(program);
-            }
-          }}
+          onProgramClick={openProgram}
           onNotepadClick={openNotepad}
           onInfoClick={(title, content) => openWindow(title, content)}
           theme={theme}
           onThemeToggle={switchTheme}
           onLogout={handleLogout}
           hasApiKey={apiKey !== null}
-          programs={desktopIcons
-            .filter(icon => icon.icon_type === 'program')
-            .map(icon => ({
-              name: icon.name,
-              url: icon.url || '',
-              icon: icon.icon,
-              description: icon.description
-            }))
-          }
+          programs={[]}
         />
       )}
 
