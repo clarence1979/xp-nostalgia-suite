@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Folder, HardDrive, Globe, Settings, HelpCircle, Search, Terminal, LogOut, Power, ChevronRight, FileText } from 'lucide-react';
+import { User, Folder, HardDrive, Globe, Settings, CircleHelp as HelpCircle, Search, Terminal, LogOut, Power, ChevronRight, FileText } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Program {
