@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Folder, HardDrive, Globe, Settings, CircleHelp as HelpCircle, Search, Terminal, LogOut, Power, ChevronRight, FileText } from 'lucide-react';
+import { User, Folder, HardDrive, Globe, Settings, CircleHelp as HelpCircle, Terminal, LogOut, Power, ChevronRight, FileText } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Program {
@@ -430,18 +430,10 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
             <Settings className="w-5 h-5" />
             <span className="text-sm">Control Panel</span>
           </div>
-          <div className="xp-menu-item">
-            <HelpCircle className="w-5 h-5" />
-            <span className="text-sm">Help</span>
-          </div>
-          <div className="xp-menu-item">
-            <Search className="w-5 h-5" />
-            <span className="text-sm">Search</span>
-          </div>
-          
+
           <div className="border-t border-gray-200 my-2" />
-          
-          <div 
+
+          <div
             className="xp-menu-item"
             onClick={() => {
               onInfoClick('Privacy Policy', <PrivacyContent />);
@@ -451,7 +443,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
             <HelpCircle className="w-5 h-5" />
             <span className="text-sm">Privacy Policy</span>
           </div>
-          <div 
+          <div
             className="xp-menu-item"
             onClick={() => {
               onInfoClick('Terms of Use', <TermsContent />);
@@ -473,19 +465,16 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           </div>
 
           {hasApiKey && onLogout && (
-            <>
-              <div className="border-t border-gray-200 my-2" />
-              <div
-                className="xp-menu-item"
-                onClick={() => {
-                  onLogout();
-                  onClose();
-                }}
-              >
-                <LogOut className="w-5 h-5" />
-                <span className="text-sm">Logout</span>
-              </div>
-            </>
+            <div
+              className="xp-menu-item"
+              onClick={() => {
+                onLogout();
+                onClose();
+              }}
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="text-sm">Log Out</span>
+            </div>
           )}
         </div>
 
