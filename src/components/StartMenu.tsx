@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Folder, HardDrive, Globe, Settings, HelpCircle, Search, Terminal, LogOut, Power, ChevronRight, FileText } from 'lucide-react';
+import { User, Folder, HardDrive, Globe, Settings, CircleHelp as HelpCircle, Terminal, LogOut, Power, ChevronRight, FileText } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Program {
@@ -28,6 +28,9 @@ interface StartMenuProps {
   onInfoClick: (title: string, content: React.ReactNode) => void;
   theme: 'xp' | 'kali';
   onThemeToggle: () => void;
+  programs?: Program[];
+  onLogout?: () => void;
+  hasApiKey?: boolean;
 }
 
 const categories: Category[] = [
@@ -54,8 +57,8 @@ const categories: Category[] = [
     name: 'Secondary School Subjects',
     icon: '🎓',
     programs: [
-      { name: 'Pantry Chef', url: 'https://chef.bolt.host/', icon: '👨‍🍳' },
-      { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭' },
+      { name: 'Pantry Chef', url: 'https://chef.bolt.host', icon: '👨‍🍳' },
+      { name: 'History', url: 'https://history.bolt.host', icon: '🎭' },
       { name: 'Drone Programming', url: 'https://drone.teachingtools.dev/', icon: '🚁' },
       { name: 'AUSLAN', url: 'https://auslan.bolt.host', icon: '👋' },
       { name: 'Voice to 3D Printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️' },
@@ -186,7 +189,30 @@ import { PrivacyContent } from './legal/PrivacyContent';
 import { TermsContent } from './legal/TermsContent';
 import { AboutContent } from './legal/AboutContent';
 
-export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle }: StartMenuProps) => {
+export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle, programs, onLogout, hasApiKey }: StartMenuProps) => {
+  const dynamicCategories: Category[] = programs ? [
+    {
+      name: 'General Tools',
+      icon: '🛠️',
+      programs: programs.filter(p => ['AI Note Taker', 'Tool Hub'].includes(p.name))
+    },
+    {
+      name: 'Teacher Tools',
+      icon: '👨‍🏫',
+      programs: programs.filter(p => ['Magic Marker', 'Teacher Scheduler', 'Student Emotion Recognition', 'Quiz Master Pro'].includes(p.name))
+    },
+    {
+      name: 'Secondary School Subjects',
+      icon: '🎓',
+      programs: programs.filter(p => ['Pantry Chef', 'History', 'Drone Programming', 'AUSLAN', 'Voice to 3D Printing', 'Network Route Tracer', 'Physics Simulator', 'Tutoring Chatbot', 'Math Genius', 'Code Class'].includes(p.name))
+    },
+    {
+      name: 'Primary School',
+      icon: '🏫',
+      programs: programs.filter(p => ['Dream Tales', 'MP3 Player'].includes(p.name))
+    },
+    ...categories.filter(c => c.name === 'Programs from the internet')
+  ] : categories;
   const [showPrograms, setShowPrograms] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [hoveredSubcategory, setHoveredSubcategory] = useState<string | null>(null);
@@ -270,7 +296,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
               })()}
             >
               <div className="py-1">
-                {categories.map((category) => (
+                {dynamicCategories.map((category) => (
                   <div key={category.name}>
                     <div
                       className={`xp-menu-item ${isMobile ? 'text-base py-3' : 'whitespace-nowrap'} relative`}
@@ -404,18 +430,10 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
             <Settings className="w-5 h-5" />
             <span className="text-sm">Control Panel</span>
           </div>
-          <div className="xp-menu-item">
-            <HelpCircle className="w-5 h-5" />
-            <span className="text-sm">Help</span>
-          </div>
-          <div className="xp-menu-item">
-            <Search className="w-5 h-5" />
-            <span className="text-sm">Search</span>
-          </div>
-          
+
           <div className="border-t border-gray-200 my-2" />
-          
-          <div 
+
+          <div
             className="xp-menu-item"
             onClick={() => {
               onInfoClick('Privacy Policy', <PrivacyContent />);
@@ -425,7 +443,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
             <HelpCircle className="w-5 h-5" />
             <span className="text-sm">Privacy Policy</span>
           </div>
-          <div 
+          <div
             className="xp-menu-item"
             onClick={() => {
               onInfoClick('Terms of Use', <TermsContent />);
@@ -445,6 +463,19 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
             <HelpCircle className="w-5 h-5" />
             <span className="text-sm">About</span>
           </div>
+
+          {hasApiKey && onLogout && (
+            <div
+              className="xp-menu-item"
+              onClick={() => {
+                onLogout();
+                onClose();
+              }}
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="text-sm">Log Out</span>
+            </div>
+          )}
         </div>
 
       </div>
