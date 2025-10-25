@@ -193,15 +193,10 @@ const Index = () => {
     const handleSubmit = () => {
       const password = input.value;
       document.body.removeChild(passwordDialog);
-      
+
       if (password) {
-        if (password === 'PVCC123' || password === 'PVCC321') {
-          setValidatedPassword(password);
-          const accessType = password === 'PVCC321' ? 'Full Access' : 'View Only';
-          openWindow(`Untitled - Notepad (${accessType})`, <Notepad password={password} />, <FileText className="w-4 h-4" />);
-        } else {
-          alert('Incorrect password. Access denied.');
-        }
+        setValidatedPassword(password);
+        openWindow(`Untitled - Notepad`, <Notepad password={password} />, <FileText className="w-4 h-4" />);
       }
     };
     

@@ -1,44 +1,60 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
 const NOTEPAD_ID = '00000000-0000-0000-0000-000000000001';
 
-// Password constants - stored server-side for security
-const VIEW_ONLY_PASSWORD = 'PVCC123';
-const WRITE_ACCESS_PASSWORD = 'PVCC321';
+async function validatePassword(
+  supabase: any,
+  password: string
+): Promise<{ valid: boolean; accessLevel: 'view' | 'write' | null }> {
+  try {
+    const { data, error } = await supabase.rpc('validate_notepad_password', {
+      input_password: password
+    });
 
-// Helper function to validate password and return access level
-function validatePassword(password: string): { valid: boolean; accessLevel: 'view' | 'write' | null } {
-  if (password === WRITE_ACCESS_PASSWORD) {
-    return { valid: true, accessLevel: 'write' };
-  } else if (password === VIEW_ONLY_PASSWORD) {
-    return { valid: true, accessLevel: 'view' };
+    if (error) {
+      console.error('Error validating password:', error);
+      return { valid: false, accessLevel: null };
+    }
+
+    if (data && data.length > 0) {
+      const result = data[0];
+      return {
+        valid: result.is_valid,
+        accessLevel: result.is_valid ? result.access_level : null
+      };
+    }
+
+    return { valid: false, accessLevel: null };
+  } catch (err) {
+    console.error('Exception validating password:', err);
+    return { valid: false, accessLevel: null };
   }
-  return { valid: false, accessLevel: null };
 }
 
-serve(async (req) => {
-  // Handle CORS preflight requests
+Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
   }
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
-    // Create Supabase client with service role (bypasses RLS)
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { password, action, content } = await req.json();
 
-    // Validate password and get access level
-    const { valid, accessLevel } = validatePassword(password);
+    const { valid, accessLevel } = await validatePassword(supabase, password);
     
     if (!valid) {
       console.log('Invalid password attempt');
@@ -53,7 +69,6 @@ serve(async (req) => {
 
     console.log(`Notepad ${action} request with ${accessLevel} access`);
 
-    // Handle GET request (read content)
     if (action === 'get') {
       const { data, error } = await supabase
         .from('notepad')
@@ -83,13 +98,11 @@ serve(async (req) => {
       );
     }
 
-    // Handle UPDATE request (save content)
     if (action === 'update') {
-      // Check if user has write access
       if (accessLevel !== 'write') {
         console.log('Write access denied for view-only user');
         return new Response(
-          JSON.stringify({ error: 'Access denied: View-only access. Use password PVCC321 for write access.' }),
+          JSON.stringify({ error: 'Access denied: View-only access. Contact administrator for write access.' }),
           { 
             status: 403, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }

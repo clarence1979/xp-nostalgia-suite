@@ -98,7 +98,7 @@ export const Notepad = ({ password }: NotepadProps) => {
     if (isReadOnly) {
       toast({
         title: 'Access denied',
-        description: 'You have view-only access. Use password PVCC321 for write access.',
+        description: 'You have view-only access. Contact administrator for write access.',
         variant: 'destructive',
       });
       setFileMenuOpen(false);
@@ -490,7 +490,7 @@ export const Notepad = ({ password }: NotepadProps) => {
             }}
             value={content}
             onChange={(e) => !isReadOnly && setContent(e.target.value)}
-            placeholder={isReadOnly ? 'View-only mode - Use password PVCC321 for write access' : 'Type here...'}
+            placeholder={isReadOnly ? 'View-only mode - Contact administrator for write access' : 'Type here...'}
             readOnly={isReadOnly}
           />
           
