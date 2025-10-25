@@ -171,36 +171,15 @@ const Index = () => {
   };
 
   const openProgram = (program: Program) => {
-    const programsToOpenInNewTab = [
-      'Drone Programming',
-      'Visual Studio Code',
-      'Student Emotion Recognition',
-      'Pantry Chef',
-      'History',
-      'AUSLAN',
-      'Voice to 3D Printing',
-      'Network Route Tracer',
-      'Physics Simulator',
-      'Tutoring Chatbot',
-      'Math Genius',
-      'Code Class',
-      'Dream Tales',
-      'MP3 Player'
-    ];
-
-    if (programsToOpenInNewTab.includes(program.name)) {
-      window.open(program.url, '_blank');
-      return;
-    }
-
     openWindow(
       program.name,
       <iframe
         src={program.url}
         className="w-full h-full border-none"
         title={program.name}
-        allow="camera; microphone; geolocation; fullscreen; payment; usb; accelerometer; gyroscope; magnetometer; display-capture; clipboard-read; clipboard-write; autoplay; encrypted-media; picture-in-picture; midi"
+        allow="*"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation"
+        referrerPolicy="no-referrer-when-downgrade"
       />,
       <span className="text-base">{program.icon}</span>
     );
