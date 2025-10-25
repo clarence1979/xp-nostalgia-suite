@@ -6,6 +6,8 @@ interface Program {
   name: string;
   url: string;
   icon: string;
+  description?: string;
+  category?: string;
 }
 
 interface SubCategory {
@@ -190,26 +192,26 @@ import { TermsContent } from './legal/TermsContent';
 import { AboutContent } from './legal/AboutContent';
 
 export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle, programs, onLogout, hasApiKey }: StartMenuProps) => {
-  const dynamicCategories: Category[] = programs ? [
+  const dynamicCategories: Category[] = programs && programs.length > 0 ? [
     {
       name: 'General Tools',
       icon: '🛠️',
-      programs: programs.filter(p => ['AI Note Taker', 'Tool Hub'].includes(p.name))
+      programs: programs.filter(p => p.category === 'general')
     },
     {
       name: 'Teacher Tools',
       icon: '👨‍🏫',
-      programs: programs.filter(p => ['Magic Marker', 'Teacher Scheduler', 'Student Emotion Recognition', 'Quiz Master Pro'].includes(p.name))
+      programs: programs.filter(p => p.category === 'teacher')
     },
     {
       name: 'Secondary School Subjects',
       icon: '🎓',
-      programs: programs.filter(p => ['Pantry Chef', 'History', 'Drone Programming', 'AUSLAN', 'Voice to 3D Printing', 'Network Route Tracer', 'Physics Simulator', 'Tutoring Chatbot', 'Math Genius', 'Code Class'].includes(p.name))
+      programs: programs.filter(p => p.category === 'secondary')
     },
     {
       name: 'Primary School',
       icon: '🏫',
-      programs: programs.filter(p => ['Dream Tales', 'MP3 Player'].includes(p.name))
+      programs: programs.filter(p => p.category === 'primary')
     },
     ...categories.filter(c => c.name === 'Programs from the internet')
   ] : categories;
