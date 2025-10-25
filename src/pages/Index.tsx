@@ -6,12 +6,14 @@ import { DesktopIcon } from '@/components/DesktopIcon';
 import { Notepad } from '@/components/Notepad';
 import { Browser } from '@/components/Browser';
 import { LoadingScreen } from '@/components/LoadingScreen';
+import { ApiKeyLogin } from '@/components/ApiKeyLogin';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText, Code } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
 interface OpenWindow {
   id: string;
@@ -51,6 +53,8 @@ const Index = () => {
   const [nextWindowId, setNextWindowId] = useState(1);
   const [validatedPassword, setValidatedPassword] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showApiKeyLogin, setShowApiKeyLogin] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
   const [theme, setTheme] = useState<'xp' | 'kali'>('xp');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [desktopIcons, setDesktopIcons] = useState<DesktopIconData[]>([]);
@@ -61,6 +65,12 @@ const Index = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
+      const savedApiKey = apiKeyStorage.get();
+      if (savedApiKey) {
+        setApiKey(savedApiKey);
+      } else {
+        setShowApiKeyLogin(true);
+      }
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
@@ -230,6 +240,35 @@ const Index = () => {
     return iconMap[iconName] || <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{iconName}</span>;
   };
 
+  const handleApiKeyLogin = (key: string) => {
+    apiKeyStorage.save(key);
+    setApiKey(key);
+    setShowApiKeyLogin(false);
+    toast({
+      title: 'Success',
+      description: 'API key saved successfully',
+    });
+  };
+
+  const handleApiKeyCancel = () => {
+    setShowApiKeyLogin(false);
+  };
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm(
+      'Are you sure you want to logout?\n\nThis will clear your stored API key from local storage. You will need to enter it again to use AI-powered programs.'
+    );
+
+    if (confirmLogout) {
+      apiKeyStorage.clear();
+      setApiKey(null);
+      toast({
+        title: 'Logged out',
+        description: 'Your API key has been cleared from local storage',
+      });
+    }
+  };
+
   const openNotepad = () => {
     // Create a custom password dialog
     const passwordDialog = document.createElement('div');
@@ -289,6 +328,10 @@ const Index = () => {
 
   if (isLoading) {
     return <LoadingScreen />;
+  }
+
+  if (showApiKeyLogin) {
+    return <ApiKeyLogin onLogin={handleApiKeyLogin} onCancel={handleApiKeyCancel} />;
   }
 
   return (
@@ -369,6 +412,8 @@ const Index = () => {
           onInfoClick={(title, content) => openWindow(title, content)}
           theme={theme}
           onThemeToggle={switchTheme}
+          onLogout={handleLogout}
+          hasApiKey={apiKey !== null}
           programs={desktopIcons
             .filter(icon => icon.icon_type === 'program')
             .map(icon => ({

@@ -29,6 +29,8 @@ interface StartMenuProps {
   theme: 'xp' | 'kali';
   onThemeToggle: () => void;
   programs?: Program[];
+  onLogout?: () => void;
+  hasApiKey?: boolean;
 }
 
 const categories: Category[] = [
@@ -187,7 +189,7 @@ import { PrivacyContent } from './legal/PrivacyContent';
 import { TermsContent } from './legal/TermsContent';
 import { AboutContent } from './legal/AboutContent';
 
-export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle, programs }: StartMenuProps) => {
+export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle, programs, onLogout, hasApiKey }: StartMenuProps) => {
   const dynamicCategories: Category[] = programs ? [
     {
       name: 'General Tools',
@@ -469,6 +471,22 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
             <HelpCircle className="w-5 h-5" />
             <span className="text-sm">About</span>
           </div>
+
+          {hasApiKey && onLogout && (
+            <>
+              <div className="border-t border-gray-200 my-2" />
+              <div
+                className="xp-menu-item"
+                onClick={() => {
+                  onLogout();
+                  onClose();
+                }}
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="text-sm">Logout</span>
+              </div>
+            </>
+          )}
         </div>
 
       </div>
