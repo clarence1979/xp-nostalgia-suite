@@ -171,7 +171,24 @@ const Index = () => {
   };
 
   const openProgram = (program: Program) => {
-    if (program.name === 'Drone Programming' || program.name === 'Visual Studio Code') {
+    const programsToOpenInNewTab = [
+      'Drone Programming',
+      'Visual Studio Code',
+      'Student Emotion Recognition',
+      'Pantry Chef',
+      'History',
+      'AUSLAN',
+      'Voice to 3D Printing',
+      'Network Route Tracer',
+      'Physics Simulator',
+      'Tutoring Chatbot',
+      'Math Genius',
+      'Code Class',
+      'Dream Tales',
+      'MP3 Player'
+    ];
+
+    if (programsToOpenInNewTab.includes(program.name)) {
       window.open(program.url, '_blank');
       return;
     }
