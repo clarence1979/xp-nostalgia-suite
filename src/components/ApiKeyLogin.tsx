@@ -85,20 +85,19 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
           </div>
 
           <div className="bg-gradient-to-b from-[#6D92D6] to-[#5D7FC7] px-6 py-4 relative">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between">
               <div className="text-center flex-1">
                 <div className="text-white text-xl font-bold mb-0.5" style={{ fontFamily: 'Segoe UI, Tahoma, sans-serif', letterSpacing: '0.5px' }}>
                   Educational AI Suite
                 </div>
-                <div className="text-white/80 text-xs" style={{ fontFamily: 'Tahoma, sans-serif' }}>Professional Edition</div>
+                <div className="text-white/80 text-xs mb-0.5" style={{ fontFamily: 'Tahoma, sans-serif' }}>Professional Edition</div>
+                <div className="text-white/70 text-[9px]" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+                  © 2025 Clarence's Solutions
+                </div>
               </div>
               <div className="ml-3">
                 <img src="/src/assets/cla sol.png" alt="Clarence's Solutions" className="h-10 w-auto" />
               </div>
-            </div>
-
-            <div className="text-white/70 text-[9px] text-center" style={{ fontFamily: 'Tahoma, sans-serif' }}>
-              © 2025 Clarence's Solutions
             </div>
           </div>
 
