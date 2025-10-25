@@ -106,12 +106,12 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             </div>
 
             <div className="text-white text-[10px] mb-4" style={{ fontFamily: 'Tahoma, sans-serif' }}>
-              Copyright © 1985-2001<br />
-              Microsoft Corporation
+              Copyright © 2025<br />
+              Clarence's Solutions
             </div>
 
-            <div className="absolute top-6 right-8 text-white text-xs" style={{ fontFamily: 'Tahoma, sans-serif' }}>
-              Microsoft
+            <div className="absolute top-6 right-8">
+              <img src="/src/assets/cla sol.png" alt="Clarence's Solutions" className="h-8 w-auto" />
             </div>
           </div>
 

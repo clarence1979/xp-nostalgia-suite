@@ -68,8 +68,6 @@ const Index = () => {
       const savedApiKey = apiKeyStorage.get();
       if (savedApiKey) {
         setApiKey(savedApiKey);
-      } else {
-        setShowApiKeyLogin(true);
       }
     }, 3000);
     return () => clearTimeout(timer);
@@ -269,6 +267,14 @@ const Index = () => {
     }
   };
 
+  const handleApiKeyIconClick = () => {
+    if (apiKey) {
+      handleLogout();
+    } else {
+      setShowApiKeyLogin(true);
+    }
+  };
+
   const openNotepad = () => {
     // Create a custom password dialog
     const passwordDialog = document.createElement('div');
@@ -436,6 +442,8 @@ const Index = () => {
         }))}
         onWindowClick={focusWindow}
         theme={theme}
+        hasApiKey={apiKey !== null}
+        onApiKeyClick={handleApiKeyIconClick}
       />
 
       {/* Context Menu */}
