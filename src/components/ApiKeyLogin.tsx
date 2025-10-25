@@ -67,81 +67,129 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-[#5a7fbe] to-[#4a6fa5]">
-      <div className="relative w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#5A7FBE]">
+      <div className="relative w-full max-w-[640px]">
         <div
-          className="bg-[hsl(var(--button-face))] border-2 shadow-[inset_1px_1px_0px_rgba(255,255,255,0.8),inset_-1px_-1px_0px_rgba(0,0,0,0.3)] rounded"
+          className="border-[3px] rounded-lg overflow-hidden shadow-2xl"
           style={{
-            borderTopColor: 'hsl(var(--button-highlight))',
-            borderLeftColor: 'hsl(var(--button-highlight))',
-            borderRightColor: 'hsl(var(--button-shadow))',
-            borderBottomColor: 'hsl(var(--button-shadow))',
+            borderTopColor: '#3C7DC9',
+            borderLeftColor: '#3C7DC9',
+            borderRightColor: '#16397E',
+            borderBottomColor: '#16397E',
           }}
         >
-          <div
-            className="bg-gradient-to-r from-[#0054e3] to-[#3c8df5] text-white px-2 py-1 flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <Key className="w-4 h-4" />
-              <span className="font-bold text-sm">OpenAI API Key Login</span>
+          <div className="bg-gradient-to-b from-[#5A8FD8] to-[#5472B6] px-3 py-2">
+            <h1 className="text-white text-base font-bold tracking-wide" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+              Log On to Windows
+            </h1>
+          </div>
+
+          <div className="bg-gradient-to-b from-[#6D92D6] to-[#5D7FC7] px-8 py-6 relative">
+            <div className="flex items-center justify-center mb-4">
+              <div className="text-center">
+                <div className="text-white text-3xl font-bold mb-1" style={{ fontFamily: 'Trebuchet MS, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+                  <span className="text-[#FF6B1A]">W</span>
+                  <span className="text-[#80C241]">i</span>
+                  <span className="text-[#FF6B1A]">n</span>
+                  <span className="text-[#FFD800]">d</span>
+                  <span className="text-[#FF6B1A]">o</span>
+                  <span className="text-[#FF6B1A]">w</span>
+                  <span className="text-[#80C241]">s</span>
+                  <span className="ml-2 text-[#FF6B1A]">XP</span>
+                </div>
+                <div className="text-white text-xs" style={{ fontFamily: 'Tahoma, sans-serif' }}>Professional</div>
+              </div>
+            </div>
+
+            <div className="text-white text-[10px] mb-4" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+              Copyright © 1985-2001<br />
+              Microsoft Corporation
+            </div>
+
+            <div className="absolute top-6 right-8 text-white text-xs" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+              Microsoft
             </div>
           </div>
 
-          <div className="p-6 space-y-4">
-            <div className="bg-white border-2 border-[hsl(var(--button-shadow))] p-4 mb-4">
-              <p className="text-sm mb-2">
-                Enter your OpenAI API key to automatically populate it across all AI-powered programs.
-              </p>
-              <p className="text-xs text-gray-600">
-                This is optional and can be skipped by clicking Cancel.
-              </p>
-            </div>
+          <div className="bg-[#D4D0C8] px-8 py-6">
+            <div className="mb-4">
+              <div className="flex items-center mb-2">
+                <label className="text-sm font-normal w-28" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+                  User name:
+                </label>
+                <input
+                  type="text"
+                  value="Administrator"
+                  disabled
+                  className="flex-1 px-2 py-1 border border-[#7F9DB9] bg-white text-sm"
+                  style={{ fontFamily: 'Tahoma, sans-serif' }}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">API Key:</label>
-              <Input
-                type="password"
-                value={apiKey}
-                onChange={(e) => {
-                  setApiKey(e.target.value);
-                  setError('');
-                }}
-                onKeyDown={handleKeyPress}
-                placeholder="sk-..."
-                className="xp-input"
-                disabled={isValidating}
-                autoFocus
-              />
+              <div className="flex items-center">
+                <label className="text-sm font-normal w-28" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+                  Password:
+                </label>
+                <Input
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => {
+                    setApiKey(e.target.value);
+                    setError('');
+                  }}
+                  onKeyDown={handleKeyPress}
+                  placeholder="sk-..."
+                  className="flex-1 px-2 py-1 border border-[#7F9DB9] bg-white text-sm focus:outline-none focus:border-[#0054E3]"
+                  style={{ fontFamily: 'Tahoma, sans-serif' }}
+                  disabled={isValidating}
+                  autoFocus
+                />
+              </div>
             </div>
 
             {error && (
-              <div className="bg-red-50 border-2 border-red-300 p-2 text-sm text-red-700">
+              <div className="mb-4 bg-[#FFF7CC] border border-[#FFD700] px-3 py-2 text-xs text-black">
                 {error}
               </div>
             )}
 
-            <div className="flex gap-2 justify-end pt-2">
-              <Button
+            <div className="flex gap-2 justify-end">
+              <button
                 onClick={handleLogin}
                 disabled={isValidating || !apiKey}
-                className="xp-button min-w-[80px]"
+                className="px-6 py-1.5 text-sm border-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  fontFamily: 'Tahoma, sans-serif',
+                  background: '#ECE9D8',
+                  borderTopColor: '#FFFFFF',
+                  borderLeftColor: '#FFFFFF',
+                  borderRightColor: '#808080',
+                  borderBottomColor: '#808080',
+                }}
               >
                 {isValidating ? 'Validating...' : 'OK'}
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={onCancel}
-                variant="outline"
                 disabled={isValidating}
-                className="xp-button min-w-[80px]"
+                className="px-6 py-1.5 text-sm border-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  fontFamily: 'Tahoma, sans-serif',
+                  background: '#ECE9D8',
+                  borderTopColor: '#FFFFFF',
+                  borderLeftColor: '#FFFFFF',
+                  borderRightColor: '#808080',
+                  borderBottomColor: '#808080',
+                }}
               >
                 Cancel
-              </Button>
+              </button>
+            </div>
+
+            <div className="mt-3 text-[10px] text-gray-600 text-center" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+              Enter your OpenAI API key (starts with sk-). This is optional and stored locally only.
             </div>
           </div>
-        </div>
-
-        <div className="mt-4 text-center text-white text-xs">
-          <p className="drop-shadow-md">Your API key is stored locally and never sent to our servers</p>
         </div>
       </div>
     </div>
