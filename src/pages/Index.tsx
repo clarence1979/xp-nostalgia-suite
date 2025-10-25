@@ -81,6 +81,12 @@ const Index = () => {
       { id: '4', name: 'Internet Explorer', icon: 'Globe', description: 'Browse the web', url: null, icon_type: 'system', position_x: 20, position_y: 290, position_x_mobile: 10, position_y_mobile: 290, category: null, open_behavior: 'special', sort_order: 4 },
       { id: '5', name: 'Notepad', icon: 'FileText', description: 'Text editor', url: null, icon_type: 'system', position_x: 20, position_y: 380, position_x_mobile: 10, position_y_mobile: 380, category: null, open_behavior: 'special', sort_order: 5 },
       { id: '6', name: 'Theme Toggle', icon: '🐉', description: 'Switch theme', url: null, icon_type: 'theme', position_x: 20, position_y: 470, position_x_mobile: 10, position_y_mobile: 470, category: null, open_behavior: 'special', sort_order: 6 },
+      { id: '7', name: 'AI Note Taker', icon: '📝', description: 'AI-powered note taking application', url: 'https://ai-note-taker-app-1476.bolt.host', icon_type: 'program', position_x: 120, position_y: 20, position_x_mobile: 110, position_y_mobile: 10, category: 'General Tools', open_behavior: 'window', sort_order: 7 },
+      { id: '8', name: 'Magic Marker', icon: '✨', description: 'AI grading assistant for teachers', url: 'https://magicmarker.bolt.host', icon_type: 'program', position_x: 120, position_y: 110, position_x_mobile: 110, position_y_mobile: 110, category: 'Teacher Tools', open_behavior: 'window', sort_order: 8 },
+      { id: '9', name: 'Quiz Master Pro', icon: '📋', description: 'Create and manage quizzes', url: 'https://quizpro.bolt.host', icon_type: 'program', position_x: 120, position_y: 200, position_x_mobile: 110, position_y_mobile: 200, category: 'Teacher Tools', open_behavior: 'window', sort_order: 9 },
+      { id: '10', name: 'Tutoring Chatbot', icon: '🤖', description: 'AI-powered tutoring assistant', url: 'https://new-chat-kb4v.bolt.host/', icon_type: 'program', position_x: 120, position_y: 290, position_x_mobile: 110, position_y_mobile: 290, category: 'Secondary School', open_behavior: 'window', sort_order: 10 },
+      { id: '11', name: 'Code Class', icon: '💻', description: 'Learn coding with AI assistance', url: 'https://new-chat-oj8v.bolt.host', icon_type: 'program', position_x: 120, position_y: 380, position_x_mobile: 110, position_y_mobile: 380, category: 'Secondary School', open_behavior: 'window', sort_order: 11 },
+      { id: '12', name: 'Math Genius', icon: '🔢', description: 'Advanced adaptive mathematics learning', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon_type: 'program', position_x: 120, position_y: 470, position_x_mobile: 110, position_y_mobile: 470, category: 'Secondary School', open_behavior: 'window', sort_order: 12 },
     ];
     setDesktopIcons(staticIcons);
     setIconsLoading(false);
@@ -190,6 +196,13 @@ const Index = () => {
       }
     } else if (icon.icon_type === 'theme') {
       switchTheme();
+    } else if (icon.icon_type === 'program' && icon.url) {
+      openProgram({
+        name: icon.name,
+        url: icon.url,
+        icon: icon.icon,
+        description: icon.description
+      });
     }
   };
 
