@@ -298,6 +298,15 @@ const Index = () => {
     if (confirmLogout) {
       apiKeyStorage.clear();
       setApiKey(null);
+
+      // Notify all iframes to clear their API keys
+      windows.forEach((win) => {
+        const iframe = document.querySelector(`iframe[title="${win.title}"]`) as HTMLIFrameElement;
+        if (iframe?.contentWindow) {
+          iframe.contentWindow.postMessage({ type: 'CLEAR_API_KEY' }, '*');
+        }
+      });
+
       toast({
         title: 'Logged out',
         description: 'Your API key has been cleared from local storage',
