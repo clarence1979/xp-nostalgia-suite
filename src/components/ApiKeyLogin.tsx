@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Key } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ApiKeyLoginProps {
   onLogin: (apiKey: string) => void;
@@ -12,6 +13,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
   const [apiKey, setApiKey] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState('');
+  const isMobile = useIsMobile();
 
   const validateApiKey = async (key: string): Promise<boolean> => {
     if (!key || key.trim() === '') {
@@ -67,8 +69,8 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#5A7FBE]">
-      <div className="relative w-full max-w-[400px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#5A7FBE] p-4">
+      <div className={`relative w-full ${isMobile ? 'max-w-[340px]' : 'max-w-[400px]'}`}>
         <div
           className="border-[3px] rounded-lg overflow-hidden shadow-2xl"
           style={{
@@ -78,46 +80,46 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             borderBottomColor: '#16397E',
           }}
         >
-          <div className="bg-gradient-to-b from-[#5A8FD8] to-[#5472B6] px-3 py-1.5">
-            <h1 className="text-white text-sm font-bold" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+          <div className={`bg-gradient-to-b from-[#5A8FD8] to-[#5472B6] ${isMobile ? 'px-2 py-1' : 'px-3 py-1.5'}`}>
+            <h1 className={`text-white ${isMobile ? 'text-xs' : 'text-sm'} font-bold`} style={{ fontFamily: 'Tahoma, sans-serif' }}>
               API Key Configuration
             </h1>
           </div>
 
-          <div className="bg-gradient-to-b from-[#6D92D6] to-[#5D7FC7] px-6 py-4 relative">
+          <div className={`bg-gradient-to-b from-[#6D92D6] to-[#5D7FC7] ${isMobile ? 'px-3 py-3' : 'px-6 py-4'} relative`}>
             <div className="flex items-center justify-between">
               <div className="text-center flex-1">
-                <div className="text-white text-xl font-bold mb-0.5" style={{ fontFamily: 'Segoe UI, Tahoma, sans-serif', letterSpacing: '0.5px' }}>
+                <div className={`text-white ${isMobile ? 'text-base' : 'text-xl'} font-bold mb-0.5`} style={{ fontFamily: 'Segoe UI, Tahoma, sans-serif', letterSpacing: '0.5px' }}>
                   Educational AI Suite
                 </div>
-                <div className="text-white/80 text-xs mb-0.5" style={{ fontFamily: 'Tahoma, sans-serif' }}>Professional Edition</div>
+                <div className={`text-white/80 ${isMobile ? 'text-[10px]' : 'text-xs'} mb-0.5`} style={{ fontFamily: 'Tahoma, sans-serif' }}>Professional Edition</div>
                 <div className="text-white/70 text-[9px]" style={{ fontFamily: 'Tahoma, sans-serif' }}>
                   © 2025 Clarence's Solutions
                 </div>
               </div>
-              <div className="ml-3">
-                <img src="/src/assets/cla sol.png" alt="Clarence's Solutions" className="h-10 w-auto" />
+              <div className={`${isMobile ? 'ml-2' : 'ml-3'}`}>
+                <img src="/src/assets/cla sol.png" alt="Clarence's Solutions" className={`${isMobile ? 'h-8' : 'h-10'} w-auto`} />
               </div>
             </div>
           </div>
 
-          <div className="bg-[#D4D0C8] px-6 py-4">
+          <div className={`bg-[#D4D0C8] ${isMobile ? 'px-3 py-3' : 'px-6 py-4'}`}>
             <div className="mb-3">
-              <div className="flex items-center mb-2">
-                <label className="text-xs font-normal w-20" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+              <div className={`flex items-center mb-2 ${isMobile ? 'flex-col items-stretch' : ''}`}>
+                <label className={`${isMobile ? 'text-[10px] mb-1' : 'text-xs w-20'} font-normal`} style={{ fontFamily: 'Tahoma, sans-serif' }}>
                   User:
                 </label>
                 <input
                   type="text"
                   value="Administrator"
                   disabled
-                  className="flex-1 px-2 py-1 border border-[#7F9DB9] bg-white text-xs"
+                  className={`${isMobile ? 'w-full' : 'flex-1'} px-2 py-1 border border-[#7F9DB9] bg-white ${isMobile ? 'text-[11px]' : 'text-xs'}`}
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
                 />
               </div>
 
-              <div className="flex items-center">
-                <label className="text-xs font-normal w-20" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+              <div className={`flex items-center ${isMobile ? 'flex-col items-stretch' : ''}`}>
+                <label className={`${isMobile ? 'text-[10px] mb-1' : 'text-xs w-20'} font-normal`} style={{ fontFamily: 'Tahoma, sans-serif' }}>
                   API Key:
                 </label>
                 <Input
@@ -129,7 +131,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
                   }}
                   onKeyDown={handleKeyPress}
                   placeholder="sk-..."
-                  className="flex-1 px-2 py-1 border border-[#7F9DB9] bg-white text-xs focus:outline-none focus:border-[#0054E3]"
+                  className={`${isMobile ? 'w-full' : 'flex-1'} px-2 py-1 border border-[#7F9DB9] bg-white ${isMobile ? 'text-[11px]' : 'text-xs'} focus:outline-none focus:border-[#0054E3]`}
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
                   disabled={isValidating}
                   autoFocus
@@ -138,16 +140,16 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             </div>
 
             {error && (
-              <div className="mb-3 bg-[#FFF7CC] border border-[#FFD700] px-2 py-1.5 text-[10px] text-black">
+              <div className={`mb-3 bg-[#FFF7CC] border border-[#FFD700] px-2 py-1.5 ${isMobile ? 'text-[9px]' : 'text-[10px]'} text-black`}>
                 {error}
               </div>
             )}
 
-            <div className="flex gap-2 justify-end">
+            <div className={`flex gap-2 justify-end ${isMobile ? 'flex-col-reverse' : ''}`}>
               <button
                 onClick={handleLogin}
                 disabled={isValidating || !apiKey}
-                className="px-5 py-1 text-xs border-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`${isMobile ? 'w-full py-2' : 'px-5 py-1'} text-xs border-2 disabled:opacity-50 disabled:cursor-not-allowed`}
                 style={{
                   fontFamily: 'Tahoma, sans-serif',
                   background: '#ECE9D8',
@@ -162,7 +164,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
               <button
                 onClick={onCancel}
                 disabled={isValidating}
-                className="px-5 py-1 text-xs border-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`${isMobile ? 'w-full py-2' : 'px-5 py-1'} text-xs border-2 disabled:opacity-50 disabled:cursor-not-allowed`}
                 style={{
                   fontFamily: 'Tahoma, sans-serif',
                   background: '#ECE9D8',
@@ -176,7 +178,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
               </button>
             </div>
 
-            <div className="mt-2 text-[9px] text-gray-600 text-center" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+            <div className={`mt-2 ${isMobile ? 'text-[8px]' : 'text-[9px]'} text-gray-600 text-center`} style={{ fontFamily: 'Tahoma, sans-serif' }}>
               OpenAI API key (optional) - Stored locally
             </div>
           </div>
