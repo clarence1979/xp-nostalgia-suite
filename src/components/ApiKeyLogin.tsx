@@ -80,7 +80,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
         >
           <div className="bg-gradient-to-b from-[#5A8FD8] to-[#5472B6] px-3 py-2">
             <h1 className="text-white text-base font-bold tracking-wide" style={{ fontFamily: 'Tahoma, sans-serif' }}>
-              Log On to Windows
+              Log On to Educational AI Suite
             </h1>
           </div>
 
@@ -88,14 +88,18 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             <div className="flex items-center justify-center mb-4">
               <div className="text-center">
                 <div className="text-white text-3xl font-bold mb-1" style={{ fontFamily: 'Trebuchet MS, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
-                  <span className="text-[#FF6B1A]">W</span>
-                  <span className="text-[#80C241]">i</span>
-                  <span className="text-[#FF6B1A]">n</span>
-                  <span className="text-[#FFD800]">d</span>
-                  <span className="text-[#FF6B1A]">o</span>
-                  <span className="text-[#FF6B1A]">w</span>
-                  <span className="text-[#80C241]">s</span>
-                  <span className="ml-2 text-[#FF6B1A]">XP</span>
+                  <span className="text-[#FF6B1A]">E</span>
+                  <span className="text-[#80C241]">d</span>
+                  <span className="text-[#FF6B1A]">u</span>
+                  <span className="text-[#FFD800]">c</span>
+                  <span className="text-[#FF6B1A]">a</span>
+                  <span className="text-[#80C241]">t</span>
+                  <span className="text-[#FF6B1A]">i</span>
+                  <span className="text-[#FFD800]">o</span>
+                  <span className="text-[#80C241]">n</span>
+                  <span className="text-[#FF6B1A]">a</span>
+                  <span className="text-[#80C241]">l</span>
+                  <span className="ml-2 text-[#FF6B1A]">AI</span>
                 </div>
                 <div className="text-white text-xs" style={{ fontFamily: 'Tahoma, sans-serif' }}>Professional</div>
               </div>
