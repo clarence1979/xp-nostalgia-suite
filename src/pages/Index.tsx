@@ -11,7 +11,6 @@ import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText, Code } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
@@ -75,41 +74,37 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    const loadIconsFromDatabase = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('desktop_icons')
-          .select('*')
-          .order('sort_order', { ascending: true });
+    const hardcodedIcons: DesktopIconData[] = [
+      { id: '1', name: 'My Computer', icon: 'HardDrive', description: 'System computer information', url: null, icon_type: 'system', position_x: 20, position_y: 20, position_x_mobile: 10, position_y_mobile: 10, category: null, open_behavior: 'special', sort_order: 1 },
+      { id: '2', name: 'My Documents', icon: 'Folder', description: 'Personal documents folder', url: null, icon_type: 'system', position_x: 20, position_y: 120, position_x_mobile: 10, position_y_mobile: 90, category: null, open_behavior: 'special', sort_order: 2 },
+      { id: '3', name: 'Recycle Bin', icon: 'Trash2', description: 'Deleted files storage', url: null, icon_type: 'system', position_x: 20, position_y: 220, position_x_mobile: 10, position_y_mobile: 170, category: null, open_behavior: 'special', sort_order: 3 },
+      { id: '4', name: 'Internet Explorer', icon: 'Globe', description: 'Web browser', url: null, icon_type: 'system', position_x: 20, position_y: 320, position_x_mobile: 10, position_y_mobile: 250, category: null, open_behavior: 'special', sort_order: 4 },
+      { id: '5', name: 'Notepad', icon: 'FileText', description: 'Text editor with password protection', url: null, icon_type: 'system', position_x: 20, position_y: 420, position_x_mobile: 10, position_y_mobile: 330, category: null, open_behavior: 'special', sort_order: 5 },
+      { id: '6', name: 'Visual Studio Code', icon: 'Code', description: 'Professional code editor', url: 'https://vscode.dev/', icon_type: 'system', position_x: 20, position_y: 520, position_x_mobile: 10, position_y_mobile: 410, category: null, open_behavior: 'new_tab', sort_order: 6 },
+      { id: '7', name: 'AI Note Taker', icon: '📝', description: 'Takes dictation notes up to 45 minutes and generates study notes in PDF, customized to suit age range of audience', url: 'https://ai-note-taker-app-1476.bolt.host', icon_type: 'program', position_x: 140, position_y: 20, position_x_mobile: 95, position_y_mobile: 10, category: 'general', open_behavior: 'window', sort_order: 100 },
+      { id: '8', name: 'Magic Marker', icon: '✨', description: 'Allows teachers to upload student assessments (hand-written or digital) and mark it either with a preset marking scheme or generated one. Gives constructive feedback in PDF', url: 'https://magicmarker.bolt.host', icon_type: 'program', position_x: 140, position_y: 120, position_x_mobile: 95, position_y_mobile: 90, category: 'teacher', open_behavior: 'window', sort_order: 200 },
+      { id: '9', name: 'Student Emotion Recognition', icon: '😊', description: 'Helps recognise student emotions to determine if they are concentrating', url: 'https://clarence.guru/emo4.html', icon_type: 'program', position_x: 140, position_y: 220, position_x_mobile: 95, position_y_mobile: 170, category: 'teacher', open_behavior: 'window', sort_order: 202 },
+      { id: '10', name: 'Pantry Chef', icon: '👨‍🍳', description: 'Suggests food that you can cook based on what is available in your pantry. Also gives steps and has a grocery list. The Food scientist analyses existing dishes and tells you how to make them.', url: 'https://chef.bolt.host', icon_type: 'program', position_x: 140, position_y: 320, position_x_mobile: 95, position_y_mobile: 250, category: 'secondary', open_behavior: 'window', sort_order: 300 },
+      { id: '11', name: 'Drone Programming', icon: '🚁', description: 'Flies the Tello Drone via Scratch Blocks, Python and natural speech (voice and typed text)', url: 'https://drone.teachingtools.dev/', icon_type: 'program', position_x: 140, position_y: 420, position_x_mobile: 95, position_y_mobile: 330, category: 'secondary', open_behavior: 'window', sort_order: 302 },
+      { id: '12', name: 'Voice to 3D Printing', icon: '🖨️', description: 'Inputs voice or text to generate an STL for 3D printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon_type: 'program', position_x: 140, position_y: 520, position_x_mobile: 95, position_y_mobile: 410, category: 'secondary', open_behavior: 'window', sort_order: 304 },
+      { id: '13', name: 'Tool Hub', icon: '🔧', description: 'Various Tools for File manipulation', url: 'https://tools.bolt.host', icon_type: 'program', position_x: 240, position_y: 20, position_x_mobile: 180, position_y_mobile: 10, category: 'general', open_behavior: 'window', sort_order: 101 },
+      { id: '14', name: 'Teacher Scheduler', icon: '📅', description: 'Helps teachers stay organised by using AI Agents (Beta)', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon_type: 'program', position_x: 240, position_y: 120, position_x_mobile: 180, position_y_mobile: 90, category: 'teacher', open_behavior: 'window', sort_order: 201 },
+      { id: '15', name: 'Quiz Master Pro', icon: '📋', description: 'Enables teachers to create Quizzes from uploaded PDF, Word or pictures and auto-generate answers. Lockdown mode will be enabled for students to take the quiz. Results are instantly available.', url: 'https://quizpro.bolt.host', icon_type: 'program', position_x: 240, position_y: 220, position_x_mobile: 180, position_y_mobile: 170, category: 'teacher', open_behavior: 'window', sort_order: 203 },
+      { id: '16', name: 'History', icon: '🎭', description: 'Talk to your favorite historical character. You can upload information or allow it to research information about the character of your choice.', url: 'https://history.bolt.host', icon_type: 'program', position_x: 240, position_y: 320, position_x_mobile: 180, position_y_mobile: 250, category: 'secondary', open_behavior: 'window', sort_order: 301 },
+      { id: '17', name: 'AUSLAN', icon: '👋', description: 'Australian Sign Language Learning Program', url: 'https://auslan.bolt.host', icon_type: 'program', position_x: 240, position_y: 420, position_x_mobile: 180, position_y_mobile: 330, category: 'secondary', open_behavior: 'window', sort_order: 303 },
+      { id: '18', name: 'Network Route Tracer', icon: '🌐', description: 'Determines where you are, and does a trace to the target website from your location. Teaches you how the internet works.', url: 'https://network-route-tracer-r2zo.bolt.host/', icon_type: 'program', position_x: 240, position_y: 520, position_x_mobile: 180, position_y_mobile: 410, category: 'secondary', open_behavior: 'window', sort_order: 305 },
+      { id: '19', name: 'Physics Simulator', icon: '⚛️', description: 'Simulates movements of balls and other objects and draws graphs to explain concepts in physics.', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon_type: 'program', position_x: 340, position_y: 20, position_x_mobile: 265, position_y_mobile: 10, category: 'secondary', open_behavior: 'window', sort_order: 306 },
+      { id: '20', name: 'Tutoring Chatbot', icon: '🤖', description: 'Students can ask any questions about academic subjects.', url: 'https://new-chat-kb4v.bolt.host/', icon_type: 'program', position_x: 340, position_y: 120, position_x_mobile: 265, position_y_mobile: 90, category: 'secondary', open_behavior: 'window', sort_order: 307 },
+      { id: '21', name: 'Math Genius', icon: '🔢', description: 'Allow students from Years 7-10 to learn Maths using AI. Customises questions based on student interest and ability.', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon_type: 'program', position_x: 340, position_y: 220, position_x_mobile: 265, position_y_mobile: 170, category: 'secondary', open_behavior: 'window', sort_order: 308 },
+      { id: '22', name: 'Code Class', icon: '💻', description: 'Teaches Coding - teachers can assign coding homework from here.', url: 'https://new-chat-oj8v.bolt.host', icon_type: 'program', position_x: 340, position_y: 320, position_x_mobile: 265, position_y_mobile: 250, category: 'secondary', open_behavior: 'window', sort_order: 309 },
+      { id: '23', name: 'Dream Tales', icon: '📚', description: 'Generates unique stories every time using the age, gender and interest of the child using AI.', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon_type: 'program', position_x: 340, position_y: 420, position_x_mobile: 265, position_y_mobile: 330, category: 'primary', open_behavior: 'window', sort_order: 400 },
+      { id: '24', name: 'MP3 Player', icon: '🎵', description: 'Play your favorite music', url: 'https://mp3.bolt.host/', icon_type: 'program', position_x: 340, position_y: 520, position_x_mobile: 265, position_y_mobile: 410, category: 'primary', open_behavior: 'window', sort_order: 401 },
+      { id: '25', name: 'Kali Linux Display', icon: '🐉', description: 'Switch to Kali Linux theme', url: null, icon_type: 'theme', position_x: 440, position_y: 20, position_x_mobile: 350, position_y_mobile: 10, category: null, open_behavior: 'special', sort_order: 310 },
+    ];
 
-        if (error) {
-          console.error('Error loading desktop icons:', error);
-          toast({
-            title: 'Error',
-            description: 'Failed to load desktop icons from database',
-            variant: 'destructive',
-          });
-          setIconsLoading(false);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          setDesktopIcons(data as DesktopIconData[]);
-        }
-      } catch (error) {
-        console.error('Unexpected error loading icons:', error);
-        toast({
-          title: 'Error',
-          description: 'An unexpected error occurred',
-          variant: 'destructive',
-        });
-      } finally {
-        setIconsLoading(false);
-      }
-    };
-
-    loadIconsFromDatabase();
-  }, [toast]);
+    setDesktopIcons(hardcodedIcons);
+    setIconsLoading(false);
+  }, []);
 
   useEffect(() => {
     // Update body class for theme
