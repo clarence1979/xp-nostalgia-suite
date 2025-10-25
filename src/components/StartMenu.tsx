@@ -28,6 +28,7 @@ interface StartMenuProps {
   onInfoClick: (title: string, content: React.ReactNode) => void;
   theme: 'xp' | 'kali';
   onThemeToggle: () => void;
+  programs?: Program[];
 }
 
 const categories: Category[] = [
@@ -186,7 +187,30 @@ import { PrivacyContent } from './legal/PrivacyContent';
 import { TermsContent } from './legal/TermsContent';
 import { AboutContent } from './legal/AboutContent';
 
-export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle }: StartMenuProps) => {
+export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle, programs }: StartMenuProps) => {
+  const dynamicCategories: Category[] = programs ? [
+    {
+      name: 'General Tools',
+      icon: '🛠️',
+      programs: programs.filter(p => ['AI Note Taker', 'Tool Hub'].includes(p.name))
+    },
+    {
+      name: 'Teacher Tools',
+      icon: '👨‍🏫',
+      programs: programs.filter(p => ['Magic Marker', 'Teacher Scheduler', 'Student Emotion Recognition', 'Quiz Master Pro'].includes(p.name))
+    },
+    {
+      name: 'Secondary School Subjects',
+      icon: '🎓',
+      programs: programs.filter(p => ['Pantry Chef', 'History', 'Drone Programming', 'AUSLAN', 'Voice to 3D Printing', 'Network Route Tracer', 'Physics Simulator', 'Tutoring Chatbot', 'Math Genius', 'Code Class'].includes(p.name))
+    },
+    {
+      name: 'Primary School',
+      icon: '🏫',
+      programs: programs.filter(p => ['Dream Tales', 'MP3 Player'].includes(p.name))
+    },
+    ...categories.filter(c => c.name === 'Programs from the internet')
+  ] : categories;
   const [showPrograms, setShowPrograms] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [hoveredSubcategory, setHoveredSubcategory] = useState<string | null>(null);
@@ -270,7 +294,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
               })()}
             >
               <div className="py-1">
-                {categories.map((category) => (
+                {dynamicCategories.map((category) => (
                   <div key={category.name}>
                     <div
                       className={`xp-menu-item ${isMobile ? 'text-base py-3' : 'whitespace-nowrap'} relative`}

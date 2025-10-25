@@ -10,6 +10,8 @@ import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText, Code } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface OpenWindow {
   id: string;
@@ -20,37 +22,28 @@ interface OpenWindow {
   icon?: React.ReactNode;
 }
 
+interface DesktopIconData {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  url: string | null;
+  icon_type: 'system' | 'program' | 'theme';
+  position_x: number;
+  position_y: number;
+  position_x_mobile: number | null;
+  position_y_mobile: number | null;
+  category: string | null;
+  open_behavior: 'window' | 'new_tab' | 'special';
+  sort_order: number;
+}
+
 interface Program {
   name: string;
   url: string;
   icon: string;
   description: string;
 }
-
-const allPrograms: Program[] = [
-  // General Tools
-  { name: 'AI Note Taker', url: 'https://ai-note-taker-app-1476.bolt.host', icon: '📝', description: 'Takes dictation notes up to 45 minutes and generates study notes in PDF, customized to suit age range of audience' },
-  { name: 'Tool Hub', url: 'https://tools.bolt.host', icon: '🔧', description: 'Various Tools for File manipulation' },
-  // Teacher Tools
-  { name: 'Magic Marker', url: 'https://magicmarker.bolt.host', icon: '✨', description: 'Allows teachers to upload student assessments (hand-written or digital) and mark it either with a preset marking scheme or generated one. Gives constructive feedback in PDF' },
-  { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅', description: 'Helps teachers stay organised by using AI Agents (Beta)' },
-  { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊', description: 'Helps recognise student emotions to determine if they are concentrating' },
-  { name: 'Quiz Master Pro', url: 'https://quizpro.bolt.host', icon: '📋', description: 'Enables teachers to create Quizzes from uploaded PDF, Word or pictures and auto-generate answers. Lockdown mode will be enabled for students to take the quiz. Results are instantly available.' },
-  // Secondary School Subjects
-  { name: 'Pantry Chef', url: 'https://chef.bolt.host/', icon: '👨‍🍳', description: 'Suggests food that you can cook based on what is available in your pantry. Also gives steps and has a grocery list. The Food scientist analyses existing dishes and tells you how to make them.' },
-  { name: 'History', url: 'https://historical-figure-ai-p08i.bolt.host', icon: '🎭', description: 'Talk to your favorite historical character. You can upload information or allow it to research information about the character of your choice.' },
-  { name: 'Drone Programming', url: 'https://drone.teachingtools.dev/', icon: '🚁', description: 'Flies the Tello Drone via Scratch Blocks, Python and natural speech (voice and typed text)' },
-  { name: 'AUSLAN', url: 'https://auslan.bolt.host', icon: '👋', description: 'Australian Sign Language Learning Program' },
-  { name: 'Voice to 3D Printing', url: 'https://voice-to-3d-print-ap-9f4m.bolt.host/', icon: '🖨️', description: 'Inputs voice or text to generate an STL for 3D printing' },
-  { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐', description: 'Determines where you are, and does a trace to the target website from your location. Teaches you how the internet works.' },
-  { name: 'Physics Simulator', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️', description: 'Simulates movements of balls and other objects and draws graphs to explain concepts in physics.' },
-  { name: 'Tutoring Chatbot', url: 'https://new-chat-kb4v.bolt.host/', icon: '🤖', description: 'Students can ask any questions about academic subjects.' },
-  { name: 'Math Genius', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢', description: 'Allow students from Years 7-10 to learn Maths using AI. Customises questions based on student interest and ability.' },
-  { name: 'Code Class', url: 'https://new-chat-oj8v.bolt.host', icon: '💻', description: 'Teaches Coding - teachers can assign coding homework from here.' },
-  // Primary School
-  { name: 'Dream Tales', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚', description: 'Generates unique stories every time using the age, gender and interest of the child using AI.' },
-  { name: 'MP3 Player', url: 'https://mp3.bolt.host/', icon: '🎵', description: 'Play your favorite music' },
-];
 
 const Index = () => {
   const [showStartMenu, setShowStartMenu] = useState(false);
@@ -60,7 +53,10 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [theme, setTheme] = useState<'xp' | 'kali'>('xp');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [desktopIcons, setDesktopIcons] = useState<DesktopIconData[]>([]);
+  const [iconsLoading, setIconsLoading] = useState(true);
   const isMobile = useIsMobile();
+  const { toast } = useToast();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -68,6 +64,34 @@ const Index = () => {
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    const loadDesktopIcons = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('desktop_icons')
+          .select('*')
+          .order('sort_order', { ascending: true });
+
+        if (error) {
+          console.error('Error loading desktop icons:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to load desktop icons',
+            variant: 'destructive',
+          });
+        } else if (data) {
+          setDesktopIcons(data);
+        }
+      } catch (err) {
+        console.error('Failed to load desktop icons:', err);
+      } finally {
+        setIconsLoading(false);
+      }
+    };
+
+    loadDesktopIcons();
+  }, [toast]);
 
   useEffect(() => {
     // Update body class for theme
@@ -151,6 +175,61 @@ const Index = () => {
     );
   };
 
+  const handleIconClick = (icon: DesktopIconData) => {
+    if (icon.icon_type === 'system') {
+      switch (icon.name) {
+        case 'My Computer':
+          openWindow('My Computer', <div className="p-4">My Computer</div>, <HardDrive className="w-4 h-4" />);
+          break;
+        case 'My Documents':
+          openWindow('My Documents', <div className="p-4">My Documents</div>, <Folder className="w-4 h-4" />);
+          break;
+        case 'Recycle Bin':
+          openWindow('Recycle Bin', <div className="p-4">Recycle Bin is empty</div>, <Trash2 className="w-4 h-4" />);
+          break;
+        case 'Internet Explorer':
+          openWindow('Internet Explorer', <Browser />, <Globe className="w-4 h-4" />);
+          break;
+        case 'Notepad':
+          openNotepad();
+          break;
+        case 'Visual Studio Code':
+          window.open('https://vscode.dev/', '_blank');
+          break;
+      }
+    } else if (icon.icon_type === 'theme') {
+      switchTheme();
+    } else if (icon.icon_type === 'program' && icon.url) {
+      if (icon.open_behavior === 'new_tab') {
+        window.open(icon.url, '_blank');
+      } else {
+        openWindow(
+          icon.name,
+          <iframe
+            src={icon.url}
+            className="w-full h-full border-none"
+            title={icon.name}
+            allow="camera; microphone; geolocation; fullscreen"
+          />,
+          <span className="text-base">{icon.icon}</span>
+        );
+      }
+    }
+  };
+
+  const getIconComponent = (iconName: string) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      'HardDrive': <HardDrive className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />,
+      'Folder': <Folder className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-yellow-300`} />,
+      'Trash2': <Trash2 className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />,
+      'Globe': <Globe className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-400`} />,
+      'FileText': <FileText className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-300`} />,
+      'Code': <Code className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-500`} />,
+    };
+
+    return iconMap[iconName] || <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{iconName}</span>;
+  };
+
   const openNotepad = () => {
     // Create a custom password dialog
     const passwordDialog = document.createElement('div');
@@ -224,72 +303,37 @@ const Index = () => {
       onClick={handleClick}
     >
       {/* Desktop Icons */}
-      <>
-        {/* System Icons */}
-        <DesktopIcon
-          icon={<HardDrive className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />}
-          label="My Computer"
-          onClick={() => openWindow('My Computer', <div className="p-4">My Computer</div>, <HardDrive className="w-4 h-4" />)}
-          position={isMobile ? { x: 10, y: 10 } : { x: 20, y: 20 }}
-        />
-        <DesktopIcon
-          icon={<Folder className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-yellow-300`} />}
-          label="My Documents"
-          onClick={() => openWindow('My Documents', <div className="p-4">My Documents</div>, <Folder className="w-4 h-4" />)}
-          position={isMobile ? { x: 10, y: 90 } : { x: 20, y: 120 }}
-        />
-        <DesktopIcon
-          icon={<Trash2 className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />}
-          label="Recycle Bin"
-          onClick={() => openWindow('Recycle Bin', <div className="p-4">Recycle Bin is empty</div>, <Trash2 className="w-4 h-4" />)}
-          position={isMobile ? { x: 10, y: 170 } : { x: 20, y: 220 }}
-        />
-        <DesktopIcon
-          icon={<Globe className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-400`} />}
-          label="Internet Explorer"
-          onClick={() => openWindow('Internet Explorer', <Browser />, <Globe className="w-4 h-4" />)}
-          position={isMobile ? { x: 10, y: 250 } : { x: 20, y: 320 }}
-        />
-        <DesktopIcon
-          icon={<FileText className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-300`} />}
-          label="Notepad"
-          onClick={openNotepad}
-          position={isMobile ? { x: 10, y: 330 } : { x: 20, y: 420 }}
-        />
-        <DesktopIcon
-          icon={<Code className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-500`} />}
-          label="Visual Studio Code"
-          onClick={() => window.open('https://vscode.dev/', '_blank')}
-          position={isMobile ? { x: 10, y: 410 } : { x: 20, y: 520 }}
-        />
-        
-        {/* Program Icons in Grid - adjusted for better visibility */}
-        <DesktopIcon
-          icon={<span className={isMobile ? 'text-3xl' : 'text-4xl'}>{theme === 'xp' ? '🐉' : '🖥️'}</span>}
-          label={theme === 'xp' ? 'Kali Linux Display' : 'Windows Display'}
-          onClick={() => setTheme(theme === 'xp' ? 'kali' : 'xp')}
-          position={isMobile ? { x: 10, y: 490 } : { x: 20, y: 620 }}
-          description={theme === 'xp' ? 'Switch to Kali Linux theme' : 'Switch to Windows XP theme'}
-        />
+      {!iconsLoading && (
+        <>
+          {desktopIcons.map((icon) => {
+            const displayLabel = icon.icon_type === 'theme'
+              ? (theme === 'xp' ? 'Kali Linux Display' : 'Windows Display')
+              : icon.name;
 
-        {allPrograms.map((program, index) => {
-          const col = Math.floor(index / 6);
-          const row = index % 6;
-          return (
-            <DesktopIcon
-              key={program.name}
-              icon={<span className={isMobile ? 'text-3xl' : 'text-4xl'}>{program.icon}</span>}
-              label={program.name}
-              onClick={() => openProgram(program)}
-              position={isMobile
-                ? { x: 95 + col * 85, y: 10 + row * 80 }
-                : { x: 140 + col * 100, y: 20 + row * 100 }
-              }
-              description={program.description}
-            />
-          );
-        })}
-      </>
+            const displayDescription = icon.icon_type === 'theme'
+              ? (theme === 'xp' ? 'Switch to Kali Linux theme' : 'Switch to Windows XP theme')
+              : icon.description;
+
+            const displayIcon = icon.icon_type === 'theme'
+              ? (theme === 'xp' ? '🐉' : '🖥️')
+              : icon.icon;
+
+            return (
+              <DesktopIcon
+                key={icon.id}
+                icon={getIconComponent(displayIcon)}
+                label={displayLabel}
+                onClick={() => handleIconClick(icon)}
+                position={isMobile
+                  ? { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y }
+                  : { x: icon.position_x, y: icon.position_y }
+                }
+                description={displayDescription}
+              />
+            );
+          })}
+        </>
+      )}
 
       {/* Open Windows */}
       {windows
@@ -313,11 +357,27 @@ const Index = () => {
       {showStartMenu && (
         <StartMenu
           onClose={() => setShowStartMenu(false)}
-          onProgramClick={openProgram}
+          onProgramClick={(program) => {
+            const iconData = desktopIcons.find(icon => icon.name === program.name && icon.icon_type === 'program');
+            if (iconData) {
+              handleIconClick(iconData);
+            } else {
+              openProgram(program);
+            }
+          }}
           onNotepadClick={openNotepad}
           onInfoClick={(title, content) => openWindow(title, content)}
           theme={theme}
           onThemeToggle={switchTheme}
+          programs={desktopIcons
+            .filter(icon => icon.icon_type === 'program')
+            .map(icon => ({
+              name: icon.name,
+              url: icon.url || '',
+              icon: icon.icon,
+              description: icon.description
+            }))
+          }
         />
       )}
 
