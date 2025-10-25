@@ -182,7 +182,7 @@ const Index = () => {
         src={program.url}
         className="w-full h-full border-none"
         title={program.name}
-        allow="camera *; microphone *; geolocation *; fullscreen *; payment *; usb *; accelerometer *; gyroscope *; magnetometer *; display-capture *; clipboard-read *; clipboard-write *; web-share *; autoplay *; encrypted-media *; picture-in-picture *; midi *"
+        allow="camera; microphone; geolocation; fullscreen; payment; usb; accelerometer; gyroscope; magnetometer; display-capture; clipboard-read; clipboard-write; autoplay; encrypted-media; picture-in-picture; midi"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation"
       />,
       <span className="text-base">{program.icon}</span>
