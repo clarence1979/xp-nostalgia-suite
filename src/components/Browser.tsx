@@ -183,8 +183,8 @@ export const Browser = () => {
             src={currentUrl}
             className="w-full h-full border-none"
             title="Browser"
-            allow="camera; microphone; geolocation; fullscreen"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
+            allow="camera *; microphone *; geolocation *; fullscreen *; payment *; usb *; accelerometer *; gyroscope *; magnetometer *; display-capture *; clipboard-read *; clipboard-write *; web-share *; autoplay *; encrypted-media *; picture-in-picture *; midi *"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation"
             onError={() => setIframeError(true)}
           />
           {/* Fallback detection for CSP errors that don't trigger onError */}
