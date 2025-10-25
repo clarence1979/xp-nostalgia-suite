@@ -74,6 +74,23 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'REQUEST_API_KEY') {
+        const apiKey = apiKeyStorage.get();
+        if (apiKey && event.source) {
+          (event.source as WindowProxy).postMessage(
+            { type: 'API_KEY_RESPONSE', apiKey },
+            '*'
+          );
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  useEffect(() => {
     const hardcodedIcons: DesktopIconData[] = [
       { id: '1', name: 'My Computer', icon: 'HardDrive', description: 'System computer information', url: null, icon_type: 'system', position_x: 20, position_y: 20, position_x_mobile: 10, position_y_mobile: 10, category: null, open_behavior: 'special', sort_order: 1 },
       { id: '2', name: 'My Documents', icon: 'Folder', description: 'Personal documents folder', url: null, icon_type: 'system', position_x: 20, position_y: 120, position_x_mobile: 10, position_y_mobile: 90, category: null, open_behavior: 'special', sort_order: 2 },
@@ -180,9 +197,23 @@ const Index = () => {
       urlWithApiKey = url.toString();
     }
 
+    const iframeRef = (iframe: HTMLIFrameElement | null) => {
+      if (iframe && apiKey) {
+        iframe.addEventListener('load', () => {
+          setTimeout(() => {
+            iframe.contentWindow?.postMessage(
+              { type: 'API_KEY_RESPONSE', apiKey },
+              '*'
+            );
+          }, 500);
+        });
+      }
+    };
+
     openWindow(
       program.name,
       <iframe
+        ref={iframeRef}
         src={urlWithApiKey}
         className="w-full h-full border-none"
         title={program.name}
