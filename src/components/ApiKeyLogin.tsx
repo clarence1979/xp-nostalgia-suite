@@ -68,7 +68,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#5A7FBE]">
-      <div className="relative w-full max-w-[640px]">
+      <div className="relative w-full max-w-[400px]">
         <div
           className="border-[3px] rounded-lg overflow-hidden shadow-2xl"
           style={{
@@ -78,61 +78,48 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             borderBottomColor: '#16397E',
           }}
         >
-          <div className="bg-gradient-to-b from-[#5A8FD8] to-[#5472B6] px-3 py-2">
-            <h1 className="text-white text-base font-bold tracking-wide" style={{ fontFamily: 'Tahoma, sans-serif' }}>
-              Log On to Educational AI Suite
+          <div className="bg-gradient-to-b from-[#5A8FD8] to-[#5472B6] px-3 py-1.5">
+            <h1 className="text-white text-sm font-bold" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+              API Key Configuration
             </h1>
           </div>
 
-          <div className="bg-gradient-to-b from-[#6D92D6] to-[#5D7FC7] px-8 py-6 relative">
-            <div className="flex items-center justify-center mb-4">
-              <div className="text-center">
-                <div className="text-white text-3xl font-bold mb-1" style={{ fontFamily: 'Trebuchet MS, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
-                  <span className="text-[#FF6B1A]">E</span>
-                  <span className="text-[#80C241]">d</span>
-                  <span className="text-[#FF6B1A]">u</span>
-                  <span className="text-[#FFD800]">c</span>
-                  <span className="text-[#FF6B1A]">a</span>
-                  <span className="text-[#80C241]">t</span>
-                  <span className="text-[#FF6B1A]">i</span>
-                  <span className="text-[#FFD800]">o</span>
-                  <span className="text-[#80C241]">n</span>
-                  <span className="text-[#FF6B1A]">a</span>
-                  <span className="text-[#80C241]">l</span>
-                  <span className="ml-2 text-[#FF6B1A]">AI</span>
+          <div className="bg-gradient-to-b from-[#6D92D6] to-[#5D7FC7] px-6 py-4 relative">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-center flex-1">
+                <div className="text-white text-xl font-bold mb-0.5" style={{ fontFamily: 'Segoe UI, Tahoma, sans-serif', letterSpacing: '0.5px' }}>
+                  Educational AI Suite
                 </div>
-                <div className="text-white text-xs" style={{ fontFamily: 'Tahoma, sans-serif' }}>Professional</div>
+                <div className="text-white/80 text-xs" style={{ fontFamily: 'Tahoma, sans-serif' }}>Professional Edition</div>
+              </div>
+              <div className="ml-3">
+                <img src="/src/assets/cla sol.png" alt="Clarence's Solutions" className="h-10 w-auto" />
               </div>
             </div>
 
-            <div className="text-white text-[10px] mb-4" style={{ fontFamily: 'Tahoma, sans-serif' }}>
-              Copyright © 2025<br />
-              Clarence's Solutions
-            </div>
-
-            <div className="absolute top-6 right-8">
-              <img src="/src/assets/cla sol.png" alt="Clarence's Solutions" className="h-8 w-auto" />
+            <div className="text-white/70 text-[9px] text-center" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+              © 2025 Clarence's Solutions
             </div>
           </div>
 
-          <div className="bg-[#D4D0C8] px-8 py-6">
-            <div className="mb-4">
+          <div className="bg-[#D4D0C8] px-6 py-4">
+            <div className="mb-3">
               <div className="flex items-center mb-2">
-                <label className="text-sm font-normal w-28" style={{ fontFamily: 'Tahoma, sans-serif' }}>
-                  User name:
+                <label className="text-xs font-normal w-20" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+                  User:
                 </label>
                 <input
                   type="text"
                   value="Administrator"
                   disabled
-                  className="flex-1 px-2 py-1 border border-[#7F9DB9] bg-white text-sm"
+                  className="flex-1 px-2 py-1 border border-[#7F9DB9] bg-white text-xs"
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
                 />
               </div>
 
               <div className="flex items-center">
-                <label className="text-sm font-normal w-28" style={{ fontFamily: 'Tahoma, sans-serif' }}>
-                  Password:
+                <label className="text-xs font-normal w-20" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+                  API Key:
                 </label>
                 <Input
                   type="password"
@@ -143,7 +130,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
                   }}
                   onKeyDown={handleKeyPress}
                   placeholder="sk-..."
-                  className="flex-1 px-2 py-1 border border-[#7F9DB9] bg-white text-sm focus:outline-none focus:border-[#0054E3]"
+                  className="flex-1 px-2 py-1 border border-[#7F9DB9] bg-white text-xs focus:outline-none focus:border-[#0054E3]"
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
                   disabled={isValidating}
                   autoFocus
@@ -152,7 +139,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             </div>
 
             {error && (
-              <div className="mb-4 bg-[#FFF7CC] border border-[#FFD700] px-3 py-2 text-xs text-black">
+              <div className="mb-3 bg-[#FFF7CC] border border-[#FFD700] px-2 py-1.5 text-[10px] text-black">
                 {error}
               </div>
             )}
@@ -161,7 +148,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
               <button
                 onClick={handleLogin}
                 disabled={isValidating || !apiKey}
-                className="px-6 py-1.5 text-sm border-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-1 text-xs border-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   fontFamily: 'Tahoma, sans-serif',
                   background: '#ECE9D8',
@@ -176,7 +163,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
               <button
                 onClick={onCancel}
                 disabled={isValidating}
-                className="px-6 py-1.5 text-sm border-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-1 text-xs border-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   fontFamily: 'Tahoma, sans-serif',
                   background: '#ECE9D8',
@@ -190,8 +177,8 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
               </button>
             </div>
 
-            <div className="mt-3 text-[10px] text-gray-600 text-center" style={{ fontFamily: 'Tahoma, sans-serif' }}>
-              Enter your OpenAI API key (starts with sk-). This is optional and stored locally only.
+            <div className="mt-2 text-[9px] text-gray-600 text-center" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+              OpenAI API key (optional) - Stored locally
             </div>
           </div>
         </div>
