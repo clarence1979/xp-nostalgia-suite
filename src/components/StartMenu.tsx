@@ -187,9 +187,6 @@ const categories: Category[] = [
   },
 ];
 
-import { PrivacyContent } from './legal/PrivacyContent';
-import { TermsContent } from './legal/TermsContent';
-import { AboutContent } from './legal/AboutContent';
 
 export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle, programs, onLogout, hasApiKey }: StartMenuProps) => {
   const dynamicCategories: Category[] = programs && programs.length > 0 ? [
@@ -438,7 +435,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           <div
             className="xp-menu-item"
             onClick={() => {
-              onInfoClick('Privacy Policy', <PrivacyContent />);
+              onInfoClick('Privacy Policy', <div className="p-4"><h2 className="text-xl font-bold mb-4">Privacy Policy</h2><p>Privacy policy content coming soon.</p></div>);
               onClose();
             }}
           >
@@ -448,7 +445,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           <div
             className="xp-menu-item"
             onClick={() => {
-              onInfoClick('Terms of Use', <TermsContent />);
+              onInfoClick('Terms of Use', <div className="p-4"><h2 className="text-xl font-bold mb-4">Terms of Use</h2><p>Terms of use content coming soon.</p></div>);
               onClose();
             }}
           >
@@ -458,7 +455,7 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           <div
             className="xp-menu-item"
             onClick={() => {
-              onInfoClick('About Teaching Tools', <AboutContent />);
+              onInfoClick('About Teaching Tools', <div className="p-4"><h2 className="text-xl font-bold mb-4">About Teaching Tools</h2><p>Teaching Tools is an educational platform with various learning applications.</p></div>);
               onClose();
             }}
           >
