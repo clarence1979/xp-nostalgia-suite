@@ -75,7 +75,7 @@ const categories: Category[] = [
     name: 'Primary School',
     icon: '🏫',
     programs: [
-      { name: 'Dream Tales', url: 'https://dreamtales-ai-bedtim-jxhc.bolt.host', icon: '📚' },
+      { name: 'Dream Tales', url: 'https://dreamtales.bolt.host', icon: '📚' },
     ]
   },
   {
