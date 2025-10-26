@@ -98,7 +98,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
                 </div>
               </div>
               <div className={`${isMobile ? 'ml-2' : 'ml-3'}`}>
-                <img src="/src/assets/cla sol.png" alt="Clarence's Solutions" className={`${isMobile ? 'h-8' : 'h-10'} w-auto`} />
+                <img src="/cla-sol.png" alt="Clarence's Solutions" className={`${isMobile ? 'h-8' : 'h-10'} w-auto`} />
               </div>
             </div>
           </div>
