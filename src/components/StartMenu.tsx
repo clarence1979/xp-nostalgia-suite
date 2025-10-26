@@ -67,7 +67,7 @@ const categories: Category[] = [
       { name: 'Network Route Tracer', url: 'https://network-route-tracer-r2zo.bolt.host/', icon: '🌐' },
       { name: 'Physics Simulator', url: 'https://interactive-3d-physi-3mdg.bolt.host', icon: '⚛️' },
       { name: 'Tutoring Chatbot', url: 'https://new-chat-kb4v.bolt.host/', icon: '🤖' },
-      { name: 'Math Genius', url: 'https://advanced-adaptive-ma-gtky.bolt.host/', icon: '🔢' },
+      { name: 'Math Genius', url: 'https://math.bolt.host', icon: '🔢' },
       { name: 'Code Class', url: 'https://new-chat-oj8v.bolt.host', icon: '💻' },
     ]
   },
