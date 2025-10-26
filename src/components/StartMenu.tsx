@@ -49,7 +49,7 @@ const categories: Category[] = [
     icon: '👨‍🏫',
     programs: [
       { name: 'Magic Marker', url: 'https://magicmarker.bolt.host', icon: '✨' },
-      { name: 'Teacher Scheduler', url: 'https://teacher-scheduler-ai-bb0t.bolt.host', icon: '📅' },
+      { name: 'Teacher Scheduler', url: 'https://teacher.bolt.host', icon: '📅' },
       { name: 'Student Emotion Recognition', url: 'https://clarence.guru/emo4.html', icon: '😊' },
       { name: 'Quiz Master Pro', url: 'https://quizpro.bolt.host', icon: '📋' },
       { name: 'Class Tools', url: 'https://www.classtools.net/', icon: '🎯' },
