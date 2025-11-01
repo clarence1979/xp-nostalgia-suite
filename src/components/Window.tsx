@@ -43,12 +43,17 @@ export const Window = ({
         // Auto-maximize on mobile
         setIsMaximized(true);
         setPosition({ x: 0, y: 0 });
-        setSize({ width: window.innerWidth, height: window.innerHeight - 40 });
+        const taskbarHeight = 40;
+        setSize({ width: window.innerWidth, height: window.innerHeight - taskbarHeight });
       }
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener('orientationchange', checkMobile);
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('orientationchange', checkMobile);
+    };
   }, []);
 
   useEffect(() => {

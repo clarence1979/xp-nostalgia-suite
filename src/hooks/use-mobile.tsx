@@ -17,3 +17,24 @@ export function useIsMobile() {
 
   return !!isMobile;
 }
+
+export function useIsLandscape() {
+  const [isLandscape, setIsLandscape] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    const checkOrientation = () => {
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+
+    window.addEventListener("resize", checkOrientation);
+    window.addEventListener("orientationchange", checkOrientation);
+    checkOrientation();
+
+    return () => {
+      window.removeEventListener("resize", checkOrientation);
+      window.removeEventListener("orientationchange", checkOrientation);
+    };
+  }, []);
+
+  return isLandscape;
+}

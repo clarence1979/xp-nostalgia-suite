@@ -10,7 +10,7 @@ import { ApiKeyLogin } from '@/components/ApiKeyLogin';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText, Code } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile, useIsLandscape } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
@@ -60,6 +60,7 @@ const Index = () => {
   const [desktopIcons, setDesktopIcons] = useState<DesktopIconData[]>([]);
   const [iconsLoading, setIconsLoading] = useState(true);
   const isMobile = useIsMobile();
+  const isLandscape = useIsLandscape();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -415,16 +416,53 @@ const Index = () => {
               ? (theme === 'xp' ? '🐉' : '🖥️')
               : icon.icon;
 
+            const getIconPosition = () => {
+              if (!isMobile) {
+                return { x: icon.position_x, y: icon.position_y };
+              }
+
+              if (isLandscape && isMobile) {
+                const landscapePositions: Record<string, { x: number; y: number }> = {
+                  '1': { x: 10, y: 10 },
+                  '2': { x: 10, y: 90 },
+                  '3': { x: 10, y: 170 },
+                  '4': { x: 10, y: 250 },
+                  '5': { x: 10, y: 330 },
+                  '6': { x: 10, y: 410 },
+                  '7': { x: 95, y: 10 },
+                  '8': { x: 95, y: 90 },
+                  '9': { x: 95, y: 170 },
+                  '10': { x: 95, y: 250 },
+                  '11': { x: 95, y: 330 },
+                  '12': { x: 95, y: 410 },
+                  '13': { x: 180, y: 10 },
+                  '14': { x: 180, y: 90 },
+                  '15': { x: 180, y: 170 },
+                  '16': { x: 180, y: 250 },
+                  '17': { x: 180, y: 330 },
+                  '18': { x: 180, y: 410 },
+                  '19': { x: 265, y: 10 },
+                  '20': { x: 265, y: 90 },
+                  '21': { x: 265, y: 170 },
+                  '22': { x: 265, y: 250 },
+                  '23': { x: 265, y: 330 },
+                  '24': { x: 265, y: 410 },
+                  '25': { x: 350, y: 10 },
+                  '26': { x: 350, y: 90 },
+                };
+                return landscapePositions[icon.id] || { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
+              }
+
+              return { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
+            };
+
             return (
               <DesktopIcon
                 key={icon.id}
                 icon={getIconComponent(displayIcon)}
                 label={displayLabel}
                 onClick={() => handleIconClick(icon)}
-                position={isMobile
-                  ? { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y }
-                  : { x: icon.position_x, y: icon.position_y }
-                }
+                position={getIconPosition()}
                 description={displayDescription}
               />
             );
