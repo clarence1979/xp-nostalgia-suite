@@ -119,6 +119,7 @@ const Index = () => {
       { id: '24', name: 'MP3 Player', icon: '🎵', description: 'Play your favorite music', url: 'https://mp3.bolt.host/', icon_type: 'program', position_x: 340, position_y: 520, position_x_mobile: 265, position_y_mobile: 410, category: 'primary', open_behavior: 'window', sort_order: 401 },
       { id: '25', name: 'Kali Linux Display', icon: '🐉', description: 'Switch to Kali Linux theme', url: null, icon_type: 'theme', position_x: 440, position_y: 20, position_x_mobile: 10, position_y_mobile: 490, category: null, open_behavior: 'special', sort_order: 310 },
       { id: '26', name: 'Code Blocks', icon: '🐍', description: 'Learn Python programming through interactive 3D objects', url: 'https://codecraft.teachingtools.dev', icon_type: 'program', position_x: 440, position_y: 120, position_x_mobile: 95, position_y_mobile: 490, category: 'secondary', open_behavior: 'window', sort_order: 310 },
+      { id: '27', name: 'Scientific Simulations for Math, Physics, Chemistry and Biology', icon: '🔬', description: 'Interactive simulations for science and math education', url: 'https://phet.colorado.edu/', icon_type: 'program', position_x: 440, position_y: 220, position_x_mobile: 180, position_y_mobile: 490, category: 'secondary', open_behavior: 'window', sort_order: 311 },
     ];
 
     setDesktopIcons(hardcodedIcons);
@@ -449,6 +450,7 @@ const Index = () => {
                   '24': { x: 265, y: 410 },
                   '25': { x: 350, y: 10 },
                   '26': { x: 350, y: 90 },
+                  '27': { x: 350, y: 170 },
                 };
                 return landscapePositions[icon.id] || { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
               }
