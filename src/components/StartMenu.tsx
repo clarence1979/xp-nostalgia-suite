@@ -69,7 +69,7 @@ const categories: Category[] = [
       { name: 'Tutoring Chatbot', url: 'https://tutor.bolt.host', icon: '🤖' },
       { name: 'Math Genius', url: 'https://math.bolt.host', icon: '🔢' },
       { name: 'Code Class', url: 'https://codeclass.bolt.host', icon: '💻' },
-      { name: 'Code Craft', url: 'https://codecraft.teachingtools.dev', icon: '🐍' },
+      { name: 'Code Blocks', url: 'https://codecraft.teachingtools.dev', icon: '🐍' },
     ]
   },
   {

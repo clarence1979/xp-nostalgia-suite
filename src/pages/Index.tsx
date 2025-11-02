@@ -118,7 +118,7 @@ const Index = () => {
       { id: '23', name: 'Dream Tales', icon: '📚', description: 'Generates unique stories every time using the age, gender and interest of the child using AI.', url: 'https://dreamtales.bolt.host', icon_type: 'program', position_x: 340, position_y: 420, position_x_mobile: 265, position_y_mobile: 330, category: 'primary', open_behavior: 'window', sort_order: 400 },
       { id: '24', name: 'MP3 Player', icon: '🎵', description: 'Play your favorite music', url: 'https://mp3.bolt.host/', icon_type: 'program', position_x: 340, position_y: 520, position_x_mobile: 265, position_y_mobile: 410, category: 'primary', open_behavior: 'window', sort_order: 401 },
       { id: '25', name: 'Kali Linux Display', icon: '🐉', description: 'Switch to Kali Linux theme', url: null, icon_type: 'theme', position_x: 440, position_y: 20, position_x_mobile: 10, position_y_mobile: 490, category: null, open_behavior: 'special', sort_order: 310 },
-      { id: '26', name: 'Code Craft', icon: '🐍', description: 'Learn Python programming through interactive 3D objects', url: 'https://codecraft.teachingtools.dev', icon_type: 'program', position_x: 440, position_y: 120, position_x_mobile: 95, position_y_mobile: 490, category: 'secondary', open_behavior: 'window', sort_order: 310 },
+      { id: '26', name: 'Code Blocks', icon: '🐍', description: 'Learn Python programming through interactive 3D objects', url: 'https://codecraft.teachingtools.dev', icon_type: 'program', position_x: 440, position_y: 120, position_x_mobile: 95, position_y_mobile: 490, category: 'secondary', open_behavior: 'window', sort_order: 310 },
     ];
 
     setDesktopIcons(hardcodedIcons);
