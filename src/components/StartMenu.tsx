@@ -70,6 +70,7 @@ const categories: Category[] = [
       { name: 'Math Genius', url: 'https://math.bolt.host', icon: '🔢' },
       { name: 'Code Class', url: 'https://codeclass.bolt.host', icon: '💻' },
       { name: 'Code Blocks', url: 'https://codecraft.teachingtools.dev', icon: '🐍' },
+      { name: 'Electronics Lab', url: 'https://electric.bolt.host', icon: '⚡' },
       { name: 'Scientific Simulations for Math, Physics, Chemistry and Biology', url: 'https://phet.colorado.edu/', icon: '🔬' },
     ]
   },
