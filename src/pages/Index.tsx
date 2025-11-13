@@ -122,6 +122,7 @@ const Index = () => {
       { id: '27', name: 'Electronics Lab', icon: '⚡', description: 'Build and simulate electronic circuits', url: 'https://electric.bolt.host', icon_type: 'program', position_x: 440, position_y: 220, position_x_mobile: 180, position_y_mobile: 490, category: 'secondary', open_behavior: 'window', sort_order: 311 },
       { id: '28', name: 'Hacking Simulator', icon: '🔐', description: 'Learn ethical hacking and cybersecurity', url: 'https://hack.bolt.host', icon_type: 'program', position_x: 440, position_y: 320, position_x_mobile: 265, position_y_mobile: 490, category: 'secondary', open_behavior: 'window', sort_order: 312 },
       { id: '29', name: 'Scientific Simulations for Math, Physics, Chemistry and Biology', icon: '🔬', description: 'Interactive simulations for science and math education', url: 'https://phet.colorado.edu/', icon_type: 'program', position_x: 440, position_y: 420, position_x_mobile: 350, position_y_mobile: 10, category: 'secondary', open_behavior: 'new_tab', sort_order: 313 },
+      { id: '30', name: 'Robot Car Simulator', icon: '🤖', description: 'Program and simulate autonomous robot cars', url: 'https://cars.bolt.host/', icon_type: 'program', position_x: 440, position_y: 520, position_x_mobile: 350, position_y_mobile: 90, category: 'secondary', open_behavior: 'window', sort_order: 314 },
     ];
 
     setDesktopIcons(hardcodedIcons);
@@ -455,6 +456,7 @@ const Index = () => {
                   '27': { x: 350, y: 170 },
                   '28': { x: 350, y: 250 },
                   '29': { x: 350, y: 330 },
+                  '30': { x: 350, y: 410 },
                 };
                 return landscapePositions[icon.id] || { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
               }

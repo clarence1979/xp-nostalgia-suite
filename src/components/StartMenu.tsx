@@ -73,6 +73,7 @@ const categories: Category[] = [
       { name: 'Electronics Lab', url: 'https://electric.bolt.host', icon: '⚡' },
       { name: 'Scientific Simulations for Math, Physics, Chemistry and Biology', url: 'https://phet.colorado.edu/', icon: '🔬' },
       { name: 'Hacking Simulator', url: 'https://hack.bolt.host', icon: '🔐' },
+      { name: 'Robot Car Simulator', url: 'https://cars.bolt.host/', icon: '🤖' },
     ]
   },
   {
