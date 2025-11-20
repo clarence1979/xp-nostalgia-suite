@@ -29,14 +29,15 @@ interface DesktopIconData {
   icon: string;
   description: string;
   url: string | null;
-  icon_type: 'system' | 'program' | 'theme';
+  icon_type: 'system' | 'program' | 'theme' | 'folder';
   position_x: number;
   position_y: number;
   position_x_mobile: number | null;
   position_y_mobile: number | null;
   category: string | null;
-  open_behavior: 'window' | 'new_tab' | 'special';
+  open_behavior: 'window' | 'new_tab' | 'special' | 'folder';
   sort_order: number;
+  folder_contents?: DesktopIconData[];
 }
 
 interface Program {
@@ -95,7 +96,26 @@ const Index = () => {
     const hardcodedIcons: DesktopIconData[] = [
       { id: '1', name: 'My Computer', icon: 'HardDrive', description: 'System computer information', url: null, icon_type: 'system', position_x: 20, position_y: 20, position_x_mobile: 10, position_y_mobile: 10, category: null, open_behavior: 'special', sort_order: 1 },
       { id: '2', name: 'My Documents', icon: 'Folder', description: 'Personal documents folder', url: null, icon_type: 'system', position_x: 20, position_y: 120, position_x_mobile: 10, position_y_mobile: 90, category: null, open_behavior: 'special', sort_order: 2 },
-      { id: '3', name: 'Recycle Bin', icon: 'Trash2', description: 'Deleted files storage', url: null, icon_type: 'system', position_x: 20, position_y: 220, position_x_mobile: 10, position_y_mobile: 170, category: null, open_behavior: 'special', sort_order: 3 },
+      {
+        id: '3',
+        name: 'VCE Software Development',
+        icon: 'Folder',
+        description: 'VCE exam training resources',
+        url: null,
+        icon_type: 'folder',
+        position_x: 20,
+        position_y: 220,
+        position_x_mobile: 10,
+        position_y_mobile: 170,
+        category: null,
+        open_behavior: 'folder',
+        sort_order: 3,
+        folder_contents: [
+          { id: '3-1', name: 'VCE Section A', icon: '📝', description: 'VCE Section A exam training', url: 'https://vce-section-a.bolt.host/', icon_type: 'program', position_x: 20, position_y: 20, position_x_mobile: 20, position_y_mobile: 20, category: null, open_behavior: 'window', sort_order: 1 },
+          { id: '3-2', name: 'VCE Section B', icon: '📊', description: 'VCE Section B exam training', url: 'https://vce.bolt.host/', icon_type: 'program', position_x: 20, position_y: 120, position_x_mobile: 20, position_y_mobile: 120, category: null, open_behavior: 'window', sort_order: 2 },
+          { id: '3-3', name: 'VCE Section C', icon: '💻', description: 'VCE Section C exam training', url: 'https://vce-section-c.bolt.host/', icon_type: 'program', position_x: 20, position_y: 220, position_x_mobile: 20, position_y_mobile: 220, category: null, open_behavior: 'window', sort_order: 3 },
+        ]
+      },
       { id: '4', name: 'Internet Explorer', icon: 'Globe', description: 'Web browser', url: null, icon_type: 'system', position_x: 20, position_y: 320, position_x_mobile: 10, position_y_mobile: 250, category: null, open_behavior: 'special', sort_order: 4 },
       { id: '5', name: 'Notepad', icon: 'FileText', description: 'Text editor with password protection', url: null, icon_type: 'system', position_x: 20, position_y: 420, position_x_mobile: 10, position_y_mobile: 330, category: null, open_behavior: 'special', sort_order: 5 },
       { id: '6', name: 'Visual Studio Code', icon: 'Code', description: 'Professional code editor', url: 'https://vscode.dev/', icon_type: 'system', position_x: 20, position_y: 520, position_x_mobile: 10, position_y_mobile: 410, category: null, open_behavior: 'new_tab', sort_order: 6 },
@@ -232,7 +252,25 @@ const Index = () => {
   };
 
   const handleIconClick = (icon: DesktopIconData) => {
-    if (icon.open_behavior === 'special' && icon.icon_type === 'system') {
+    if (icon.open_behavior === 'folder' && icon.folder_contents) {
+      const folderContent = (
+        <div className="p-4 bg-white h-full overflow-auto">
+          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))' }}>
+            {icon.folder_contents.map((item) => (
+              <div
+                key={item.id}
+                className="flex flex-col items-center cursor-pointer hover:bg-blue-100 p-2 rounded"
+                onClick={() => handleIconClick(item)}
+              >
+                <div className="text-4xl mb-1">{item.icon}</div>
+                <div className="text-xs text-center break-words">{item.name}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+      openWindow(icon.name, folderContent, <Folder className="w-4 h-4" />);
+    } else if (icon.open_behavior === 'special' && icon.icon_type === 'system') {
       switch (icon.name) {
         case 'My Computer':
           openWindow('My Computer', <div className="p-4">My Computer</div>, <HardDrive className="w-4 h-4" />);
