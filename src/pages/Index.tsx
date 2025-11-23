@@ -5,6 +5,7 @@ import { Taskbar } from '@/components/Taskbar';
 import { DesktopIcon } from '@/components/DesktopIcon';
 import { Notepad } from '@/components/Notepad';
 import { Browser } from '@/components/Browser';
+import { OneDrive } from '@/components/OneDrive';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ApiKeyLogin } from '@/components/ApiKeyLogin';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
@@ -276,7 +277,7 @@ const Index = () => {
           openWindow('My Computer', <div className="p-4">My Computer</div>, <HardDrive className="w-4 h-4" />);
           break;
         case 'My Documents':
-          openWindow('My Documents', <div className="p-4">My Documents</div>, <Folder className="w-4 h-4" />);
+          openWindow('My Documents', <OneDrive />, <Folder className="w-4 h-4" />);
           break;
         case 'Recycle Bin':
           openWindow('Recycle Bin', <div className="p-4">Recycle Bin is empty</div>, <Trash2 className="w-4 h-4" />);
