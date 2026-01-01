@@ -125,7 +125,7 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey
       {/* Email Address */}
       {!isMobile && (
         <a
-          href="mailto:clarence.guru.bring446@passmail.net"
+          href="mailto:info@teachingtools.dev"
           className="flex items-center h-[32px] px-2 hover:bg-white/10 rounded-sm transition-colors"
           title="Contact via email"
         >
@@ -133,7 +133,7 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey
             className="text-[11px] font-tahoma"
             style={{ color: theme === 'xp' ? '#ffffff' : 'hsl(180 100% 70%)' }}
           >
-            clarence.guru.bring446@passmail.net
+            info@teachingtools.dev
           </span>
         </a>
       )}
