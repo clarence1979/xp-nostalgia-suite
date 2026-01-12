@@ -63,7 +63,7 @@ const categories: Category[] = [
       { name: 'History', url: 'https://history.bolt.host', icon: '🎭' },
       { name: 'Drone Programming', url: 'https://drone.teachingtools.dev/', icon: '🚁' },
       { name: 'AUSLAN', url: 'https://auslan.bolt.host', icon: '👋' },
-      { name: 'Voice to 3D Printing', url: 'https://print3d.bolt.host', icon: '🖨️' },
+      { name: 'AI 2D, 3D, QR and Video Generator', url: 'https://replicate.bolt.host', icon: '✨' },
       { name: 'Network Route Tracer', url: 'https://network.bolt.host', icon: '🌐' },
       { name: 'Physics Simulator', url: 'https://physics.bolt.host/', icon: '⚛️' },
       { name: 'Tutoring Chatbot', url: 'https://tutor.bolt.host', icon: '🤖' },
