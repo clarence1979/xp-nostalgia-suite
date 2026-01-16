@@ -101,7 +101,7 @@ ON CONFLICT DO NOTHING;
 
 -- Insert program icons - Teacher Tools
 INSERT INTO desktop_icons (name, icon, description, url, icon_type, category, position_x, position_y, position_x_mobile, position_y_mobile, open_behavior, sort_order) VALUES
-  ('Magic Marker', '✨', 'Allows teachers to upload student assessments (hand-written or digital) and mark it either with a preset marking scheme or generated one. Gives constructive feedback in PDF', 'https://magicmarker.bolt.host', 'program', 'teacher', 140, 120, 95, 90, 'window', 200),
+  ('Magic Marker', '✅', 'Allows teachers to upload student assessments (hand-written or digital) and mark it either with a preset marking scheme or generated one. Gives constructive feedback in PDF', 'https://magicmarker.bolt.host', 'program', 'teacher', 140, 120, 95, 90, 'window', 200),
   ('Teacher Scheduler', '📅', 'Helps teachers stay organised by using AI Agents (Beta)', 'https://teacher-scheduler-ai-bb0t.bolt.host', 'program', 'teacher', 240, 120, 180, 90, 'window', 201),
   ('Student Emotion Recognition', '😊', 'Helps recognise student emotions to determine if they are concentrating', 'https://clarence.guru/emo4.html', 'program', 'teacher', 140, 220, 95, 170, 'window', 202),
   ('Quiz Master Pro', '📋', 'Enables teachers to create Quizzes from uploaded PDF, Word or pictures and auto-generate answers. Lockdown mode will be enabled for students to take the quiz. Results are instantly available.', 'https://quizpro.bolt.host', 'program', 'teacher', 240, 220, 180, 170, 'window', 203)
