@@ -66,7 +66,6 @@ const categories: Category[] = [
       { name: 'AUSLAN', url: 'https://auslan.bolt.host', icon: '👋' },
       { name: 'AI 2D, 3D, QR and Video Generator', url: 'https://replicate.bolt.host', icon: '✨' },
       { name: 'Network Route Tracer', url: 'https://network.bolt.host', icon: '🌐' },
-      { name: 'Physics Simulator', url: 'https://physics.bolt.host/', icon: '⚛️' },
       { name: 'Tutoring Chatbot', url: 'https://tutor.bolt.host', icon: '🤖' },
       { name: 'Math Genius', url: 'https://math.bolt.host', icon: '🔢' },
       { name: 'Code Class', url: 'https://codeclass.bolt.host', icon: '💻' },
