@@ -144,6 +144,7 @@ const Index = () => {
       { id: '28', name: 'Hacking Simulator', icon: '🔐', description: 'Learn ethical hacking and cybersecurity', url: 'https://hack.bolt.host', icon_type: 'program', position_x: 440, position_y: 320, position_x_mobile: 265, position_y_mobile: 490, category: 'secondary', open_behavior: 'window', sort_order: 312 },
       { id: '29', name: 'Scientific Simulations', icon: '🔬', description: 'Interactive simulations for science and math education', url: 'https://phet.colorado.edu/', icon_type: 'program', position_x: 440, position_y: 420, position_x_mobile: 350, position_y_mobile: 10, category: 'secondary', open_behavior: 'new_tab', sort_order: 313 },
       { id: '30', name: 'Robot Car Simulator', icon: '🚗', description: 'Program and simulate autonomous robot cars', url: 'https://cars.bolt.host/', icon_type: 'program', position_x: 440, position_y: 520, position_x_mobile: 350, position_y_mobile: 90, category: 'secondary', open_behavior: 'window', sort_order: 314 },
+      { id: '31', name: 'AI Council', icon: '🏛️', description: 'Collaborative AI decision-making and advisory platform', url: 'https://council.bolt.host', icon_type: 'program', position_x: 540, position_y: 20, position_x_mobile: 350, position_y_mobile: 170, category: 'general', open_behavior: 'window', sort_order: 102 },
     ];
 
     setDesktopIcons(hardcodedIcons);

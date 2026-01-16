@@ -42,6 +42,7 @@ const categories: Category[] = [
     programs: [
       { name: 'AI Note Taker', url: 'https://note.bolt.host', icon: '📝' },
       { name: 'Tool Hub', url: 'https://tools.bolt.host', icon: '🔧' },
+      { name: 'AI Council', url: 'https://council.bolt.host', icon: '🏛️' },
     ]
   },
   {
