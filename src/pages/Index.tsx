@@ -14,6 +14,7 @@ import { HardDrive, Folder, Trash2, Globe, FileText, Code } from 'lucide-react';
 import { useIsMobile, useIsLandscape } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
+import { supabase } from '@/integrations/supabase/client';
 
 interface OpenWindow {
   id: string;
@@ -94,59 +95,40 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    const hardcodedIcons: DesktopIconData[] = [
-      { id: '1', name: 'My Computer', icon: 'HardDrive', description: 'System computer information', url: null, icon_type: 'system', position_x: 20, position_y: 20, position_x_mobile: 10, position_y_mobile: 10, category: null, open_behavior: 'special', sort_order: 1 },
-      { id: '2', name: 'My Documents', icon: 'Folder', description: 'Personal documents folder', url: null, icon_type: 'system', position_x: 20, position_y: 120, position_x_mobile: 10, position_y_mobile: 90, category: null, open_behavior: 'special', sort_order: 2 },
-      {
-        id: '3',
-        name: 'VCE Software Development',
-        icon: 'Folder',
-        description: 'VCE exam training resources',
-        url: null,
-        icon_type: 'folder',
-        position_x: 20,
-        position_y: 220,
-        position_x_mobile: 10,
-        position_y_mobile: 170,
-        category: null,
-        open_behavior: 'folder',
-        sort_order: 3,
-        folder_contents: [
-          { id: '3-1', name: 'VCE Section A', icon: '📝', description: 'VCE Section A exam training', url: 'https://vce-section-a.bolt.host/', icon_type: 'program', position_x: 20, position_y: 20, position_x_mobile: 20, position_y_mobile: 20, category: null, open_behavior: 'window', sort_order: 1 },
-          { id: '3-2', name: 'VCE Section B', icon: '📊', description: 'VCE Section B exam training', url: 'https://vce.bolt.host/', icon_type: 'program', position_x: 20, position_y: 120, position_x_mobile: 20, position_y_mobile: 120, category: null, open_behavior: 'window', sort_order: 2 },
-          { id: '3-3', name: 'VCE Section C', icon: '💻', description: 'VCE Section C exam training', url: 'https://vce-section-c.bolt.host/', icon_type: 'program', position_x: 20, position_y: 220, position_x_mobile: 20, position_y_mobile: 220, category: null, open_behavior: 'window', sort_order: 3 },
-        ]
-      },
-      { id: '4', name: 'Internet Explorer', icon: 'Globe', description: 'Web browser', url: null, icon_type: 'system', position_x: 20, position_y: 320, position_x_mobile: 10, position_y_mobile: 250, category: null, open_behavior: 'special', sort_order: 4 },
-      { id: '6', name: 'Visual Studio Code', icon: 'Code', description: 'Professional code editor', url: 'https://vscode.dev/', icon_type: 'system', position_x: 20, position_y: 420, position_x_mobile: 10, position_y_mobile: 330, category: null, open_behavior: 'new_tab', sort_order: 6 },
-      { id: '31', name: 'AI Council', icon: '🏛️', description: 'Collaborative AI decision-making and advisory platform', url: 'https://aicouncil.bolt.host/', icon_type: 'program', position_x: 20, position_y: 520, position_x_mobile: 10, position_y_mobile: 410, category: 'general', open_behavior: 'window', sort_order: 102 },
-      { id: '7', name: 'AI Note Taker', icon: '📝', description: 'Takes dictation notes up to 45 minutes and generates study notes in PDF, customized to suit age range of audience', url: 'https://note.bolt.host', icon_type: 'program', position_x: 140, position_y: 20, position_x_mobile: 95, position_y_mobile: 10, category: 'general', open_behavior: 'window', sort_order: 100 },
-      { id: '8', name: 'Magic Marker', icon: '✅', description: 'Allows teachers to upload student assessments (hand-written or digital) and mark it either with a preset marking scheme or generated one. Gives constructive feedback in PDF', url: 'https://magicmarker.bolt.host', icon_type: 'program', position_x: 140, position_y: 120, position_x_mobile: 95, position_y_mobile: 90, category: 'teacher', open_behavior: 'window', sort_order: 200 },
-      { id: '9', name: 'Student Emotion Recognition', icon: '😊', description: 'Helps recognise student emotions to determine if they are concentrating', url: 'https://clarence.guru/emo4.html', icon_type: 'program', position_x: 140, position_y: 220, position_x_mobile: 95, position_y_mobile: 170, category: 'teacher', open_behavior: 'window', sort_order: 202 },
-      { id: '10', name: 'Pantry Chef', icon: '👨‍🍳', description: 'Suggests food that you can cook based on what is available in your pantry. Also gives steps and has a grocery list. The Food scientist analyses existing dishes and tells you how to make them.', url: 'https://chef.bolt.host', icon_type: 'program', position_x: 140, position_y: 320, position_x_mobile: 95, position_y_mobile: 250, category: 'secondary', open_behavior: 'window', sort_order: 300 },
-      { id: '11', name: 'Drone Programming', icon: '🚁', description: 'Flies the Tello Drone via Scratch Blocks, Python and natural speech (voice and typed text)', url: 'https://drone.teachingtools.dev/', icon_type: 'program', position_x: 140, position_y: 420, position_x_mobile: 95, position_y_mobile: 330, category: 'secondary', open_behavior: 'new_tab', sort_order: 302 },
-      { id: '12', name: 'AI 2D, 3D, QR and Video Generator', icon: '✨', description: 'Generate images, 3D models, QR codes, and videos using AI', url: 'https://replicate.bolt.host', icon_type: 'program', position_x: 140, position_y: 520, position_x_mobile: 95, position_y_mobile: 410, category: 'secondary', open_behavior: 'window', sort_order: 304 },
-      { id: '13', name: 'Tool Hub', icon: '🔧', description: 'Various Tools for File manipulation', url: 'https://tools.bolt.host', icon_type: 'program', position_x: 240, position_y: 20, position_x_mobile: 180, position_y_mobile: 10, category: 'general', open_behavior: 'window', sort_order: 101 },
-      { id: '14', name: 'Teacher Scheduler', icon: '📅', description: 'Helps teachers stay organised by using AI Agents (Beta)', url: 'https://teacher.bolt.host', icon_type: 'program', position_x: 240, position_y: 120, position_x_mobile: 180, position_y_mobile: 90, category: 'teacher', open_behavior: 'window', sort_order: 201 },
-      { id: '15', name: 'Quiz Master Pro', icon: '📋', description: 'Enables teachers to create Quizzes from uploaded PDF, Word or pictures and auto-generate answers. Lockdown mode will be enabled for students to take the quiz. Results are instantly available.', url: 'https://quizpro.bolt.host', icon_type: 'program', position_x: 240, position_y: 220, position_x_mobile: 180, position_y_mobile: 170, category: 'teacher', open_behavior: 'window', sort_order: 203 },
-      { id: '16', name: 'History', icon: '🎭', description: 'Talk to your favorite historical character. You can upload information or allow it to research information about the character of your choice.', url: 'https://history.bolt.host', icon_type: 'program', position_x: 240, position_y: 320, position_x_mobile: 180, position_y_mobile: 250, category: 'secondary', open_behavior: 'window', sort_order: 301 },
-      { id: '17', name: 'AUSLAN', icon: '👋', description: 'Australian Sign Language Learning Program', url: 'https://auslan.bolt.host', icon_type: 'program', position_x: 240, position_y: 420, position_x_mobile: 180, position_y_mobile: 330, category: 'secondary', open_behavior: 'window', sort_order: 303 },
-      { id: '18', name: 'Network Route Tracer', icon: '🌐', description: 'Determines where you are, and does a trace to the target website from your location. Teaches you how the internet works.', url: 'https://network.bolt.host', icon_type: 'program', position_x: 240, position_y: 520, position_x_mobile: 180, position_y_mobile: 410, category: 'secondary', open_behavior: 'window', sort_order: 305 },
-      { id: '20', name: 'Tutoring Chatbot', icon: '🤖', description: 'Students can ask any questions about academic subjects.', url: 'https://tutor.bolt.host', icon_type: 'program', position_x: 340, position_y: 20, position_x_mobile: 265, position_y_mobile: 10, category: 'secondary', open_behavior: 'window', sort_order: 307 },
-      { id: '30', name: 'Robot Car Simulator', icon: '🚗', description: 'Program and simulate autonomous robot cars', url: 'https://cars.bolt.host/', icon_type: 'program', position_x: 340, position_y: 120, position_x_mobile: 265, position_y_mobile: 90, category: 'secondary', open_behavior: 'window', sort_order: 314 },
-      { id: '21', name: 'Math Genius', icon: '🔢', description: 'Allow students from Years 7-10 to learn Maths using AI. Customises questions based on student interest and ability.', url: 'https://math.bolt.host', icon_type: 'program', position_x: 340, position_y: 220, position_x_mobile: 265, position_y_mobile: 170, category: 'secondary', open_behavior: 'window', sort_order: 308 },
-      { id: '22', name: 'Code Class', icon: '💻', description: 'Teaches Coding - teachers can assign coding homework from here.', url: 'https://codeclass.bolt.host', icon_type: 'program', position_x: 340, position_y: 320, position_x_mobile: 265, position_y_mobile: 250, category: 'secondary', open_behavior: 'window', sort_order: 309 },
-      { id: '23', name: 'Dream Tales', icon: '📚', description: 'Generates unique stories every time using the age, gender and interest of the child using AI.', url: 'https://dreamtales.bolt.host', icon_type: 'program', position_x: 340, position_y: 420, position_x_mobile: 265, position_y_mobile: 330, category: 'primary', open_behavior: 'window', sort_order: 400 },
-      { id: '24', name: 'MP3 Player', icon: '🎵', description: 'Play your favorite music', url: 'https://mp3.bolt.host/', icon_type: 'program', position_x: 340, position_y: 520, position_x_mobile: 265, position_y_mobile: 410, category: 'primary', open_behavior: 'window', sort_order: 401 },
-      { id: '25', name: 'Kali Linux Display', icon: '🐉', description: 'Switch to Kali Linux theme', url: null, icon_type: 'theme', position_x: 440, position_y: 20, position_x_mobile: 10, position_y_mobile: 490, category: null, open_behavior: 'special', sort_order: 310 },
-      { id: '26', name: 'Code Blocks', icon: '🐍', description: 'Learn Python programming through interactive 3D objects', url: 'https://codecraft.teachingtools.dev', icon_type: 'program', position_x: 440, position_y: 120, position_x_mobile: 95, position_y_mobile: 490, category: 'secondary', open_behavior: 'window', sort_order: 310 },
-      { id: '27', name: 'Electronics Lab', icon: '⚡', description: 'Build and simulate electronic circuits', url: 'https://electric.bolt.host', icon_type: 'program', position_x: 440, position_y: 220, position_x_mobile: 180, position_y_mobile: 490, category: 'secondary', open_behavior: 'window', sort_order: 311 },
-      { id: '28', name: 'Hacking Simulator', icon: '🔐', description: 'Learn ethical hacking and cybersecurity', url: 'https://hack.bolt.host', icon_type: 'program', position_x: 440, position_y: 320, position_x_mobile: 265, position_y_mobile: 490, category: 'secondary', open_behavior: 'window', sort_order: 312 },
-      { id: '29', name: 'Scientific Simulations', icon: '🔬', description: 'Interactive simulations for science and math education', url: 'https://phet.colorado.edu/', icon_type: 'program', position_x: 440, position_y: 420, position_x_mobile: 350, position_y_mobile: 10, category: 'secondary', open_behavior: 'new_tab', sort_order: 313 },
-    ];
+    const fetchDesktopIcons = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('desktop_icons')
+          .select('*')
+          .order('sort_order', { ascending: true });
 
-    setDesktopIcons(hardcodedIcons);
-    setIconsLoading(false);
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const iconsWithFolderContents = data.map((icon) => {
+            if (icon.icon_type === 'folder' && icon.name === 'VCE Software Development') {
+              return {
+                ...icon,
+                folder_contents: [
+                  { id: '3-1', name: 'VCE Section A', icon: '📝', description: 'VCE Section A exam training', url: 'https://vce-section-a.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 20, position_x_mobile: 20, position_y_mobile: 20, category: null, open_behavior: 'window' as const, sort_order: 1 },
+                  { id: '3-2', name: 'VCE Section B', icon: '📊', description: 'VCE Section B exam training', url: 'https://vce.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 120, position_x_mobile: 20, position_y_mobile: 120, category: null, open_behavior: 'window' as const, sort_order: 2 },
+                  { id: '3-3', name: 'VCE Section C', icon: '💻', description: 'VCE Section C exam training', url: 'https://vce-section-c.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 220, position_x_mobile: 20, position_y_mobile: 220, category: null, open_behavior: 'window' as const, sort_order: 3 },
+                ]
+              };
+            }
+            return icon;
+          });
+
+          setDesktopIcons(iconsWithFolderContents as DesktopIconData[]);
+        }
+      } catch (error) {
+        console.error('Error fetching desktop icons:', error);
+      } finally {
+        setIconsLoading(false);
+      }
+    };
+
+    fetchDesktopIcons();
   }, []);
 
   useEffect(() => {
