@@ -58,6 +58,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showApiKeyLogin, setShowApiKeyLogin] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   const [theme, setTheme] = useState<'xp' | 'kali'>('xp');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [desktopIcons, setDesktopIcons] = useState<DesktopIconData[]>([]);
@@ -69,9 +70,10 @@ const Index = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-      const savedApiKey = apiKeyStorage.get();
-      if (savedApiKey) {
-        setApiKey(savedApiKey);
+      const session = apiKeyStorage.getSession();
+      if (session) {
+        setUsername(session.username);
+        setApiKey(session.apiKey);
       }
     }, 3000);
     return () => clearTimeout(timer);
@@ -302,28 +304,32 @@ const Index = () => {
     return iconMap[iconName] || <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{iconName}</span>;
   };
 
-  const handleApiKeyLogin = (key: string) => {
-    apiKeyStorage.save(key);
+  const handleApiKeyLogin = (user: string, key: string | null) => {
+    apiKeyStorage.saveSession(user, key);
+    setUsername(user);
     setApiKey(key);
     setShowApiKeyLogin(false);
     toast({
-      title: 'Success',
-      description: 'API key saved successfully',
+      title: 'Login Successful',
+      description: `Welcome back, ${user}!`,
     });
   };
 
   const handleApiKeyCancel = () => {
-    setShowApiKeyLogin(false);
+    if (username) {
+      setShowApiKeyLogin(false);
+    }
   };
 
   const handleLogout = () => {
     const confirmLogout = window.confirm(
-      'Are you sure you want to logout?\n\nThis will clear your stored API key from local storage. You will need to enter it again to use AI-powered programs.'
+      'Are you sure you want to logout?\n\nThis will end your session and you will need to login again.'
     );
 
     if (confirmLogout) {
-      apiKeyStorage.clear();
+      apiKeyStorage.clearSession();
       setApiKey(null);
+      setUsername(null);
 
       // Notify all iframes to clear their API keys
       windows.forEach((win) => {
@@ -335,13 +341,15 @@ const Index = () => {
 
       toast({
         title: 'Logged out',
-        description: 'Your API key has been cleared from local storage',
+        description: 'You have been logged out successfully',
       });
+
+      setShowApiKeyLogin(true);
     }
   };
 
   const handleApiKeyIconClick = () => {
-    if (apiKey) {
+    if (username) {
       handleLogout();
     } else {
       setShowApiKeyLogin(true);
@@ -409,7 +417,7 @@ const Index = () => {
     return <LoadingScreen />;
   }
 
-  if (showApiKeyLogin) {
+  if (!username || showApiKeyLogin) {
     return <ApiKeyLogin onLogin={handleApiKeyLogin} onCancel={handleApiKeyCancel} />;
   }
 
@@ -526,7 +534,7 @@ const Index = () => {
           theme={theme}
           onThemeToggle={switchTheme}
           onLogout={handleLogout}
-          hasApiKey={apiKey !== null}
+          hasApiKey={username !== null}
           programs={desktopIcons
             .filter((icon) => icon.icon_type === 'program' && icon.url)
             .map((icon) => ({
@@ -549,7 +557,7 @@ const Index = () => {
         }))}
         onWindowClick={focusWindow}
         theme={theme}
-        hasApiKey={apiKey !== null}
+        hasApiKey={username !== null}
         onApiKeyClick={handleApiKeyIconClick}
       />
 

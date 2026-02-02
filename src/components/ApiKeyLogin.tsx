@@ -3,47 +3,54 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Key } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ApiKeyLoginProps {
-  onLogin: (apiKey: string) => void;
+  onLogin: (username: string, apiKey: string | null) => void;
   onCancel: () => void;
 }
 
 export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
-  const [apiKey, setApiKey] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState('');
   const isMobile = useIsMobile();
 
-  const validateApiKey = async (key: string): Promise<boolean> => {
-    if (!key || key.trim() === '') {
-      return false;
-    }
-
-    if (!key.startsWith('sk-')) {
-      setError('Invalid API key format. OpenAI keys start with "sk-"');
-      return false;
+  const validateCredentials = async (user: string, pass: string): Promise<{ valid: boolean; apiKey: string | null }> => {
+    if (!user || user.trim() === '' || !pass || pass.trim() === '') {
+      setError('Please enter both username and password');
+      return { valid: false, apiKey: null };
     }
 
     try {
-      const response = await fetch('https://api.openai.com/v1/models', {
-        headers: {
-          'Authorization': `Bearer ${key}`,
-        },
-      });
+      const { data, error: dbError } = await supabase
+        .from('users_login')
+        .select('username, password, api_key')
+        .eq('username', user)
+        .maybeSingle();
 
-      if (response.ok) {
-        return true;
-      } else if (response.status === 401) {
-        setError('Invalid API key. Please check and try again.');
-        return false;
-      } else {
-        setError('Unable to validate API key. Please try again.');
-        return false;
+      if (dbError) {
+        console.error('Database error:', dbError);
+        setError('Unable to validate credentials. Please try again.');
+        return { valid: false, apiKey: null };
       }
+
+      if (!data) {
+        setError('Invalid username or password');
+        return { valid: false, apiKey: null };
+      }
+
+      if (data.password !== pass) {
+        setError('Invalid username or password');
+        return { valid: false, apiKey: null };
+      }
+
+      return { valid: true, apiKey: data.api_key || null };
     } catch (err) {
+      console.error('Error during login:', err);
       setError('Network error. Please check your connection.');
-      return false;
+      return { valid: false, apiKey: null };
     }
   };
 
@@ -51,12 +58,12 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
     setError('');
     setIsValidating(true);
 
-    const isValid = await validateApiKey(apiKey);
+    const result = await validateCredentials(username, password);
 
     setIsValidating(false);
 
-    if (isValid) {
-      onLogin(apiKey);
+    if (result.valid) {
+      onLogin(username, result.apiKey);
     }
   };
 
@@ -82,7 +89,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
         >
           <div className={`bg-gradient-to-b from-[#5A8FD8] to-[#5472B6] ${isMobile ? 'px-3 py-2' : 'px-3 py-1.5'}`}>
             <h1 className={`text-white ${isMobile ? 'text-sm' : 'text-sm'} font-bold`} style={{ fontFamily: 'Tahoma, sans-serif' }}>
-              API Key Configuration
+              Log On to Educational AI Suite
             </h1>
           </div>
 
@@ -107,34 +114,40 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             <div className="mb-4">
               <div className={`flex items-center mb-3 ${isMobile ? 'flex-col items-stretch' : ''}`}>
                 <label className={`${isMobile ? 'text-xs mb-1.5' : 'text-xs w-20'} font-normal`} style={{ fontFamily: 'Tahoma, sans-serif' }}>
-                  User:
+                  Username:
                 </label>
-                <input
+                <Input
                   type="text"
-                  value="Administrator"
-                  disabled
-                  className={`${isMobile ? 'w-full py-2' : 'flex-1'} px-2 py-1 border border-[#7F9DB9] bg-white ${isMobile ? 'text-xs' : 'text-xs'}`}
+                  value={username}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    setError('');
+                  }}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Enter username"
+                  className={`${isMobile ? 'w-full py-2' : 'flex-1'} px-2 py-1 border border-[#7F9DB9] bg-white ${isMobile ? 'text-xs' : 'text-xs'} focus:outline-none focus:border-[#0054E3]`}
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
+                  disabled={isValidating}
+                  autoFocus
                 />
               </div>
 
               <div className={`flex items-center ${isMobile ? 'flex-col items-stretch' : ''}`}>
                 <label className={`${isMobile ? 'text-xs mb-1.5' : 'text-xs w-20'} font-normal`} style={{ fontFamily: 'Tahoma, sans-serif' }}>
-                  API Key:
+                  Password:
                 </label>
                 <Input
                   type="password"
-                  value={apiKey}
+                  value={password}
                   onChange={(e) => {
-                    setApiKey(e.target.value);
+                    setPassword(e.target.value);
                     setError('');
                   }}
                   onKeyDown={handleKeyPress}
-                  placeholder="sk-..."
+                  placeholder="Enter password"
                   className={`${isMobile ? 'w-full py-2' : 'flex-1'} px-2 py-1 border border-[#7F9DB9] bg-white ${isMobile ? 'text-xs' : 'text-xs'} focus:outline-none focus:border-[#0054E3]`}
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
                   disabled={isValidating}
-                  autoFocus
                 />
               </div>
             </div>
@@ -148,7 +161,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             <div className={`flex gap-2 justify-end ${isMobile ? 'flex-col-reverse' : ''}`}>
               <button
                 onClick={handleLogin}
-                disabled={isValidating || !apiKey}
+                disabled={isValidating || !username || !password}
                 className={`${isMobile ? 'w-full py-2.5 text-sm' : 'px-5 py-1 text-xs'} border-2 disabled:opacity-50 disabled:cursor-not-allowed`}
                 style={{
                   fontFamily: 'Tahoma, sans-serif',
@@ -159,7 +172,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
                   borderBottomColor: '#808080',
                 }}
               >
-                {isValidating ? 'Validating...' : 'OK'}
+                {isValidating ? 'Logging in...' : 'OK'}
               </button>
               <button
                 onClick={onCancel}
@@ -179,7 +192,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             </div>
 
             <div className={`mt-3 ${isMobile ? 'text-[9px]' : 'text-[9px]'} text-gray-600 text-center`} style={{ fontFamily: 'Tahoma, sans-serif' }}>
-              OpenAI API key (optional) - Stored locally
+              Enter your username and password to access the system
             </div>
           </div>
         </div>
