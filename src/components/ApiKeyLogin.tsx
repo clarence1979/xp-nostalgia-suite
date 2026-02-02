@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Key } from 'lucide-react';
@@ -15,7 +15,32 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
   const [password, setPassword] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState('');
+  const [usernames, setUsernames] = useState<string[]>([]);
+  const [isLoadingUsernames, setIsLoadingUsernames] = useState(true);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const fetchUsernames = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('users_login')
+          .select('username')
+          .order('username', { ascending: true });
+
+        if (error) {
+          console.error('Error fetching usernames:', error);
+        } else if (data) {
+          setUsernames(data.map(u => u.username));
+        }
+      } catch (err) {
+        console.error('Failed to load usernames:', err);
+      } finally {
+        setIsLoadingUsernames(false);
+      }
+    };
+
+    fetchUsernames();
+  }, []);
 
   const validateCredentials = async (user: string, pass: string): Promise<{ valid: boolean; apiKey: string | null }> => {
     if (!user || user.trim() === '' || !pass || pass.trim() === '') {
@@ -116,20 +141,25 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
                 <label className={`${isMobile ? 'text-xs mb-1.5' : 'text-xs w-20'} font-normal`} style={{ fontFamily: 'Tahoma, sans-serif' }}>
                   Username:
                 </label>
-                <Input
-                  type="text"
+                <select
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);
                     setError('');
                   }}
                   onKeyDown={handleKeyPress}
-                  placeholder="Enter username"
                   className={`${isMobile ? 'w-full py-2' : 'flex-1'} px-2 py-1 border border-[#7F9DB9] bg-white ${isMobile ? 'text-xs' : 'text-xs'} focus:outline-none focus:border-[#0054E3]`}
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
-                  disabled={isValidating}
+                  disabled={isValidating || isLoadingUsernames}
                   autoFocus
-                />
+                >
+                  <option value="">Select a username</option>
+                  {usernames.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className={`flex items-center ${isMobile ? 'flex-col items-stretch' : ''}`}>
