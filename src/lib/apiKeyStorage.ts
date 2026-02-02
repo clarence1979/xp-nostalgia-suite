@@ -4,6 +4,7 @@ const USER_SESSION_KEY = 'user_session';
 interface UserSession {
   username: string;
   apiKey: string | null;
+  isAdmin: boolean;
 }
 
 export const apiKeyStorage = {
@@ -37,9 +38,9 @@ export const apiKeyStorage = {
     return apiKeyStorage.get() !== null;
   },
 
-  saveSession: (username: string, apiKey: string | null): void => {
+  saveSession: (username: string, apiKey: string | null, isAdmin: boolean = false): void => {
     try {
-      const session: UserSession = { username, apiKey };
+      const session: UserSession = { username, apiKey, isAdmin };
       localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
       if (apiKey) {
         localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);

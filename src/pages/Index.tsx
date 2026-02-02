@@ -8,9 +8,10 @@ import { Browser } from '@/components/Browser';
 import { OneDrive } from '@/components/OneDrive';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ApiKeyLogin } from '@/components/ApiKeyLogin';
+import { UserManagement } from '@/components/UserManagement';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
-import { HardDrive, Folder, Trash2, Globe, FileText, Code } from 'lucide-react';
+import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog } from 'lucide-react';
 import { useIsMobile, useIsLandscape } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
@@ -59,6 +60,7 @@ const Index = () => {
   const [showApiKeyLogin, setShowApiKeyLogin] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [theme, setTheme] = useState<'xp' | 'kali'>('xp');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [desktopIcons, setDesktopIcons] = useState<DesktopIconData[]>([]);
@@ -74,6 +76,7 @@ const Index = () => {
       if (session) {
         setUsername(session.username);
         setApiKey(session.apiKey);
+        setIsAdmin(session.isAdmin || false);
       }
     }, 3000);
     return () => clearTimeout(timer);
@@ -276,6 +279,17 @@ const Index = () => {
             window.open(icon.url, '_blank');
           }
           break;
+        case 'User Management':
+          if (isAdmin && username) {
+            openWindow('User Management', <UserManagement currentUsername={username} />, <UserCog className="w-4 h-4" />);
+          } else {
+            toast({
+              title: 'Access Denied',
+              description: 'Only administrators can access User Management',
+              variant: 'destructive',
+            });
+          }
+          break;
       }
     } else if (icon.icon_type === 'theme') {
       switchTheme();
@@ -299,19 +313,21 @@ const Index = () => {
       'Globe': <Globe className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-400`} />,
       'FileText': <FileText className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-300`} />,
       'Code': <Code className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-500`} />,
+      'UserCog': <UserCog className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-purple-500`} />,
     };
 
     return iconMap[iconName] || <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{iconName}</span>;
   };
 
-  const handleApiKeyLogin = (user: string, key: string | null) => {
-    apiKeyStorage.saveSession(user, key);
+  const handleApiKeyLogin = (user: string, key: string | null, admin: boolean) => {
+    apiKeyStorage.saveSession(user, key, admin);
     setUsername(user);
     setApiKey(key);
+    setIsAdmin(admin);
     setShowApiKeyLogin(false);
     toast({
       title: 'Login Successful',
-      description: `Welcome back, ${user}!`,
+      description: `Welcome back, ${user}!${admin ? ' (Admin)' : ''}`,
     });
   };
 
@@ -330,6 +346,7 @@ const Index = () => {
       apiKeyStorage.clearSession();
       setApiKey(null);
       setUsername(null);
+      setIsAdmin(false);
 
       // Notify all iframes to clear their API keys
       windows.forEach((win) => {

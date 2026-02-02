@@ -6,7 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ApiKeyLoginProps {
-  onLogin: (username: string, apiKey: string | null) => void;
+  onLogin: (username: string, apiKey: string | null, isAdmin: boolean) => void;
   onCancel: () => void;
 }
 
@@ -42,40 +42,40 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
     fetchUsernames();
   }, []);
 
-  const validateCredentials = async (user: string, pass: string): Promise<{ valid: boolean; apiKey: string | null }> => {
+  const validateCredentials = async (user: string, pass: string): Promise<{ valid: boolean; apiKey: string | null; isAdmin: boolean }> => {
     if (!user || user.trim() === '' || !pass || pass.trim() === '') {
       setError('Please enter both username and password');
-      return { valid: false, apiKey: null };
+      return { valid: false, apiKey: null, isAdmin: false };
     }
 
     try {
       const { data, error: dbError } = await supabase
         .from('users_login')
-        .select('username, password, api_key')
+        .select('username, password, api_key, is_admin')
         .eq('username', user)
         .maybeSingle();
 
       if (dbError) {
         console.error('Database error:', dbError);
         setError('Unable to validate credentials. Please try again.');
-        return { valid: false, apiKey: null };
+        return { valid: false, apiKey: null, isAdmin: false };
       }
 
       if (!data) {
         setError('Invalid username or password');
-        return { valid: false, apiKey: null };
+        return { valid: false, apiKey: null, isAdmin: false };
       }
 
       if (data.password !== pass) {
         setError('Invalid username or password');
-        return { valid: false, apiKey: null };
+        return { valid: false, apiKey: null, isAdmin: false };
       }
 
-      return { valid: true, apiKey: data.api_key || null };
+      return { valid: true, apiKey: data.api_key || null, isAdmin: data.is_admin || false };
     } catch (err) {
       console.error('Error during login:', err);
       setError('Network error. Please check your connection.');
-      return { valid: false, apiKey: null };
+      return { valid: false, apiKey: null, isAdmin: false };
     }
   };
 
@@ -88,7 +88,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
     setIsValidating(false);
 
     if (result.valid) {
-      onLogin(username, result.apiKey);
+      onLogin(username, result.apiKey, result.isAdmin);
     }
   };
 
