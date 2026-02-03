@@ -130,7 +130,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#5A7FBE] p-4">
+    <div className="w-full h-full flex items-center justify-center p-4">
       <div className={`relative w-full ${isMobile ? 'max-w-[95vw]' : 'max-w-[400px]'}`}>
         <div
           className="border-[3px] rounded-lg overflow-hidden shadow-2xl"

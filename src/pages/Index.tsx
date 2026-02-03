@@ -574,9 +574,7 @@ const Index = () => {
     return <LoadingScreen />;
   }
 
-  if (!username || showApiKeyLogin) {
-    return <ApiKeyLogin onLogin={handleApiKeyLogin} onCancel={handleApiKeyCancel} />;
-  }
+  const isAuthenticated = username && !showApiKeyLogin;
 
   return (
     <div
@@ -589,8 +587,16 @@ const Index = () => {
       onContextMenu={handleContextMenu}
       onClick={handleClick}
     >
+      {/* Blur overlay when not authenticated */}
+      {!isAuthenticated && (
+        <div
+          className="absolute inset-0 backdrop-blur-md bg-black/20 z-40"
+          style={{ pointerEvents: 'none' }}
+        />
+      )}
+
       {/* Desktop Icons */}
-      {!iconsLoading && (
+      {!iconsLoading && isAuthenticated && (
         <>
           {desktopIcons.map((icon) => {
             const displayLabel = icon.icon_type === 'theme'
@@ -664,7 +670,7 @@ const Index = () => {
       )}
 
       {/* Open Windows */}
-      {windows
+      {isAuthenticated && windows
         .filter((w) => !w.minimized)
         .map((window, index) => (
           <Window
@@ -682,7 +688,7 @@ const Index = () => {
         ))}
 
       {/* Start Menu */}
-      {showStartMenu && (
+      {isAuthenticated && showStartMenu && (
         <StartMenu
           onClose={() => setShowStartMenu(false)}
           onProgramClick={openProgram}
@@ -706,21 +712,23 @@ const Index = () => {
       )}
 
       {/* Taskbar */}
-      <Taskbar
-        onStartClick={() => setShowStartMenu(!showStartMenu)}
-        windows={windows.map((w) => ({
-          id: w.id,
-          title: w.title,
-          active: w.active,
-        }))}
-        onWindowClick={focusWindow}
-        theme={theme}
-        hasApiKey={username !== null}
-        onApiKeyClick={handleApiKeyIconClick}
-      />
+      {isAuthenticated && (
+        <Taskbar
+          onStartClick={() => setShowStartMenu(!showStartMenu)}
+          windows={windows.map((w) => ({
+            id: w.id,
+            title: w.title,
+            active: w.active,
+          }))}
+          onWindowClick={focusWindow}
+          theme={theme}
+          hasApiKey={username !== null}
+          onApiKeyClick={handleApiKeyIconClick}
+        />
+      )}
 
       {/* Context Menu */}
-      {contextMenu && (
+      {isAuthenticated && contextMenu && (
         <div
           className="fixed bg-background border-2 shadow-lg z-50 min-w-[200px] py-1"
           style={{
@@ -739,6 +747,13 @@ const Index = () => {
           >
             Switch to {theme === 'xp' ? 'Kali Desktop' : 'Windows XP Desktop'}
           </button>
+        </div>
+      )}
+
+      {/* Login Overlay */}
+      {!isAuthenticated && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center">
+          <ApiKeyLogin onLogin={handleApiKeyLogin} onCancel={handleApiKeyCancel} />
         </div>
       )}
     </div>
