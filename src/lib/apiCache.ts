@@ -18,7 +18,10 @@ export const apiCache = {
       const updated = { ...existing, ...data };
       localStorage.setItem(API_CACHE_KEY, JSON.stringify(updated));
 
-      if (data.OPENAI_API_KEY) localStorage.setItem('OPENAI_API_KEY', data.OPENAI_API_KEY);
+      if (data.OPENAI_API_KEY) {
+        localStorage.setItem('OPENAI_API_KEY', data.OPENAI_API_KEY);
+        localStorage.setItem('openai_api_key', data.OPENAI_API_KEY);
+      }
       if (data.CLAUDE_API_KEY) localStorage.setItem('CLAUDE_API_KEY', data.CLAUDE_API_KEY);
       if (data.GEMINI_API_KEY) localStorage.setItem('GEMINI_API_KEY', data.GEMINI_API_KEY);
       if (data.REPLICATE_API_KEY) localStorage.setItem('REPLICATE_API_KEY', data.REPLICATE_API_KEY);
@@ -77,6 +80,7 @@ export const apiCache = {
     try {
       localStorage.removeItem(API_CACHE_KEY);
       localStorage.removeItem('OPENAI_API_KEY');
+      localStorage.removeItem('openai_api_key');
       localStorage.removeItem('CLAUDE_API_KEY');
       localStorage.removeItem('GEMINI_API_KEY');
       localStorage.removeItem('REPLICATE_API_KEY');

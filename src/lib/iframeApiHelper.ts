@@ -45,6 +45,7 @@ export const iframeApiHelper = {
 
           const values = event.data.data;
           localStorage.setItem('OPENAI_API_KEY', values.OPENAI_API_KEY || '');
+          localStorage.setItem('openai_api_key', values.OPENAI_API_KEY || '');
           localStorage.setItem('CLAUDE_API_KEY', values.CLAUDE_API_KEY || '');
           localStorage.setItem('GEMINI_API_KEY', values.GEMINI_API_KEY || '');
           localStorage.setItem('REPLICATE_API_KEY', values.REPLICATE_API_KEY || '');

@@ -31,7 +31,7 @@ The following values are cached and available to iframe programs:
 If your iframe program runs on the same origin as the main application, you can directly access the values from localStorage:
 
 ```javascript
-// Get individual values
+// Get individual values (new format)
 const openaiKey = localStorage.getItem('OPENAI_API_KEY');
 const claudeKey = localStorage.getItem('CLAUDE_API_KEY');
 const geminiKey = localStorage.getItem('GEMINI_API_KEY');
@@ -41,8 +41,26 @@ const supabaseAnonKey = localStorage.getItem('SUPABASE_ANON_KEY');
 const username = localStorage.getItem('username');
 const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
+// Backward compatibility: OpenAI key is also stored in the old format
+const openaiKeyLegacy = localStorage.getItem('openai_api_key');
+
 // Or get all values at once
 const apiCache = JSON.parse(localStorage.getItem('api_cache') || '{}');
+```
+
+### Using the apiKeyStorage Utility (Backward Compatible)
+
+The existing method using `apiKeyStorage` still works:
+
+```javascript
+import { apiKeyStorage } from '@/lib/apiKeyStorage';
+
+// Get the OpenAI API key (works as before)
+const apiKey = apiKeyStorage.get();
+
+// Get all API keys
+const apiKeys = apiKeyStorage.getApiKeys();
+// Returns: { OPENAI_API_KEY, CLAUDE_API_KEY, GEMINI_API_KEY, REPLICATE_API_KEY }
 ```
 
 ## Method 2: PostMessage Communication (Cross-Origin)
@@ -52,8 +70,11 @@ If your iframe program runs on a different origin, use the postMessage API:
 ### Step 1: Request API values from parent
 
 ```javascript
-// Send request to parent window
+// New method (recommended) - request all API values
 window.parent.postMessage({ type: 'REQUEST_API_VALUES' }, '*');
+
+// Legacy method (still works) - request just OpenAI key
+window.parent.postMessage({ type: 'REQUEST_API_KEY' }, '*');
 ```
 
 ### Step 2: Listen for response
@@ -61,11 +82,13 @@ window.parent.postMessage({ type: 'REQUEST_API_VALUES' }, '*');
 ```javascript
 // Listen for the response
 window.addEventListener('message', (event) => {
+  // New format - all API values
   if (event.data.type === 'API_VALUES_RESPONSE') {
     const apiValues = event.data.data;
 
     // Store in localStorage for future use
     localStorage.setItem('OPENAI_API_KEY', apiValues.OPENAI_API_KEY || '');
+    localStorage.setItem('openai_api_key', apiValues.OPENAI_API_KEY || ''); // Backward compatibility
     localStorage.setItem('CLAUDE_API_KEY', apiValues.CLAUDE_API_KEY || '');
     localStorage.setItem('GEMINI_API_KEY', apiValues.GEMINI_API_KEY || '');
     localStorage.setItem('REPLICATE_API_KEY', apiValues.REPLICATE_API_KEY || '');
@@ -76,6 +99,12 @@ window.addEventListener('message', (event) => {
 
     // Use the values
     console.log('Received API values:', apiValues);
+  }
+
+  // Legacy format (still supported) - OpenAI key only
+  if (event.data.type === 'API_KEY_RESPONSE' && event.data.apiKey) {
+    localStorage.setItem('openai_api_key', event.data.apiKey);
+    console.log('Received API key:', event.data.apiKey);
   }
 });
 ```
@@ -125,7 +154,7 @@ let apiValues = null;
 // Try to get from localStorage first (same-origin)
 function getFromCache() {
   return {
-    OPENAI_API_KEY: localStorage.getItem('OPENAI_API_KEY'),
+    OPENAI_API_KEY: localStorage.getItem('OPENAI_API_KEY') || localStorage.getItem('openai_api_key'),
     CLAUDE_API_KEY: localStorage.getItem('CLAUDE_API_KEY'),
     GEMINI_API_KEY: localStorage.getItem('GEMINI_API_KEY'),
     REPLICATE_API_KEY: localStorage.getItem('REPLICATE_API_KEY'),
@@ -145,8 +174,9 @@ function requestFromParent() {
 
         const values = event.data.data;
 
-        // Save to localStorage
+        // Save to localStorage (both new and old formats for backward compatibility)
         localStorage.setItem('OPENAI_API_KEY', values.OPENAI_API_KEY || '');
+        localStorage.setItem('openai_api_key', values.OPENAI_API_KEY || '');
         localStorage.setItem('CLAUDE_API_KEY', values.CLAUDE_API_KEY || '');
         localStorage.setItem('GEMINI_API_KEY', values.GEMINI_API_KEY || '');
         localStorage.setItem('REPLICATE_API_KEY', values.REPLICATE_API_KEY || '');
@@ -193,6 +223,39 @@ async function initialize() {
 // Call on page load
 initialize();
 ```
+
+## Backward Compatibility
+
+The cache system maintains full backward compatibility with existing iframe programs:
+
+### Existing Programs Continue to Work
+
+If your iframe program already uses any of these methods, no changes are required:
+
+1. **URL Parameter Method**: OpenAI key passed via `?apiKey=...` still works
+2. **localStorage Access**: `localStorage.getItem('openai_api_key')` still works
+3. **apiKeyStorage Utility**: `apiKeyStorage.get()` still works
+4. **postMessage Legacy**: `REQUEST_API_KEY` and `API_KEY_RESPONSE` still work
+
+### New Programs Get Enhanced Access
+
+New iframe programs can access all available API keys and values:
+
+```javascript
+// Access all keys at once
+const cache = apiCache.getAll();
+
+// Or request them all via postMessage
+window.parent.postMessage({ type: 'REQUEST_API_VALUES' }, '*');
+```
+
+### Storage Format
+
+The OpenAI API key is stored in both formats:
+- `OPENAI_API_KEY` - New format (uppercase)
+- `openai_api_key` - Legacy format (lowercase)
+
+Both will always contain the same value, ensuring compatibility.
 
 ## Security Considerations
 
