@@ -16,6 +16,7 @@ import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock } from 
 import { useIsMobile, useIsLandscape } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
+import { apiCache } from '@/lib/apiCache';
 import { supabase } from '@/integrations/supabase/client';
 
 interface OpenWindow {
@@ -71,6 +72,8 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    apiCache.initializeSupabaseValues();
+
     const timer = setTimeout(() => {
       setIsLoading(false);
       const session = apiKeyStorage.getSession();
@@ -78,6 +81,20 @@ const Index = () => {
         setUsername(session.username);
         setApiKey(session.apiKey);
         setIsAdmin(session.isAdmin || false);
+
+        apiCache.saveAll({
+          username: session.username,
+          isAdmin: session.isAdmin || false,
+          OPENAI_API_KEY: session.apiKey,
+        });
+
+        const apiKeys = apiKeyStorage.getApiKeys();
+        apiCache.saveAll({
+          OPENAI_API_KEY: apiKeys.OPENAI_API_KEY,
+          CLAUDE_API_KEY: apiKeys.CLAUDE_API_KEY,
+          GEMINI_API_KEY: apiKeys.GEMINI_API_KEY,
+          REPLICATE_API_KEY: apiKeys.REPLICATE_API_KEY,
+        });
       }
     }, 3000);
     return () => clearTimeout(timer);
@@ -85,11 +102,15 @@ const Index = () => {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === 'REQUEST_API_KEY') {
-        const apiKey = apiKeyStorage.get();
-        if (apiKey && event.source) {
+      if (event.data.type === 'REQUEST_API_KEY' || event.data.type === 'REQUEST_API_VALUES') {
+        const allApiValues = apiCache.getAll();
+        if (event.source) {
           (event.source as WindowProxy).postMessage(
-            { type: 'API_KEY_RESPONSE', apiKey },
+            {
+              type: 'API_VALUES_RESPONSE',
+              data: allApiValues,
+              apiKey: allApiValues.OPENAI_API_KEY
+            },
             '*'
           );
         }
@@ -203,6 +224,7 @@ const Index = () => {
 
   const openProgram = (program: Program) => {
     const apiKey = apiKeyStorage.get();
+    const allApiValues = apiCache.getAll();
     let urlWithApiKey = program.url;
 
     if (apiKey) {
@@ -212,11 +234,15 @@ const Index = () => {
     }
 
     const iframeRef = (iframe: HTMLIFrameElement | null) => {
-      if (iframe && apiKey) {
+      if (iframe) {
         iframe.addEventListener('load', () => {
           setTimeout(() => {
             iframe.contentWindow?.postMessage(
-              { type: 'API_KEY_RESPONSE', apiKey },
+              {
+                type: 'API_VALUES_RESPONSE',
+                data: allApiValues,
+                apiKey: apiKey || allApiValues.OPENAI_API_KEY
+              },
               '*'
             );
           }, 500);

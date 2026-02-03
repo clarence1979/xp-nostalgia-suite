@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iframe API Access Example</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .api-values {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .api-value {
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        .label {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        .value {
+            color: #00ff00;
+            word-break: break-all;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Iframe API Access Example</h1>
+
+        <div class="status" id="status">
+            <strong>Status:</strong> Initializing...
+        </div>
+
+        <div style="text-align: center; margin-bottom: 20px;">
+            <button onclick="requestApiValues()">Request API Values</button>
+            <button onclick="checkCache()">Check Cache</button>
+            <button onclick="clearDisplay()">Clear Display</button>
+        </div>
+
+        <div class="api-values" id="apiValues">
+            <div style="text-align: center; color: #888;">
+                Click "Request API Values" to fetch data from parent window
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiValues = null;
+
+        // Function to display API values
+        function displayApiValues(values) {
+            const container = document.getElementById('apiValues');
+            container.innerHTML = '';
+
+            const keys = [
+                'OPENAI_API_KEY',
+                'CLAUDE_API_KEY',
+                'GEMINI_API_KEY',
+                'REPLICATE_API_KEY',
+                'SUPABASE_URL',
+                'SUPABASE_ANON_KEY',
+                'username',
+                'isAdmin'
+            ];
+
+            keys.forEach(key => {
+                const div = document.createElement('div');
+                div.className = 'api-value';
+
+                const label = document.createElement('span');
+                label.className = 'label';
+                label.textContent = key + ': ';
+
+                const value = document.createElement('span');
+                value.className = 'value';
+                const val = values[key];
+                value.textContent = val ? (typeof val === 'string' && val.length > 50 ? val.substring(0, 50) + '...' : val) : 'null';
+
+                div.appendChild(label);
+                div.appendChild(value);
+                container.appendChild(div);
+            });
+
+            updateStatus('✅ API values loaded successfully!');
+        }
+
+        // Function to update status
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = '<strong>Status:</strong> ' + message;
+        }
+
+        // Function to get values from localStorage cache
+        function getFromCache() {
+            updateStatus('📦 Reading from localStorage cache...');
+
+            const values = {
+                OPENAI_API_KEY: localStorage.getItem('OPENAI_API_KEY'),
+                CLAUDE_API_KEY: localStorage.getItem('CLAUDE_API_KEY'),
+                GEMINI_API_KEY: localStorage.getItem('GEMINI_API_KEY'),
+                REPLICATE_API_KEY: localStorage.getItem('REPLICATE_API_KEY'),
+                SUPABASE_URL: localStorage.getItem('SUPABASE_URL'),
+                SUPABASE_ANON_KEY: localStorage.getItem('SUPABASE_ANON_KEY'),
+                username: localStorage.getItem('username'),
+                isAdmin: localStorage.getItem('isAdmin') === 'true',
+            };
+
+            return values;
+        }
+
+        // Function to request API values from parent
+        function requestFromParent() {
+            return new Promise((resolve) => {
+                updateStatus('📡 Requesting API values from parent window...');
+
+                const handleMessage = (event) => {
+                    if (event.data.type === 'API_VALUES_RESPONSE') {
+                        window.removeEventListener('message', handleMessage);
+
+                        const values = event.data.data;
+
+                        // Save to localStorage
+                        localStorage.setItem('OPENAI_API_KEY', values.OPENAI_API_KEY || '');
+                        localStorage.setItem('CLAUDE_API_KEY', values.CLAUDE_API_KEY || '');
+                        localStorage.setItem('GEMINI_API_KEY', values.GEMINI_API_KEY || '');
+                        localStorage.setItem('REPLICATE_API_KEY', values.REPLICATE_API_KEY || '');
+                        localStorage.setItem('SUPABASE_URL', values.SUPABASE_URL || '');
+                        localStorage.setItem('SUPABASE_ANON_KEY', values.SUPABASE_ANON_KEY || '');
+                        localStorage.setItem('username', values.username || '');
+                        localStorage.setItem('isAdmin', String(values.isAdmin));
+
+                        updateStatus('✅ Received API values from parent!');
+                        resolve(values);
+                    }
+                };
+
+                window.addEventListener('message', handleMessage);
+
+                // Send request to parent
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'REQUEST_API_VALUES' }, '*');
+                } else {
+                    updateStatus('⚠️ Not running in iframe - cannot request from parent');
+                }
+
+                // Timeout after 3 seconds
+                setTimeout(() => {
+                    window.removeEventListener('message', handleMessage);
+                    updateStatus('⏱️ Request timeout - using cached values');
+                    resolve(getFromCache());
+                }, 3000);
+            });
+        }
+
+        // Button click handlers
+        async function requestApiValues() {
+            const values = await requestFromParent();
+            apiValues = values;
+            displayApiValues(values);
+        }
+
+        function checkCache() {
+            const values = getFromCache();
+            apiValues = values;
+            displayApiValues(values);
+            updateStatus('📦 Loaded from localStorage cache');
+        }
+
+        function clearDisplay() {
+            document.getElementById('apiValues').innerHTML = '<div style="text-align: center; color: #888;">Display cleared</div>';
+            updateStatus('🔄 Ready');
+        }
+
+        // Auto-initialize on load
+        window.addEventListener('load', async () => {
+            updateStatus('🚀 Page loaded - waiting for API values...');
+
+            // Wait a bit for parent to send values automatically
+            setTimeout(async () => {
+                // Check if we received values
+                const cached = getFromCache();
+                if (cached.SUPABASE_URL || cached.OPENAI_API_KEY) {
+                    apiValues = cached;
+                    displayApiValues(cached);
+                    updateStatus('✅ API values received automatically!');
+                } else {
+                    updateStatus('⏳ Waiting for API values... Click "Request API Values" to fetch');
+                }
+            }, 1000);
+        });
+
+        // Also listen for automatic sends from parent
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'API_VALUES_RESPONSE') {
+                const values = event.data.data;
+
+                // Save to localStorage
+                localStorage.setItem('OPENAI_API_KEY', values.OPENAI_API_KEY || '');
+                localStorage.setItem('CLAUDE_API_KEY', values.CLAUDE_API_KEY || '');
+                localStorage.setItem('GEMINI_API_KEY', values.GEMINI_API_KEY || '');
+                localStorage.setItem('REPLICATE_API_KEY', values.REPLICATE_API_KEY || '');
+                localStorage.setItem('SUPABASE_URL', values.SUPABASE_URL || '');
+                localStorage.setItem('SUPABASE_ANON_KEY', values.SUPABASE_ANON_KEY || '');
+                localStorage.setItem('username', values.username || '');
+                localStorage.setItem('isAdmin', String(values.isAdmin));
+
+                apiValues = values;
+                displayApiValues(values);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -5,6 +5,7 @@ import { Key } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
+import { apiCache } from '@/lib/apiCache';
 
 interface ApiKeyLoginProps {
   onLogin: (username: string, apiKey: string | null, isAdmin: boolean) => void;
@@ -101,6 +102,14 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
           };
 
           apiKeyStorage.saveApiKeys(apiKeys);
+          apiCache.saveAll({
+            OPENAI_API_KEY: apiKeys.OPENAI_API_KEY,
+            CLAUDE_API_KEY: apiKeys.CLAUDE_API_KEY,
+            GEMINI_API_KEY: apiKeys.GEMINI_API_KEY,
+            REPLICATE_API_KEY: apiKeys.REPLICATE_API_KEY,
+            username: username,
+            isAdmin: result.isAdmin,
+          });
         }
       } catch (err) {
         console.error('Failed to fetch API keys from secrets:', err);
