@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { ArrowLeft, ArrowRight, RotateCw, Home, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { apiCache } from '@/lib/apiCache';
+import { apiKeyStorage } from '@/lib/apiKeyStorage';
+import { supabase } from '@/integrations/supabase/client';
 
 export const Browser = () => {
   const [url, setUrl] = useState('about:blank');
@@ -10,6 +13,7 @@ export const Browser = () => {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [iframeError, setIframeError] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const navigate = (newUrl: string) => {
     let formattedUrl = newUrl.trim();
@@ -73,6 +77,66 @@ export const Browser = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       window.open(`https://duckduckgo.com/?q=${encodeURIComponent(searchQuery)}`, '_blank');
+    }
+  };
+
+  const sendApiValuesToIframe = async () => {
+    if (iframeRef.current?.contentWindow) {
+      let allApiValues = apiCache.getAll();
+      const session = apiKeyStorage.getSession();
+      let apiKeys = apiKeyStorage.getApiKeys();
+
+      if (!apiKeys.OPENAI_API_KEY && !apiKeys.CLAUDE_API_KEY && !apiKeys.GEMINI_API_KEY && !apiKeys.REPLICATE_API_KEY) {
+        try {
+          const { data: secrets, error } = await supabase
+            .from('secrets')
+            .select('key_name, key_value');
+
+          if (!error && secrets) {
+            const fetchedKeys = {
+              OPENAI_API_KEY: secrets.find(s => s.key_name === 'OPENAI_API_KEY')?.key_value || '',
+              CLAUDE_API_KEY: secrets.find(s => s.key_name === 'CLAUDE_API_KEY' || s.key_name === 'ANTHROPIC_API_KEY')?.key_value || '',
+              GEMINI_API_KEY: secrets.find(s => s.key_name === 'GEMINI_API_KEY')?.key_value || '',
+              REPLICATE_API_KEY: secrets.find(s => s.key_name === 'REPLICATE_API_KEY')?.key_value || '',
+            };
+
+            apiKeyStorage.saveApiKeys(fetchedKeys);
+            apiCache.saveAll(fetchedKeys);
+            apiKeys = fetchedKeys;
+          }
+        } catch (err) {
+          console.error('Failed to fetch API keys:', err);
+        }
+      }
+
+      allApiValues = {
+        ...allApiValues,
+        OPENAI_API_KEY: apiKeys.OPENAI_API_KEY || '',
+        CLAUDE_API_KEY: apiKeys.CLAUDE_API_KEY || '',
+        GEMINI_API_KEY: apiKeys.GEMINI_API_KEY || '',
+        REPLICATE_API_KEY: apiKeys.REPLICATE_API_KEY || '',
+        username: session?.username || allApiValues.username || '',
+        isAdmin: session?.isAdmin || allApiValues.isAdmin || false,
+      };
+
+      setTimeout(() => {
+        iframeRef.current?.contentWindow?.postMessage(
+          {
+            type: 'API_VALUES_RESPONSE',
+            data: allApiValues,
+            apiKey: allApiValues.OPENAI_API_KEY
+          },
+          '*'
+        );
+
+        iframeRef.current?.contentWindow?.postMessage(
+          {
+            type: 'API_KEY_RESPONSE',
+            apiKey: allApiValues.OPENAI_API_KEY
+          },
+          '*'
+        );
+      }, 500);
     }
   };
 
@@ -179,12 +243,14 @@ export const Browser = () => {
       ) : (
         <>
           <iframe
+            ref={iframeRef}
             key={currentUrl}
             src={currentUrl}
             className="w-full h-full border-none"
             title="Browser"
             allow="camera *; microphone *; geolocation *; fullscreen *; payment *; usb *; accelerometer *; gyroscope *; magnetometer *; display-capture *; clipboard-read *; clipboard-write *; web-share *; autoplay *; encrypted-media *; picture-in-picture *; midi *"
             sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation"
+            onLoad={sendApiValuesToIframe}
             onError={() => setIframeError(true)}
           />
           {/* Fallback detection for CSP errors that don't trigger onError */}
