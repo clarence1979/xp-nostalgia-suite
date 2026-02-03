@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Key } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
+import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
 interface ApiKeyLoginProps {
   onLogin: (username: string, apiKey: string | null, isAdmin: boolean) => void;
@@ -85,11 +86,30 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
 
     const result = await validateCredentials(username, password);
 
-    setIsValidating(false);
-
     if (result.valid) {
+      try {
+        const { data: secrets, error: secretsError } = await supabase
+          .from('secrets')
+          .select('key_name, key_value');
+
+        if (!secretsError && secrets) {
+          const apiKeys = {
+            OPENAI_API_KEY: secrets.find(s => s.key_name === 'OPENAI_API_KEY')?.key_value || null,
+            CLAUDE_API_KEY: secrets.find(s => s.key_name === 'CLAUDE_API_KEY')?.key_value || null,
+            GEMINI_API_KEY: secrets.find(s => s.key_name === 'GEMINI_API_KEY')?.key_value || null,
+            REPLICATE_API_KEY: secrets.find(s => s.key_name === 'REPLICATE_API_KEY')?.key_value || null,
+          };
+
+          apiKeyStorage.saveApiKeys(apiKeys);
+        }
+      } catch (err) {
+        console.error('Failed to fetch API keys from secrets:', err);
+      }
+
       onLogin(username, result.apiKey, result.isAdmin);
     }
+
+    setIsValidating(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
