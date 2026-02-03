@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Folder, HardDrive, Globe, Settings, CircleHelp as HelpCircle, Terminal, LogOut, Power, ChevronRight, FileText } from 'lucide-react';
+import { User, Folder, HardDrive, Globe, Settings, CircleHelp as HelpCircle, Terminal, LogOut, Power, ChevronRight, FileText, Lock } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Program {
@@ -33,6 +33,7 @@ interface StartMenuProps {
   programs?: Program[];
   onLogout?: () => void;
   hasApiKey?: boolean;
+  onChangePasswordClick?: () => void;
 }
 
 const categories: Category[] = [
@@ -193,7 +194,7 @@ const categories: Category[] = [
 ];
 
 
-export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle, programs, onLogout, hasApiKey }: StartMenuProps) => {
+export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle, programs, onLogout, hasApiKey, onChangePasswordClick }: StartMenuProps) => {
   const dynamicCategories: Category[] = programs && programs.length > 0 ? [
     {
       name: 'General Tools',
@@ -434,6 +435,19 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
             <Settings className="w-5 h-5" />
             <span className="text-sm">Control Panel</span>
           </div>
+
+          {hasApiKey && onChangePasswordClick && (
+            <div
+              className="xp-menu-item"
+              onClick={() => {
+                onChangePasswordClick();
+                onClose();
+              }}
+            >
+              <Lock className="w-5 h-5" />
+              <span className="text-sm">Change Password</span>
+            </div>
+          )}
 
           <div className="border-t border-gray-200 my-2" />
 

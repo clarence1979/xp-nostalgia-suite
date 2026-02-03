@@ -9,9 +9,10 @@ import { OneDrive } from '@/components/OneDrive';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ApiKeyLogin } from '@/components/ApiKeyLogin';
 import { UserManagement } from '@/components/UserManagement';
+import { ChangePassword } from '@/components/ChangePassword';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
-import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog } from 'lucide-react';
+import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock } from 'lucide-react';
 import { useIsMobile, useIsLandscape } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
@@ -373,6 +374,16 @@ const Index = () => {
     }
   };
 
+  const handleChangePassword = () => {
+    if (username) {
+      openWindow(
+        'Change Password',
+        <ChangePassword username={username} />,
+        <Lock className="w-4 h-4" />
+      );
+    }
+  };
+
   const openNotepad = () => {
     // Create a custom password dialog
     const passwordDialog = document.createElement('div');
@@ -552,6 +563,7 @@ const Index = () => {
           onThemeToggle={switchTheme}
           onLogout={handleLogout}
           hasApiKey={username !== null}
+          onChangePasswordClick={handleChangePassword}
           programs={desktopIcons
             .filter((icon) => icon.icon_type === 'program' && icon.url)
             .map((icon) => ({
