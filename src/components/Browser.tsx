@@ -136,6 +136,16 @@ export const Browser = () => {
           },
           '*'
         );
+
+        if (allApiValues.REPLICATE_API_KEY) {
+          iframeRef.current?.contentWindow?.postMessage(
+            {
+              type: 'replicate-api-key',
+              key: allApiValues.REPLICATE_API_KEY
+            },
+            '*'
+          );
+        }
       }, 500);
     }
   };
