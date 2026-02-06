@@ -12,12 +12,14 @@ import { UserManagement } from '@/components/UserManagement';
 import { ChangePassword } from '@/components/ChangePassword';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
-import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock } from 'lucide-react';
+import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock, Plus, Pencil, X } from 'lucide-react';
 import { useIsMobile, useIsLandscape } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 import { apiCache } from '@/lib/apiCache';
 import { supabase } from '@/integrations/supabase/client';
+import { IconEditorDialog, type IconFormData } from '@/components/IconEditorDialog';
+import { insertDesktopIcon, updateDesktopIcon, deleteDesktopIcon, updateIconPosition } from '@/lib/desktopIconService';
 
 interface OpenWindow {
   id: string;
@@ -65,8 +67,12 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [theme, setTheme] = useState<'xp' | 'kali'>('xp');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [iconContextMenu, setIconContextMenu] = useState<{ x: number; y: number; icon: DesktopIconData } | null>(null);
   const [desktopIcons, setDesktopIcons] = useState<DesktopIconData[]>([]);
   const [iconsLoading, setIconsLoading] = useState(true);
+  const [showIconEditor, setShowIconEditor] = useState(false);
+  const [editingIcon, setEditingIcon] = useState<DesktopIconData | null>(null);
+  const [addIconPosition, setAddIconPosition] = useState({ x: 100, y: 100 });
   const isMobile = useIsMobile();
   const isLandscape = useIsLandscape();
   const { toast } = useToast();
@@ -227,16 +233,132 @@ const Index = () => {
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
+    setIconContextMenu(null);
     setContextMenu({ x: e.clientX, y: e.clientY });
   };
 
   const handleClick = () => {
     setContextMenu(null);
+    setIconContextMenu(null);
   };
 
   const switchTheme = () => {
     setTheme(theme === 'xp' ? 'kali' : 'xp');
     setContextMenu(null);
+  };
+
+  const handleIconRightClick = (e: React.MouseEvent, icon: DesktopIconData) => {
+    setContextMenu(null);
+    setIconContextMenu({ x: e.clientX, y: e.clientY, icon });
+  };
+
+  const refetchIcons = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('desktop_icons')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      if (data) {
+        const iconsWithFolderContents = data.map((icon: DesktopIconData) => {
+          if (icon.icon_type === 'folder' && icon.name === 'VCE Software Development') {
+            return {
+              ...icon,
+              folder_contents: [
+                { id: '3-1', name: 'VCE Section A', icon: '\u{1F4DD}', description: 'VCE Section A exam training', url: 'https://vce-section-a.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 20, position_x_mobile: 20, position_y_mobile: 20, category: null, open_behavior: 'window' as const, sort_order: 1 },
+                { id: '3-2', name: 'VCE Section B', icon: '\u{1F4CA}', description: 'VCE Section B exam training', url: 'https://vce.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 120, position_x_mobile: 20, position_y_mobile: 120, category: null, open_behavior: 'window' as const, sort_order: 2 },
+                { id: '3-3', name: 'VCE Section C', icon: '\u{1F4BB}', description: 'VCE Section C exam training', url: 'https://vce-section-c.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 220, position_x_mobile: 20, position_y_mobile: 220, category: null, open_behavior: 'window' as const, sort_order: 3 },
+              ]
+            };
+          }
+          return icon;
+        });
+        setDesktopIcons(iconsWithFolderContents as DesktopIconData[]);
+      }
+    } catch (err) {
+      console.error('Error refetching icons:', err);
+    }
+  };
+
+  const handleAddNewIcon = () => {
+    const pos = contextMenu || { x: 100, y: 100 };
+    setAddIconPosition({ x: pos.x, y: pos.y });
+    setEditingIcon(null);
+    setShowIconEditor(true);
+    setContextMenu(null);
+  };
+
+  const handleEditIconClick = () => {
+    if (!iconContextMenu) return;
+    setEditingIcon(iconContextMenu.icon);
+    setShowIconEditor(true);
+    setIconContextMenu(null);
+  };
+
+  const handleDeleteIconClick = async () => {
+    if (!iconContextMenu) return;
+    const icon = iconContextMenu.icon;
+    setIconContextMenu(null);
+
+    if (icon.icon_type === 'system') {
+      toast({ title: 'Cannot Delete', description: 'System icons cannot be deleted', variant: 'destructive' });
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete "${icon.name}" from the desktop?`);
+    if (!confirmed) return;
+
+    try {
+      await deleteDesktopIcon(icon.id);
+      await refetchIcons();
+      toast({ title: 'Deleted', description: `"${icon.name}" has been removed` });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to delete icon', variant: 'destructive' });
+    }
+  };
+
+  const handleSaveIcon = async (formData: IconFormData) => {
+    try {
+      if (editingIcon) {
+        await updateDesktopIcon(editingIcon.id, {
+          name: formData.name,
+          icon: formData.icon,
+          url: formData.url,
+          description: formData.description,
+          open_behavior: formData.open_behavior,
+        });
+        toast({ title: 'Updated', description: `"${formData.name}" has been updated` });
+      } else {
+        await insertDesktopIcon({
+          name: formData.name,
+          icon: formData.icon,
+          url: formData.url,
+          description: formData.description,
+          open_behavior: formData.open_behavior,
+          position_x: addIconPosition.x,
+          position_y: addIconPosition.y,
+        });
+        toast({ title: 'Added', description: `"${formData.name}" has been added to the desktop` });
+      }
+      await refetchIcons();
+      setShowIconEditor(false);
+      setEditingIcon(null);
+    } catch {
+      toast({ title: 'Error', description: 'Failed to save icon', variant: 'destructive' });
+    }
+  };
+
+  const handleIconDragEnd = async (icon: DesktopIconData, x: number, y: number) => {
+    if (icon.icon_type === 'system' || icon.icon_type === 'theme') return;
+    try {
+      await updateIconPosition(icon.id, x, y);
+      setDesktopIcons((prev) =>
+        prev.map((i) => i.id === icon.id ? { ...i, position_x: x, position_y: y } : i)
+      );
+    } catch {
+      toast({ title: 'Error', description: 'Failed to move icon', variant: 'destructive' });
+    }
   };
 
   const openWindow = (title: string, content: React.ReactNode, icon?: React.ReactNode) => {
@@ -588,7 +710,7 @@ const Index = () => {
 
   return (
     <div
-      className="w-screen h-screen relative overflow-hidden"
+      className="desktop-area w-screen h-screen relative overflow-hidden"
       style={{
         backgroundImage: theme === 'xp' ? `url(${blissWallpaper})` : `url(${kaliWallpaper})`,
         backgroundSize: 'cover',
@@ -596,6 +718,7 @@ const Index = () => {
       }}
       onContextMenu={handleContextMenu}
       onClick={handleClick}
+      onDragOver={(e) => e.preventDefault()}
     >
       {/* Blur overlay when not authenticated */}
       {!isAuthenticated && (
@@ -665,6 +788,8 @@ const Index = () => {
               return { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
             };
 
+            const canDrag = isAdmin && icon.icon_type !== 'system' && icon.icon_type !== 'theme';
+
             return (
               <DesktopIcon
                 key={icon.id}
@@ -673,6 +798,9 @@ const Index = () => {
                 onClick={() => handleIconClick(icon)}
                 position={getIconPosition()}
                 description={displayDescription}
+                draggable={canDrag}
+                onContextMenu={isAdmin ? (e) => handleIconRightClick(e, icon) : undefined}
+                onDragEnd={canDrag ? (x, y) => handleIconDragEnd(icon, x, y) : undefined}
               />
             );
           })}
@@ -737,7 +865,7 @@ const Index = () => {
         />
       )}
 
-      {/* Context Menu */}
+      {/* Desktop Context Menu */}
       {isAuthenticated && contextMenu && (
         <div
           className="fixed bg-background border-2 shadow-lg z-50 min-w-[200px] py-1"
@@ -748,16 +876,72 @@ const Index = () => {
             background: theme === 'kali' ? 'hsl(var(--kali-menu-bg))' : 'hsl(var(--menu-bg))',
           }}
         >
+          {isAdmin && (
+            <button
+              onClick={handleAddNewIcon}
+              className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
+              style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
+            >
+              <Plus className="w-4 h-4" />
+              Add New Icon
+            </button>
+          )}
           <button
             onClick={switchTheme}
             className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors"
-            style={{
-              color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))',
-            }}
+            style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
           >
             Switch to {theme === 'xp' ? 'Kali Desktop' : 'Windows XP Desktop'}
           </button>
         </div>
+      )}
+
+      {/* Icon Context Menu (admin only) */}
+      {isAuthenticated && isAdmin && iconContextMenu && (
+        <div
+          className="fixed bg-background border-2 shadow-lg z-50 min-w-[180px] py-1"
+          style={{
+            left: iconContextMenu.x,
+            top: iconContextMenu.y,
+            borderColor: theme === 'kali' ? 'hsl(var(--kali-border))' : 'hsl(var(--border))',
+            background: theme === 'kali' ? 'hsl(var(--kali-menu-bg))' : 'hsl(var(--menu-bg))',
+          }}
+        >
+          <button
+            onClick={handleEditIconClick}
+            className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
+            style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            Edit Icon
+          </button>
+          {iconContextMenu.icon.icon_type !== 'system' && (
+            <button
+              onClick={handleDeleteIconClick}
+              className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-red-100 transition-colors flex items-center gap-2 text-red-600"
+            >
+              <X className="w-3.5 h-3.5" />
+              Delete Icon
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Icon Editor Dialog */}
+      {isAdmin && (
+        <IconEditorDialog
+          open={showIconEditor}
+          onClose={() => { setShowIconEditor(false); setEditingIcon(null); }}
+          onSave={handleSaveIcon}
+          initialData={editingIcon ? {
+            name: editingIcon.name,
+            icon: editingIcon.icon,
+            url: editingIcon.url || '',
+            description: editingIcon.description,
+            open_behavior: (editingIcon.open_behavior === 'window' || editingIcon.open_behavior === 'new_tab') ? editingIcon.open_behavior : 'window',
+          } : null}
+          theme={theme}
+        />
       )}
 
       {/* Login Overlay */}
