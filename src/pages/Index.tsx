@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Window } from '@/components/Window';
 import { StartMenu } from '@/components/StartMenu';
 import { Taskbar } from '@/components/Taskbar';
@@ -435,19 +435,29 @@ const Index = () => {
     }
   };
 
-  const getIconComponent = (iconName: string) => {
-    const iconMap: Record<string, React.ReactNode> = {
-      'HardDrive': <HardDrive className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />,
-      'Folder': <Folder className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-yellow-300`} />,
-      'Trash2': <Trash2 className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />,
-      'Globe': <Globe className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-400`} />,
-      'FileText': <FileText className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-300`} />,
-      'Code': <Code className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-500`} />,
-      'UserCog': <UserCog className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-purple-500`} />,
-    };
+  const iconComponentMap = useMemo(() => ({
+    'HardDrive': <HardDrive className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />,
+    'Folder': <Folder className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-yellow-300`} />,
+    'Trash2': <Trash2 className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300`} />,
+    'Globe': <Globe className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-400`} />,
+    'FileText': <FileText className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-300`} />,
+    'Code': <Code className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-blue-500`} />,
+    'UserCog': <UserCog className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} text-purple-500`} />,
+  }), [isMobile]);
 
-    return iconMap[iconName] || <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{iconName}</span>;
-  };
+  const getIconComponent = useCallback((iconName: string) => {
+    if (!iconName) {
+      return <span className={isMobile ? 'text-3xl' : 'text-4xl'}>?</span>;
+    }
+
+    const normalizedIconName = iconName.trim();
+
+    if (iconComponentMap[normalizedIconName]) {
+      return iconComponentMap[normalizedIconName];
+    }
+
+    return <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{normalizedIconName}</span>;
+  }, [iconComponentMap, isMobile]);
 
   const handleApiKeyLogin = (user: string, key: string | null, admin: boolean) => {
     apiKeyStorage.saveSession(user, key, admin);
@@ -609,7 +619,7 @@ const Index = () => {
 
             const displayIcon = icon.icon_type === 'theme'
               ? (theme === 'xp' ? '🐉' : '🖥️')
-              : icon.icon;
+              : (icon.icon || '');
 
             const getIconPosition = () => {
               if (!isMobile) {
