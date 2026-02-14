@@ -45,6 +45,10 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
   const [managingProgramsUserId, setManagingProgramsUserId] = useState<string | null>(null);
   const [userPrograms, setUserPrograms] = useState<ProgramPermission[]>([]);
   const [loadingPrograms, setLoadingPrograms] = useState(false);
+  const [showBulkProgramManager, setShowBulkProgramManager] = useState(false);
+  const [availablePrograms, setAvailablePrograms] = useState<string[]>([]);
+  const [selectedProgramForBulk, setSelectedProgramForBulk] = useState('');
+  const [bulkOperationInProgress, setBulkOperationInProgress] = useState(false);
 
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [filteredApiKeys, setFilteredApiKeys] = useState<ApiKey[]>([]);
@@ -59,6 +63,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
   useEffect(() => {
     fetchUsers();
     fetchApiKeys();
+    fetchAvailablePrograms();
   }, []);
 
   useEffect(() => {
@@ -504,6 +509,124 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     }
   };
 
+  const fetchAvailablePrograms = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('desktop_icons')
+        .select('name')
+        .eq('icon_type', 'program')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      const programs = data?.map(d => d.name) || [];
+      programs.push('VCE Section A', 'VCE Section B', 'VCE Section C');
+      setAvailablePrograms(programs.sort());
+    } catch (error: any) {
+      console.error('Error fetching programs:', error);
+    }
+  };
+
+  const handleBulkProgramEnable = async () => {
+    if (selectedUsers.size === 0 || !selectedProgramForBulk) {
+      toast({
+        title: 'Error',
+        description: 'Please select users and a program',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setBulkOperationInProgress(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      for (const userId of Array.from(selectedUsers)) {
+        try {
+          const { error } = await supabase
+            .rpc('update_user_program_permission', {
+              target_user_id: userId,
+              program_name: selectedProgramForBulk,
+              has_access: true
+            });
+
+          if (error) throw error;
+          successCount++;
+        } catch (err) {
+          errorCount++;
+          console.error(`Failed to enable for user ${userId}:`, err);
+        }
+      }
+
+      toast({
+        title: 'Bulk Update Complete',
+        description: `Enabled "${selectedProgramForBulk}" for ${successCount} user(s)${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
+      });
+
+      setShowBulkProgramManager(false);
+      setSelectedProgramForBulk('');
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update program access',
+        variant: 'destructive',
+      });
+    } finally {
+      setBulkOperationInProgress(false);
+    }
+  };
+
+  const handleBulkProgramDisable = async () => {
+    if (selectedUsers.size === 0 || !selectedProgramForBulk) {
+      toast({
+        title: 'Error',
+        description: 'Please select users and a program',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setBulkOperationInProgress(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      for (const userId of Array.from(selectedUsers)) {
+        try {
+          const { error } = await supabase
+            .rpc('update_user_program_permission', {
+              target_user_id: userId,
+              program_name: selectedProgramForBulk,
+              has_access: false
+            });
+
+          if (error) throw error;
+          successCount++;
+        } catch (err) {
+          errorCount++;
+          console.error(`Failed to disable for user ${userId}:`, err);
+        }
+      }
+
+      toast({
+        title: 'Bulk Update Complete',
+        description: `Disabled "${selectedProgramForBulk}" for ${successCount} user(s)${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
+      });
+
+      setShowBulkProgramManager(false);
+      setSelectedProgramForBulk('');
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update program access',
+        variant: 'destructive',
+      });
+    } finally {
+      setBulkOperationInProgress(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-white">
@@ -547,7 +670,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
         {activeTab === 'users' && (
           <>
             <div className="flex items-center justify-between mb-3">
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   onClick={() => setShowAddUser(!showAddUser)}
                   className="text-xs h-7 px-3"
@@ -557,14 +680,24 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                   Add User
                 </Button>
                 {selectedUsers.size > 0 && (
-                  <Button
-                    onClick={handleDeleteSelected}
-                    className="text-xs h-7 px-3"
-                    variant="destructive"
-                  >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Delete ({selectedUsers.size})
-                  </Button>
+                  <>
+                    <Button
+                      onClick={handleDeleteSelected}
+                      className="text-xs h-7 px-3"
+                      variant="destructive"
+                    >
+                      <Trash2 className="w-3 h-3 mr-1" />
+                      Delete ({selectedUsers.size})
+                    </Button>
+                    <Button
+                      onClick={() => setShowBulkProgramManager(!showBulkProgramManager)}
+                      className="text-xs h-7 px-3"
+                      variant="outline"
+                    >
+                      <UserCog className="w-3 h-3 mr-1" />
+                      Bulk Program Access
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
@@ -579,6 +712,62 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                 className="pl-8 text-xs h-8"
               />
             </div>
+
+            {showBulkProgramManager && selectedUsers.size > 0 && (
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                <h3 className="text-sm font-bold mb-2">
+                  Bulk Program Access - {selectedUsers.size} user(s) selected
+                </h3>
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <label className="text-xs font-medium block mb-1">Select Program</label>
+                    <select
+                      value={selectedProgramForBulk}
+                      onChange={(e) => setSelectedProgramForBulk(e.target.value)}
+                      className="w-full text-xs h-8 px-2 border border-gray-300 rounded"
+                      disabled={bulkOperationInProgress}
+                    >
+                      <option value="">-- Choose a program --</option>
+                      {availablePrograms.map((program) => (
+                        <option key={program} value={program}>
+                          {program}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button
+                    onClick={handleBulkProgramEnable}
+                    className="text-xs h-8 px-3"
+                    variant="default"
+                    disabled={!selectedProgramForBulk || bulkOperationInProgress}
+                  >
+                    Enable
+                  </Button>
+                  <Button
+                    onClick={handleBulkProgramDisable}
+                    className="text-xs h-8 px-3"
+                    variant="destructive"
+                    disabled={!selectedProgramForBulk || bulkOperationInProgress}
+                  >
+                    Disable
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowBulkProgramManager(false);
+                      setSelectedProgramForBulk('');
+                    }}
+                    className="text-xs h-8 px-3"
+                    variant="outline"
+                    disabled={bulkOperationInProgress}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+                {bulkOperationInProgress && (
+                  <div className="text-xs text-gray-600 mt-2">Processing bulk update...</div>
+                )}
+              </div>
+            )}
           </>
         )}
 
