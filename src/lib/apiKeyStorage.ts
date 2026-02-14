@@ -9,6 +9,7 @@ const REPLICATE_KEY = 'REPLICATE_API_KEY';
 
 interface UserSession {
   username: string;
+  userId?: string;
   apiKey: string | null;
   isAdmin: boolean;
   authToken?: string;
@@ -52,9 +53,9 @@ export const apiKeyStorage = {
     return apiKeyStorage.get() !== null;
   },
 
-  saveSession: (username: string, apiKey: string | null, isAdmin: boolean = false, authToken?: string): void => {
+  saveSession: (username: string, apiKey: string | null, isAdmin: boolean = false, authToken?: string, userId?: string): void => {
     try {
-      const session: UserSession = { username, apiKey, isAdmin, authToken };
+      const session: UserSession = { username, userId, apiKey, isAdmin, authToken };
       localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
       if (apiKey) {
         localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);

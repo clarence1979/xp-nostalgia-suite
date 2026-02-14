@@ -64,6 +64,7 @@ const Index = () => {
   const [showApiKeyLogin, setShowApiKeyLogin] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [theme, setTheme] = useState<'xp' | 'kali'>('xp');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -85,6 +86,7 @@ const Index = () => {
       const session = apiKeyStorage.getSession();
       if (session) {
         setUsername(session.username);
+        setUserId(session.userId || null);
         setApiKey(session.apiKey);
         setIsAdmin(session.isAdmin || false);
 
@@ -199,10 +201,10 @@ const Index = () => {
         if (data && data.length > 0) {
           let accessiblePrograms: string[] = [];
 
-          if (username) {
+          if (userId) {
             try {
               const { data: programsData, error: programsError } = await supabase
-                .rpc('get_accessible_programs');
+                .rpc('get_accessible_programs_for_user', { target_user_id: userId });
 
               if (!programsError && programsData) {
                 accessiblePrograms = programsData.map((p: { program_name: string }) => p.program_name);
@@ -212,7 +214,7 @@ const Index = () => {
             }
           }
 
-          const filteredIcons = username && accessiblePrograms.length > 0
+          const filteredIcons = userId && accessiblePrograms.length > 0
             ? data.filter(icon => accessiblePrograms.includes(icon.name))
             : data;
 
@@ -224,7 +226,7 @@ const Index = () => {
                 { id: '3-3', name: 'VCE Section C', icon: '💻', description: 'VCE Section C exam training', url: 'https://vce-section-c.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 220, position_x_mobile: 20, position_y_mobile: 220, category: null, open_behavior: 'window' as const, sort_order: 3 },
               ];
 
-              const filteredFolderContents = username && accessiblePrograms.length > 0
+              const filteredFolderContents = userId && accessiblePrograms.length > 0
                 ? folderContents.filter(item => accessiblePrograms.includes(item.name))
                 : folderContents;
 
@@ -246,7 +248,7 @@ const Index = () => {
     };
 
     fetchDesktopIcons();
-  }, [username]);
+  }, [userId]);
 
   useEffect(() => {
     // Update body class for theme
@@ -612,10 +614,11 @@ const Index = () => {
     return <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{normalizedIconName}</span>;
   }, [iconComponentMap, isMobile]);
 
-  const handleApiKeyLogin = (user: string, key: string | null, admin: boolean) => {
+  const handleApiKeyLogin = (user: string, key: string | null, admin: boolean, userIdParam?: string) => {
     const authToken = apiKeyStorage.getAuthToken();
-    apiKeyStorage.saveSession(user, key, admin, authToken || undefined);
+    apiKeyStorage.saveSession(user, key, admin, authToken || undefined, userIdParam);
     setUsername(user);
+    setUserId(userIdParam || null);
     setApiKey(key);
     setIsAdmin(admin);
     setShowApiKeyLogin(false);
@@ -640,6 +643,7 @@ const Index = () => {
       apiKeyStorage.clearSession();
       setApiKey(null);
       setUsername(null);
+      setUserId(null);
       setIsAdmin(false);
 
       // Notify all iframes to clear their API keys
