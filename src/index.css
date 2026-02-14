@@ -275,3 +275,44 @@
     background: hsl(var(--button-highlight));
   }
 }
+
+/* Grid overlay for icon positioning */
+.desktop-area.show-grid {
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.1) 0px,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px,
+      transparent 80px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.1) 0px,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px,
+      transparent 80px
+    );
+  background-size: 80px 80px;
+  background-position: 0 0;
+}
+
+.kali-theme .desktop-area.show-grid {
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 255, 255, 0.15) 0px,
+      rgba(0, 255, 255, 0.15) 1px,
+      transparent 1px,
+      transparent 80px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 255, 255, 0.15) 0px,
+      rgba(0, 255, 255, 0.15) 1px,
+      transparent 1px,
+      transparent 80px
+    );
+  background-size: 80px 80px;
+  background-position: 0 0;
+}

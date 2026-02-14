@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { apiKeyStorage } from './apiKeyStorage';
 
 export interface IconInsertData {
   name: string;
@@ -15,59 +16,68 @@ export interface IconUpdateData extends Partial<IconInsertData> {
   position_y_mobile?: number | null;
 }
 
+function getAuthToken(): string {
+  const token = apiKeyStorage.getAuthToken();
+  if (!token) {
+    throw new Error('No auth token found. Please log in again.');
+  }
+  return token;
+}
+
 export async function insertDesktopIcon(data: IconInsertData) {
-  const { data: maxSort } = await supabase
-    .from('desktop_icons')
-    .select('sort_order')
-    .order('sort_order', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const token = getAuthToken();
 
-  const nextSort = (maxSort?.sort_order ?? 0) + 1;
-
-  const { data: inserted, error } = await supabase
-    .from('desktop_icons')
-    .insert({
-      ...data,
-      icon_type: 'program',
-      sort_order: nextSort,
-      position_x_mobile: data.position_x,
-      position_y_mobile: data.position_y,
-    })
-    .select()
-    .maybeSingle();
+  const { data: result, error } = await supabase.rpc('admin_insert_icon', {
+    p_token: token,
+    p_name: data.name,
+    p_icon: data.icon,
+    p_description: data.description,
+    p_url: data.url,
+    p_open_behavior: data.open_behavior,
+    p_position_x: data.position_x,
+    p_position_y: data.position_y,
+  });
 
   if (error) throw error;
-  return inserted;
+  return result;
 }
 
 export async function updateDesktopIcon(id: string, data: IconUpdateData) {
-  const { error } = await supabase
-    .from('desktop_icons')
-    .update({ ...data, updated_at: new Date().toISOString() })
-    .eq('id', id);
+  const token = getAuthToken();
+
+  const { error } = await supabase.rpc('admin_update_icon', {
+    p_token: token,
+    p_icon_id: id,
+    p_name: data.name || null,
+    p_icon: data.icon || null,
+    p_description: data.description || null,
+    p_url: data.url || null,
+    p_open_behavior: data.open_behavior || null,
+  });
 
   if (error) throw error;
 }
 
 export async function deleteDesktopIcon(id: string) {
-  const { error } = await supabase
-    .from('desktop_icons')
-    .delete()
-    .eq('id', id);
+  const token = getAuthToken();
+
+  const { error } = await supabase.rpc('admin_delete_icon', {
+    p_token: token,
+    p_icon_id: id,
+  });
 
   if (error) throw error;
 }
 
 export async function updateIconPosition(id: string, x: number, y: number) {
-  const { error } = await supabase
-    .from('desktop_icons')
-    .update({
-      position_x: x,
-      position_y: y,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id);
+  const token = getAuthToken();
+
+  const { error } = await supabase.rpc('admin_update_icon_position', {
+    p_token: token,
+    p_icon_id: id,
+    p_position_x: x,
+    p_position_y: y,
+  });
 
   if (error) throw error;
 }
