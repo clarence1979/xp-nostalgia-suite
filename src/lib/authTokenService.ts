@@ -12,13 +12,11 @@ export const authTokenService = {
     try {
       const token = crypto.randomUUID() + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2);
 
-      const { error } = await supabase
-        .from('auth_tokens')
-        .insert({
-          username,
-          token,
-          is_admin: isAdmin,
-        });
+      const { error } = await supabase.rpc('create_auth_token', {
+        p_username: username,
+        p_token: token,
+        p_is_admin: isAdmin,
+      });
 
       if (error) {
         console.error('Failed to create auth token:', error);
