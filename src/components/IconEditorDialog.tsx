@@ -31,7 +31,7 @@ export interface IconFormData {
   icon: string;
   url: string;
   description: string;
-  open_behavior: 'window' | 'new_tab';
+  open_behavior: 'window' | 'new_tab' | 'iframe';
 }
 
 export const IconEditorDialog = ({ open, onClose, onSave, initialData, theme }: IconEditorDialogProps) => {
@@ -39,7 +39,7 @@ export const IconEditorDialog = ({ open, onClose, onSave, initialData, theme }: 
   const [icon, setIcon] = useState('🌐');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
-  const [openBehavior, setOpenBehavior] = useState<'window' | 'new_tab'>('window');
+  const [openBehavior, setOpenBehavior] = useState<'window' | 'new_tab' | 'iframe'>('window');
   const [customEmoji, setCustomEmoji] = useState('');
 
   useEffect(() => {
@@ -173,6 +173,13 @@ export const IconEditorDialog = ({ open, onClose, onSave, initialData, theme }: 
                 onClick={() => setOpenBehavior('window')}
               >
                 In Window
+              </Button>
+              <Button
+                variant={openBehavior === 'iframe' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setOpenBehavior('iframe')}
+              >
+                Iframe
               </Button>
               <Button
                 variant={openBehavior === 'new_tab' ? 'default' : 'outline'}

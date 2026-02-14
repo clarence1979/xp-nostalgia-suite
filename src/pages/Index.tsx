@@ -42,7 +42,7 @@ interface DesktopIconData {
   position_x_mobile: number | null;
   position_y_mobile: number | null;
   category: string | null;
-  open_behavior: 'window' | 'new_tab' | 'special' | 'folder';
+  open_behavior: 'window' | 'new_tab' | 'special' | 'folder' | 'iframe';
   sort_order: number;
   folder_contents?: DesktopIconData[];
 }
@@ -638,6 +638,21 @@ const Index = () => {
       switchTheme();
     } else if (icon.open_behavior === 'new_tab' && icon.url) {
       window.open(icon.url, '_blank');
+    } else if (icon.open_behavior === 'iframe' && icon.url) {
+      const iframeContent = (
+        <iframe
+          src={icon.url}
+          className="w-full h-full border-none"
+          title={icon.name}
+          allow="camera *; microphone *; geolocation *; fullscreen *; payment *; usb *; accelerometer *; gyroscope *; magnetometer *; display-capture *; clipboard-read *; clipboard-write *; web-share *; autoplay *; encrypted-media *; picture-in-picture *; midi *"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation"
+        />
+      );
+      openWindow(
+        icon.name,
+        iframeContent,
+        <span className="text-base">{icon.icon}</span>
+      );
     } else if (icon.open_behavior === 'window' && icon.url) {
       openProgram({
         name: icon.name,
@@ -1032,7 +1047,7 @@ const Index = () => {
             icon: editingIcon.icon,
             url: editingIcon.url || '',
             description: editingIcon.description,
-            open_behavior: (editingIcon.open_behavior === 'window' || editingIcon.open_behavior === 'new_tab') ? editingIcon.open_behavior : 'window',
+            open_behavior: (editingIcon.open_behavior === 'window' || editingIcon.open_behavior === 'new_tab' || editingIcon.open_behavior === 'iframe') ? editingIcon.open_behavior : 'window',
           } : null}
           theme={theme}
         />
