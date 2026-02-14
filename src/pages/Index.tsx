@@ -482,7 +482,7 @@ const Index = () => {
         src={urlWithApiKey}
         className="w-full h-full border-none"
         title={program.name}
-        allow="microphone *; camera *; geolocation *; autoplay *; encrypted-media *; clipboard-read *; clipboard-write *; display-capture *"
+        allow="microphone *; camera *; geolocation *; autoplay *; encrypted-media *; clipboard-read *; clipboard-write *; display-capture *; speaker-selection *; midi *; payment *"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation"
         referrerPolicy="no-referrer-when-downgrade"
       />,
