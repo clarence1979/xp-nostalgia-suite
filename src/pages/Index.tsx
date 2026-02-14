@@ -197,15 +197,40 @@ const Index = () => {
         if (error) throw error;
 
         if (data && data.length > 0) {
-          const iconsWithFolderContents = data.map((icon) => {
+          let accessiblePrograms: string[] = [];
+
+          if (username) {
+            try {
+              const { data: programsData, error: programsError } = await supabase
+                .rpc('get_accessible_programs');
+
+              if (!programsError && programsData) {
+                accessiblePrograms = programsData.map((p: { program_name: string }) => p.program_name);
+              }
+            } catch (err) {
+              console.error('Error fetching accessible programs:', err);
+            }
+          }
+
+          const filteredIcons = username && accessiblePrograms.length > 0
+            ? data.filter(icon => accessiblePrograms.includes(icon.name))
+            : data;
+
+          const iconsWithFolderContents = filteredIcons.map((icon) => {
             if (icon.icon_type === 'folder' && icon.name === 'VCE Software Development') {
+              const folderContents = [
+                { id: '3-1', name: 'VCE Section A', icon: '📝', description: 'VCE Section A exam training', url: 'https://vce-section-a.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 20, position_x_mobile: 20, position_y_mobile: 20, category: null, open_behavior: 'window' as const, sort_order: 1 },
+                { id: '3-2', name: 'VCE Section B', icon: '📊', description: 'VCE Section B exam training', url: 'https://vce.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 120, position_x_mobile: 20, position_y_mobile: 120, category: null, open_behavior: 'window' as const, sort_order: 2 },
+                { id: '3-3', name: 'VCE Section C', icon: '💻', description: 'VCE Section C exam training', url: 'https://vce-section-c.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 220, position_x_mobile: 20, position_y_mobile: 220, category: null, open_behavior: 'window' as const, sort_order: 3 },
+              ];
+
+              const filteredFolderContents = username && accessiblePrograms.length > 0
+                ? folderContents.filter(item => accessiblePrograms.includes(item.name))
+                : folderContents;
+
               return {
                 ...icon,
-                folder_contents: [
-                  { id: '3-1', name: 'VCE Section A', icon: '📝', description: 'VCE Section A exam training', url: 'https://vce-section-a.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 20, position_x_mobile: 20, position_y_mobile: 20, category: null, open_behavior: 'window' as const, sort_order: 1 },
-                  { id: '3-2', name: 'VCE Section B', icon: '📊', description: 'VCE Section B exam training', url: 'https://vce.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 120, position_x_mobile: 20, position_y_mobile: 120, category: null, open_behavior: 'window' as const, sort_order: 2 },
-                  { id: '3-3', name: 'VCE Section C', icon: '💻', description: 'VCE Section C exam training', url: 'https://vce-section-c.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 220, position_x_mobile: 20, position_y_mobile: 220, category: null, open_behavior: 'window' as const, sort_order: 3 },
-                ]
+                folder_contents: filteredFolderContents
               };
             }
             return icon;
@@ -221,7 +246,7 @@ const Index = () => {
     };
 
     fetchDesktopIcons();
-  }, []);
+  }, [username]);
 
   useEffect(() => {
     // Update body class for theme

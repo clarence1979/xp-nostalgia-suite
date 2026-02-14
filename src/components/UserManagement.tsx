@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Trash2, Edit2, UserCog, Key } from 'lucide-react';
+import { Search, Plus, Trash2, Edit2, UserCog, Key, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface User {
   id: string;
@@ -12,6 +12,11 @@ interface User {
   is_admin: boolean;
   api_key: string | null;
   created_at: string;
+}
+
+interface ProgramPermission {
+  program_name: string;
+  has_access: boolean;
 }
 
 interface ApiKey {
@@ -37,6 +42,9 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showAddUser, setShowAddUser] = useState(false);
   const [newUser, setNewUser] = useState({ username: '', password: '', isAdmin: false });
+  const [managingProgramsUserId, setManagingProgramsUserId] = useState<string | null>(null);
+  const [userPrograms, setUserPrograms] = useState<ProgramPermission[]>([]);
+  const [loadingPrograms, setLoadingPrograms] = useState(false);
 
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [filteredApiKeys, setFilteredApiKeys] = useState<ApiKey[]>([]);
@@ -435,6 +443,67 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     }
   };
 
+  const fetchUserPrograms = async (userId: string) => {
+    setLoadingPrograms(true);
+    try {
+      const { data, error } = await supabase
+        .rpc('get_user_program_permissions', { target_user_id: userId });
+
+      if (error) throw error;
+      setUserPrograms(data || []);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to load program permissions',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingPrograms(false);
+    }
+  };
+
+  const handleToggleProgramAccess = async (userId: string, programName: string, currentAccess: boolean) => {
+    try {
+      const { error } = await supabase
+        .rpc('update_user_program_permission', {
+          target_user_id: userId,
+          program_name: programName,
+          has_access: !currentAccess
+        });
+
+      if (error) throw error;
+
+      setUserPrograms(prev =>
+        prev.map(p =>
+          p.program_name === programName
+            ? { ...p, has_access: !currentAccess }
+            : p
+        )
+      );
+
+      toast({
+        title: 'Success',
+        description: `Program access updated for ${programName}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update program access',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleManagePrograms = (userId: string) => {
+    if (managingProgramsUserId === userId) {
+      setManagingProgramsUserId(null);
+      setUserPrograms([]);
+    } else {
+      setManagingProgramsUserId(userId);
+      fetchUserPrograms(userId);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-white">
@@ -750,47 +819,90 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
             </thead>
             <tbody>
               {filteredUsers.map((user, index) => (
-                <tr
-                  key={user.id}
-                  className={`border-b border-gray-200 hover:bg-blue-50 ${
-                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  }`}
-                >
-                  <td className="p-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedUsers.has(user.id)}
-                      onChange={() => toggleUserSelection(user.id)}
-                    />
-                  </td>
-                  <td className="p-2 font-medium">{user.username}</td>
-                  <td className="p-2 text-gray-600">{'•'.repeat(user.password.length)}</td>
-                  <td className="p-2">
-                    {user.is_admin && (
-                      <UserCog className="w-4 h-4 text-blue-600" />
-                    )}
-                  </td>
-                  <td className="p-2">
-                    <div className="flex gap-1">
-                      <Button
-                        onClick={() => setEditingUser(user)}
-                        className="text-xs h-6 px-2"
-                        variant="outline"
-                        size="sm"
-                      >
-                        <Edit2 className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        onClick={() => handleDeleteUser(user.id, user.username)}
-                        className="text-xs h-6 px-2"
-                        variant="destructive"
-                        size="sm"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
+                <>
+                  <tr
+                    key={user.id}
+                    className={`border-b border-gray-200 hover:bg-blue-50 ${
+                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                    }`}
+                  >
+                    <td className="p-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.has(user.id)}
+                        onChange={() => toggleUserSelection(user.id)}
+                      />
+                    </td>
+                    <td className="p-2 font-medium">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleManagePrograms(user.id)}
+                          className="hover:bg-gray-200 p-1 rounded"
+                        >
+                          {managingProgramsUserId === user.id ? (
+                            <ChevronUp className="w-3 h-3" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3" />
+                          )}
+                        </button>
+                        {user.username}
+                      </div>
+                    </td>
+                    <td className="p-2 text-gray-600">{'•'.repeat(user.password.length)}</td>
+                    <td className="p-2">
+                      {user.is_admin && (
+                        <UserCog className="w-4 h-4 text-blue-600" />
+                      )}
+                    </td>
+                    <td className="p-2">
+                      <div className="flex gap-1">
+                        <Button
+                          onClick={() => setEditingUser(user)}
+                          className="text-xs h-6 px-2"
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteUser(user.id, user.username)}
+                          className="text-xs h-6 px-2"
+                          variant="destructive"
+                          size="sm"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                  {managingProgramsUserId === user.id && (
+                    <tr key={`${user.id}-programs`}>
+                      <td colSpan={5} className="p-4 bg-blue-50 border-b-2 border-blue-200">
+                        <div className="text-sm font-bold mb-3">Program Access for {user.username}</div>
+                        {loadingPrograms ? (
+                          <div className="text-xs text-gray-600">Loading programs...</div>
+                        ) : (
+                          <div className="grid grid-cols-4 gap-3">
+                            {userPrograms.map((program) => (
+                              <label
+                                key={program.program_name}
+                                className="flex items-center gap-2 text-xs hover:bg-blue-100 p-2 rounded cursor-pointer"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={program.has_access}
+                                  onChange={() => handleToggleProgramAccess(user.id, program.program_name, program.has_access)}
+                                  className="cursor-pointer"
+                                />
+                                <span className="select-none">{program.program_name}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                </>
               ))}
             </tbody>
           </table>
