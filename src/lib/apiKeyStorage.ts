@@ -1,5 +1,6 @@
 const API_KEY_STORAGE_KEY = 'openai_api_key';
 const USER_SESSION_KEY = 'user_session';
+const AUTH_TOKEN_KEY = 'auth_token';
 
 const OPENAI_KEY = 'OPENAI_API_KEY';
 const CLAUDE_KEY = 'CLAUDE_API_KEY';
@@ -10,6 +11,7 @@ interface UserSession {
   username: string;
   apiKey: string | null;
   isAdmin: boolean;
+  authToken?: string;
 }
 
 interface ApiKeys {
@@ -50,12 +52,15 @@ export const apiKeyStorage = {
     return apiKeyStorage.get() !== null;
   },
 
-  saveSession: (username: string, apiKey: string | null, isAdmin: boolean = false): void => {
+  saveSession: (username: string, apiKey: string | null, isAdmin: boolean = false, authToken?: string): void => {
     try {
-      const session: UserSession = { username, apiKey, isAdmin };
+      const session: UserSession = { username, apiKey, isAdmin, authToken };
       localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
       if (apiKey) {
         localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
+      }
+      if (authToken) {
+        localStorage.setItem(AUTH_TOKEN_KEY, authToken);
       }
     } catch (error) {
       console.error('Failed to save user session:', error);
@@ -77,6 +82,7 @@ export const apiKeyStorage = {
     try {
       localStorage.removeItem(USER_SESSION_KEY);
       localStorage.removeItem(API_KEY_STORAGE_KEY);
+      localStorage.removeItem(AUTH_TOKEN_KEY);
       localStorage.removeItem(OPENAI_KEY);
       localStorage.removeItem(CLAUDE_KEY);
       localStorage.removeItem(GEMINI_KEY);
@@ -131,6 +137,29 @@ export const apiKeyStorage = {
     } catch (error) {
       console.error(`Failed to retrieve ${keyName}:`, error);
       return null;
+    }
+  },
+
+  getAuthToken: (): string | null => {
+    try {
+      const session = apiKeyStorage.getSession();
+      return session?.authToken || localStorage.getItem(AUTH_TOKEN_KEY);
+    } catch (error) {
+      console.error('Failed to retrieve auth token:', error);
+      return null;
+    }
+  },
+
+  saveAuthToken: (token: string): void => {
+    try {
+      localStorage.setItem(AUTH_TOKEN_KEY, token);
+      const session = apiKeyStorage.getSession();
+      if (session) {
+        session.authToken = token;
+        localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
+      }
+    } catch (error) {
+      console.error('Failed to save auth token:', error);
     }
   }
 };

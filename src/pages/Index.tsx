@@ -136,6 +136,8 @@ const Index = () => {
           }
         }
 
+        const authToken = apiKeyStorage.getAuthToken();
+
         allApiValues = {
           ...allApiValues,
           OPENAI_API_KEY: apiKeys.OPENAI_API_KEY || '',
@@ -144,6 +146,7 @@ const Index = () => {
           REPLICATE_API_KEY: apiKeys.REPLICATE_API_KEY || '',
           username: session?.username || allApiValues.username || '',
           isAdmin: session?.isAdmin || allApiValues.isAdmin || false,
+          authToken: authToken || '',
         };
 
         if (event.source) {
@@ -441,6 +444,8 @@ const Index = () => {
             }
           }
 
+          const authToken = apiKeyStorage.getAuthToken();
+
           updatedApiValues = {
             ...updatedApiValues,
             OPENAI_API_KEY: apiKeys.OPENAI_API_KEY || '',
@@ -449,6 +454,7 @@ const Index = () => {
             REPLICATE_API_KEY: apiKeys.REPLICATE_API_KEY || '',
             username: session?.username || updatedApiValues.username || '',
             isAdmin: session?.isAdmin || updatedApiValues.isAdmin || false,
+            authToken: authToken || '',
           };
 
           setTimeout(() => {
@@ -582,7 +588,8 @@ const Index = () => {
   }, [iconComponentMap, isMobile]);
 
   const handleApiKeyLogin = (user: string, key: string | null, admin: boolean) => {
-    apiKeyStorage.saveSession(user, key, admin);
+    const authToken = apiKeyStorage.getAuthToken();
+    apiKeyStorage.saveSession(user, key, admin, authToken || undefined);
     setUsername(user);
     setApiKey(key);
     setIsAdmin(admin);

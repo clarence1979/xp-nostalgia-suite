@@ -23,8 +23,19 @@ The following values are cached and available to iframe programs:
   SUPABASE_ANON_KEY: string | null;
   username: string | null;
   isAdmin: boolean;
+  authToken: string | null;
 }
 ```
+
+### Authentication Token (authToken)
+
+The `authToken` is a secure session token that allows iframe programs to authenticate users without requiring them to log in again. This token:
+
+- Is automatically generated when a user logs in
+- Expires after 24 hours
+- Cannot be read from URLs or browser cache by third parties
+- Can be validated server-side using Supabase
+- Does NOT contain passwords or sensitive credentials
 
 ## Method 1: Direct localStorage Access (Same-Origin)
 
@@ -257,9 +268,153 @@ The OpenAI API key is stored in both formats:
 
 Both will always contain the same value, ensuring compatibility.
 
+## Validating Authentication Token in Iframe Programs
+
+To validate the user's authentication without requiring them to log in again, use the provided `authToken`:
+
+### Method 1: Using the Auth Token Service (Recommended)
+
+```javascript
+import { authTokenService } from '@/lib/authTokenService';
+
+async function validateUser(authToken) {
+  const tokenData = await authTokenService.validateToken(authToken);
+
+  if (tokenData) {
+    console.log('User authenticated:', tokenData.username);
+    console.log('Is admin:', tokenData.isAdmin);
+    // User is authenticated, proceed with app
+    return tokenData;
+  } else {
+    console.log('Invalid or expired token');
+    // Token is invalid, prompt for login
+    return null;
+  }
+}
+
+// Get token from postMessage
+window.addEventListener('message', async (event) => {
+  if (event.data.type === 'API_VALUES_RESPONSE') {
+    const authToken = event.data.data.authToken;
+
+    if (authToken) {
+      const userData = await validateUser(authToken);
+      if (userData) {
+        // User is authenticated, start your app
+        initializeApp(userData);
+      }
+    }
+  }
+});
+```
+
+### Method 2: Direct Supabase Query
+
+```javascript
+async function validateToken(token) {
+  const { data, error } = await supabase
+    .from('auth_tokens')
+    .select('username, is_admin, expires_at')
+    .eq('token', token)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return {
+    username: data.username,
+    isAdmin: data.is_admin,
+  };
+}
+```
+
+### Complete Example: Auto-Login with Auth Token
+
+```javascript
+// In your iframe program
+let currentUser = null;
+
+async function attemptAutoLogin() {
+  // First, request API values from parent
+  window.parent.postMessage({ type: 'REQUEST_API_VALUES' }, '*');
+
+  // Wait for response
+  return new Promise((resolve) => {
+    const handleMessage = async (event) => {
+      if (event.data.type === 'API_VALUES_RESPONSE') {
+        window.removeEventListener('message', handleMessage);
+
+        const authToken = event.data.data.authToken;
+
+        if (authToken) {
+          // Validate the token
+          const response = await fetch(supabaseUrl + '/rest/v1/auth_tokens?token=eq.' + authToken + '&expires_at=gt.' + new Date().toISOString(), {
+            headers: {
+              'apikey': supabaseAnonKey,
+              'Content-Type': 'application/json',
+            }
+          });
+
+          const tokens = await response.json();
+
+          if (tokens && tokens.length > 0) {
+            currentUser = {
+              username: tokens[0].username,
+              isAdmin: tokens[0].is_admin,
+            };
+
+            console.log('Auto-login successful:', currentUser.username);
+            resolve(currentUser);
+          } else {
+            console.log('Token validation failed');
+            resolve(null);
+          }
+        } else {
+          console.log('No auth token received');
+          resolve(null);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    // Timeout after 2 seconds
+    setTimeout(() => {
+      window.removeEventListener('message', handleMessage);
+      resolve(null);
+    }, 2000);
+  });
+}
+
+// Use it in your app initialization
+async function initApp() {
+  const user = await attemptAutoLogin();
+
+  if (user) {
+    // User is authenticated, proceed
+    console.log('Welcome back,', user.username);
+    showMainApp();
+  } else {
+    // No valid token, show login screen
+    showLoginScreen();
+  }
+}
+
+// Start app
+initApp();
+```
+
 ## Security Considerations
 
 1. The postMessage API uses `'*'` as the target origin for compatibility. In production, consider restricting this to specific origins.
 2. Never log or expose API keys in production environments.
 3. Store API keys securely and never commit them to version control.
 4. The main application ensures API keys are encrypted in the database and only accessible to authenticated users.
+5. **Authentication Tokens**:
+   - Tokens expire after 24 hours automatically
+   - Tokens are validated server-side to prevent tampering
+   - Tokens do not contain passwords or sensitive data
+   - Always validate tokens on the server before trusting them
+   - Tokens are passed via postMessage (in-memory only), never in URLs or query parameters

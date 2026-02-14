@@ -109,6 +109,8 @@ export const Browser = () => {
         }
       }
 
+      const authToken = apiKeyStorage.getAuthToken();
+
       allApiValues = {
         ...allApiValues,
         OPENAI_API_KEY: apiKeys.OPENAI_API_KEY || '',
@@ -117,6 +119,7 @@ export const Browser = () => {
         REPLICATE_API_KEY: apiKeys.REPLICATE_API_KEY || '',
         username: session?.username || allApiValues.username || '',
         isAdmin: session?.isAdmin || allApiValues.isAdmin || false,
+        authToken: authToken || '',
       };
 
       setTimeout(() => {

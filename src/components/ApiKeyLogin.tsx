@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 import { apiCache } from '@/lib/apiCache';
+import { authTokenService } from '@/lib/authTokenService';
 
 interface ApiKeyLoginProps {
   onLogin: (username: string, apiKey: string | null, isAdmin: boolean) => void;
@@ -89,6 +90,8 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
 
     if (result.valid) {
       try {
+        const authToken = await authTokenService.generateToken(username, result.isAdmin);
+
         const { data: secrets, error: secretsError } = await supabase
           .from('secrets')
           .select('key_name, key_value');
@@ -110,6 +113,10 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             username: username,
             isAdmin: result.isAdmin,
           });
+        }
+
+        if (authToken) {
+          apiKeyStorage.saveAuthToken(authToken);
         }
       } catch (err) {
         console.error('Failed to fetch API keys from secrets:', err);
