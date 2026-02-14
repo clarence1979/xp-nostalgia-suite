@@ -90,7 +90,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
 
     if (result.valid) {
       try {
-        const authToken = await authTokenService.generateToken(username, password);
+        const authToken = await authTokenService.generateToken(username, result.isAdmin);
 
         const { data: secrets, error: secretsError } = await supabase
           .from('secrets')
