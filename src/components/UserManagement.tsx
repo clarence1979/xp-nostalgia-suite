@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -819,9 +819,8 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
             </thead>
             <tbody>
               {filteredUsers.map((user, index) => (
-                <>
+                <Fragment key={user.id}>
                   <tr
-                    key={user.id}
                     className={`border-b border-gray-200 hover:bg-blue-50 ${
                       index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                     }`}
@@ -876,7 +875,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                     </td>
                   </tr>
                   {managingProgramsUserId === user.id && (
-                    <tr key={`${user.id}-programs`}>
+                    <tr>
                       <td colSpan={5} className="p-4 bg-blue-50 border-b-2 border-blue-200">
                         <div className="text-sm font-bold mb-3">Program Access for {user.username}</div>
                         {loadingPrograms ? (
@@ -902,7 +901,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
