@@ -441,9 +441,44 @@ const Index = () => {
       urlWithApiKey = url.toString();
     }
 
+    let hasOpenedInNewTab = false;
+
     const iframeRef = (iframe: HTMLIFrameElement | null) => {
       if (iframe) {
+        iframe.addEventListener('error', () => {
+          if (!hasOpenedInNewTab) {
+            hasOpenedInNewTab = true;
+            window.open(urlWithApiKey, '_blank');
+            toast({
+              title: 'Opening in New Tab',
+              description: `${program.name} cannot be embedded. Opening in a new tab instead.`,
+            });
+          }
+        });
+
         iframe.addEventListener('load', async () => {
+          try {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!iframeDoc && !hasOpenedInNewTab) {
+              hasOpenedInNewTab = true;
+              window.open(urlWithApiKey, '_blank');
+              toast({
+                title: 'Opening in New Tab',
+                description: `${program.name} cannot be embedded. Opening in a new tab instead.`,
+              });
+              return;
+            }
+          } catch (e) {
+            if (!hasOpenedInNewTab) {
+              hasOpenedInNewTab = true;
+              window.open(urlWithApiKey, '_blank');
+              toast({
+                title: 'Opening in New Tab',
+                description: `${program.name} cannot be embedded. Opening in a new tab instead.`,
+              });
+              return;
+            }
+          }
           const session = apiKeyStorage.getSession();
           let apiKeys = apiKeyStorage.getApiKeys();
           let updatedApiValues = { ...allApiValues };
@@ -505,6 +540,29 @@ const Index = () => {
             }
           }, 500);
         });
+
+        setTimeout(() => {
+          try {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!iframeDoc && !hasOpenedInNewTab) {
+              hasOpenedInNewTab = true;
+              window.open(urlWithApiKey, '_blank');
+              toast({
+                title: 'Opening in New Tab',
+                description: `${program.name} cannot be embedded. Opening in a new tab instead.`,
+              });
+            }
+          } catch (e) {
+            if (!hasOpenedInNewTab) {
+              hasOpenedInNewTab = true;
+              window.open(urlWithApiKey, '_blank');
+              toast({
+                title: 'Opening in New Tab',
+                description: `${program.name} cannot be embedded. Opening in a new tab instead.`,
+              });
+            }
+          }
+        }, 3000);
       }
     };
 
