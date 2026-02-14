@@ -16,11 +16,28 @@ interface ApiKeyLoginProps {
 export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState('');
   const [usernames, setUsernames] = useState<string[]>([]);
   const [isLoadingUsernames, setIsLoadingUsernames] = useState(true);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const savedCredentials = localStorage.getItem('rememberedLogin');
+    if (savedCredentials) {
+      try {
+        const { username: savedUsername, password: savedPassword } = JSON.parse(savedCredentials);
+        if (savedUsername && savedPassword) {
+          setUsername(savedUsername);
+          setPassword(savedPassword);
+          setRememberMe(true);
+        }
+      } catch (err) {
+        console.error('Failed to load saved credentials:', err);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchUsernames = async () => {
@@ -89,6 +106,12 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
     const result = await validateCredentials(username, password);
 
     if (result.valid) {
+      if (rememberMe) {
+        localStorage.setItem('rememberedLogin', JSON.stringify({ username, password }));
+      } else {
+        localStorage.removeItem('rememberedLogin');
+      }
+
       try {
         const authToken = await authTokenService.generateToken(username, result.isAdmin);
 
@@ -215,6 +238,29 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
                   disabled={isValidating}
                 />
+              </div>
+
+              <div className={`flex items-center mt-3 ${isMobile ? 'pl-0' : 'pl-20'}`}>
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => {
+                    setRememberMe(e.target.checked);
+                    if (!e.target.checked) {
+                      localStorage.removeItem('rememberedLogin');
+                    }
+                  }}
+                  disabled={isValidating}
+                  className="mr-2 w-3.5 h-3.5 cursor-pointer"
+                />
+                <label
+                  htmlFor="rememberMe"
+                  className={`${isMobile ? 'text-xs' : 'text-xs'} font-normal cursor-pointer select-none`}
+                  style={{ fontFamily: 'Tahoma, sans-serif' }}
+                >
+                  Remember my username and password
+                </label>
               </div>
             </div>
 
