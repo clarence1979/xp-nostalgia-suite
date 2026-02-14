@@ -129,15 +129,20 @@ Client → Edge Function (/auth-token/revoke)
 
 ## Additional Security Fixes (Later on February 14, 2026)
 
-### 5. Added Missing Foreign Key Index
-**Issue**: `desktop_icons.user_id` foreign key lacked an index, causing suboptimal join performance.
+### 5. Removed Unused Foreign Key Index
+**Issue**: `desktop_icons.user_id` index was added but never used by queries.
 
-**Fixed**: Added `idx_desktop_icons_user_id` index
+**Analysis**:
+- Foreign key constraint already provides referential integrity
+- RLS policies handle user-specific filtering without needing this index
+- No queries perform joins that would benefit from this index
+
+**Fixed**: Removed `idx_desktop_icons_user_id` index
 ```sql
-CREATE INDEX idx_desktop_icons_user_id ON desktop_icons(user_id);
+DROP INDEX idx_desktop_icons_user_id;
 ```
 
-**Impact**: Significantly improves query performance for desktop icon lookups by user.
+**Impact**: Reduced database maintenance overhead without impacting performance.
 
 ---
 
@@ -159,11 +164,16 @@ CREATE TRIGGER enforce_auth_token_field_immutability
   EXECUTE FUNCTION validate_auth_token_update();
 ```
 
+3. Fixed `validate_auth_token_update()` function security:
+   - Added `SECURITY DEFINER` mode
+   - Set immutable `search_path = public`
+   - Prevents search path manipulation attacks
+
 **Allowed Updates**:
 - `last_used_at` (usage tracking)
 - `expires_at` (token extension, if needed)
 
-**Impact**: Critical fields are now immutable at the database level, preventing token manipulation even if application code is compromised.
+**Impact**: Critical fields are now immutable at the database level, preventing token manipulation even if application code is compromised. Function executes in a secure, predictable context.
 
 ---
 
@@ -219,17 +229,19 @@ SELECT cleanup_expired_auth_tokens();
 | Issue | Severity | Status | Protection Method |
 |-------|----------|--------|-------------------|
 | Unauthorized token creation | Critical | ✅ Fixed | Edge function + RLS |
-| Search path vulnerability | High | ✅ Fixed | Immutable search_path |
+| Search path vulnerability (cleanup) | High | ✅ Fixed | Immutable search_path |
+| Search path vulnerability (trigger) | High | ✅ Fixed | Immutable search_path |
 | RLS always true (INSERT) | High | ✅ Fixed | Restrictive policy |
 | RLS always true (DELETE) | High | ✅ Fixed | Expiration check |
 | RLS always true (UPDATE) | High | ✅ Fixed | Policy + Trigger |
-| Unindexed foreign key | Medium | ✅ Fixed | Added index |
-| Unused indexes | Low | ✅ Fixed | Removed redundant indexes |
+| Unused indexes (auth_tokens) | Low | ✅ Fixed | Removed 3 indexes |
+| Unused index (desktop_icons) | Low | ✅ Fixed | Removed index |
 | Auth connection strategy | Low | ⚠️ Manual | Dashboard setting |
 
 ---
 
 ## Additional Migration Files
-- `fix_security_issues_indexes_and_rls.sql`
-- `fix_auth_tokens_update_policy.sql`
-- `simplify_auth_tokens_update_policy.sql`
+- `fix_security_issues_indexes_and_rls.sql` - Added/removed indexes, fixed RLS policies
+- `fix_auth_tokens_update_policy.sql` - Improved UPDATE policy logic
+- `simplify_auth_tokens_update_policy.sql` - Added trigger-based field protection
+- `fix_remaining_security_issues.sql` - Removed unused index, fixed function search path
