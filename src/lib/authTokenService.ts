@@ -10,8 +10,10 @@ export interface AuthTokenData {
 export const authTokenService = {
   generateToken: async (username: string, isAdmin: boolean): Promise<string | null> => {
     try {
+      console.log('[AuthTokenService] Generating token for:', { username, isAdmin });
       const token = crypto.randomUUID() + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2);
 
+      console.log('[AuthTokenService] Calling create_auth_token RPC...');
       const { error } = await supabase.rpc('create_auth_token', {
         p_username: username,
         p_token: token,
@@ -19,13 +21,14 @@ export const authTokenService = {
       });
 
       if (error) {
-        console.error('Failed to create auth token:', error);
+        console.error('[AuthTokenService] Failed to create auth token:', error);
         return null;
       }
 
+      console.log('[AuthTokenService] Token created successfully, length:', token.length);
       return token;
     } catch (err) {
-      console.error('Error generating auth token:', err);
+      console.error('[AuthTokenService] Error generating auth token:', err);
       return null;
     }
   },

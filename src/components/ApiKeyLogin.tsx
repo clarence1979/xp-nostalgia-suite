@@ -9,7 +9,7 @@ import { apiCache } from '@/lib/apiCache';
 import { authTokenService } from '@/lib/authTokenService';
 
 interface ApiKeyLoginProps {
-  onLogin: (username: string, apiKey: string | null, isAdmin: boolean, userId?: string) => void;
+  onLogin: (username: string, apiKey: string | null, isAdmin: boolean, userId?: string, authToken?: string) => void;
   onCancel: () => void;
 }
 
@@ -112,8 +112,18 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
         localStorage.removeItem('rememberedLogin');
       }
 
+      let generatedAuthToken: string | null = null;
+
       try {
-        const authToken = await authTokenService.generateToken(username, result.isAdmin);
+        console.log('[Login] Generating auth token for user:', username);
+        generatedAuthToken = await authTokenService.generateToken(username, result.isAdmin);
+
+        if (generatedAuthToken) {
+          console.log('[Login] Auth token generated successfully');
+          apiKeyStorage.saveAuthToken(generatedAuthToken);
+        } else {
+          console.warn('[Login] Failed to generate auth token - proceeding without token');
+        }
 
         const { data: secrets, error: secretsError } = await supabase
           .from('secrets')
@@ -137,15 +147,11 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
             isAdmin: result.isAdmin,
           });
         }
-
-        if (authToken) {
-          apiKeyStorage.saveAuthToken(authToken);
-        }
       } catch (err) {
-        console.error('Failed to fetch API keys from secrets:', err);
+        console.error('[Login] Error during post-login setup:', err);
       }
 
-      onLogin(username, result.apiKey, result.isAdmin, result.userId);
+      onLogin(username, result.apiKey, result.isAdmin, result.userId, generatedAuthToken || undefined);
     }
 
     setIsValidating(false);

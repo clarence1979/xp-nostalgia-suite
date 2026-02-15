@@ -53,6 +53,14 @@ export const IframeProgram = ({ url, title }: IframeProgramProps) => {
         authToken: authToken || '',
       };
 
+      console.log('[IframeProgram] Sending credentials to iframe:', {
+        hasKey: !!allApiValues.OPENAI_API_KEY,
+        hasToken: !!authToken,
+        hasUsername: !!allApiValues.username,
+        isAdmin: allApiValues.isAdmin,
+        tokenLength: authToken?.length || 0
+      });
+
       setTimeout(() => {
         iframeRef.current?.contentWindow?.postMessage(
           {

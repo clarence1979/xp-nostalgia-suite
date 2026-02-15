@@ -144,7 +144,14 @@ export const apiKeyStorage = {
   getAuthToken: (): string | null => {
     try {
       const session = apiKeyStorage.getSession();
-      return session?.authToken || localStorage.getItem(AUTH_TOKEN_KEY);
+      const token = session?.authToken || localStorage.getItem(AUTH_TOKEN_KEY);
+      console.log('[ApiKeyStorage] Retrieved auth token:', {
+        hasToken: !!token,
+        tokenLength: token?.length || 0,
+        fromSession: !!session?.authToken,
+        fromStorage: !!localStorage.getItem(AUTH_TOKEN_KEY)
+      });
+      return token;
     } catch (error) {
       console.error('Failed to retrieve auth token:', error);
       return null;
@@ -153,11 +160,15 @@ export const apiKeyStorage = {
 
   saveAuthToken: (token: string): void => {
     try {
+      console.log('[ApiKeyStorage] Saving auth token, length:', token.length);
       localStorage.setItem(AUTH_TOKEN_KEY, token);
       const session = apiKeyStorage.getSession();
       if (session) {
         session.authToken = token;
         localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
+        console.log('[ApiKeyStorage] Token saved to both storage and session');
+      } else {
+        console.log('[ApiKeyStorage] Token saved to storage only (no session)');
       }
     } catch (error) {
       console.error('Failed to save auth token:', error);

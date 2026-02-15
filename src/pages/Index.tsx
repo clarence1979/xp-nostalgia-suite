@@ -152,6 +152,14 @@ const Index = () => {
           authToken: authToken || '',
         };
 
+        console.log('[Index] Sending credentials via postMessage:', {
+          hasKey: !!allApiValues.OPENAI_API_KEY,
+          hasToken: !!authToken,
+          hasUsername: !!allApiValues.username,
+          isAdmin: allApiValues.isAdmin,
+          tokenLength: authToken?.length || 0
+        });
+
         if (event.source) {
           (event.source as WindowProxy).postMessage(
             {
@@ -679,8 +687,12 @@ const Index = () => {
     return <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{normalizedIconName}</span>;
   }, [iconComponentMap, isMobile]);
 
-  const handleApiKeyLogin = (user: string, key: string | null, admin: boolean, userIdParam?: string) => {
-    const authToken = apiKeyStorage.getAuthToken();
+  const handleApiKeyLogin = (user: string, key: string | null, admin: boolean, userIdParam?: string, authToken?: string) => {
+    console.log('[Index] handleApiKeyLogin called with authToken:', {
+      hasToken: !!authToken,
+      tokenLength: authToken?.length || 0
+    });
+
     apiKeyStorage.saveSession(user, key, admin, authToken || undefined, userIdParam);
     setUsername(user);
     setUserId(userIdParam || null);
