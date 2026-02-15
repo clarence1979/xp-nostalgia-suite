@@ -10,6 +10,7 @@ import { LoadingScreen } from '@/components/LoadingScreen';
 import { ApiKeyLogin } from '@/components/ApiKeyLogin';
 import { UserManagement } from '@/components/UserManagement';
 import { ChangePassword } from '@/components/ChangePassword';
+import { IframeProgram } from '@/components/IframeProgram';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock, Plus, Pencil, X } from 'lucide-react';
@@ -639,18 +640,9 @@ const Index = () => {
     } else if (icon.open_behavior === 'new_tab' && icon.url) {
       window.open(icon.url, '_blank');
     } else if (icon.open_behavior === 'iframe' && icon.url) {
-      const iframeContent = (
-        <iframe
-          src={icon.url}
-          className="w-full h-full border-none"
-          title={icon.name}
-          allow="camera *; microphone *; geolocation *; fullscreen *; payment *; usb *; accelerometer *; gyroscope *; magnetometer *; display-capture *; clipboard-read *; clipboard-write *; web-share *; autoplay *; encrypted-media *; picture-in-picture *; midi *"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation"
-        />
-      );
       openWindow(
         icon.name,
-        iframeContent,
+        <IframeProgram url={icon.url} title={icon.name} />,
         <span className="text-base">{icon.icon}</span>
       );
     } else if (icon.open_behavior === 'window' && icon.url) {
