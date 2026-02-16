@@ -235,6 +235,7 @@ const Index = () => {
                 { id: '3-3', name: 'VCE Section C', icon: '💻', description: 'VCE Section C exam training', url: 'https://vce-section-c.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 220, position_x_mobile: 20, position_y_mobile: 220, category: null, open_behavior: 'window' as const, sort_order: 3 },
                 { id: '3-4', name: 'VCE Pseudocode', icon: '📄', description: 'Interactive pseudocode editor and learning tool', url: 'https://pseudocode.teachingtools.dev', icon_type: 'program' as const, position_x: 20, position_y: 320, position_x_mobile: 20, position_y_mobile: 320, category: null, open_behavior: 'iframe' as const, sort_order: 4 },
                 { id: '3-5', name: 'VCE Lists Mastery', icon: '📋', description: 'Python lists practice and mastery tool', url: 'https://pythonlist.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 420, position_x_mobile: 20, position_y_mobile: 420, category: null, open_behavior: 'iframe' as const, sort_order: 5 },
+                { id: '3-6', name: 'VCE Software Requirement Specifications (SRS)', icon: '📑', description: 'Software requirement specifications tool', url: 'https://srs.bolt.host', icon_type: 'program' as const, position_x: 20, position_y: 520, position_x_mobile: 20, position_y_mobile: 520, category: null, open_behavior: 'iframe' as const, sort_order: 6 },
               ];
 
               const filteredFolderContents = userId && accessiblePrograms.length > 0
