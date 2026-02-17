@@ -11,6 +11,7 @@ interface WindowProps {
   icon?: React.ReactNode;
   active?: boolean;
   onFocus?: () => void;
+  autoMaximizeOnMobile?: boolean;
 }
 
 export const Window = ({
@@ -23,6 +24,7 @@ export const Window = ({
   icon,
   active = true,
   onFocus,
+  autoMaximizeOnMobile = false,
 }: WindowProps) => {
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
@@ -48,6 +50,15 @@ export const Window = ({
       window.removeEventListener('orientationchange', checkMobile);
     };
   }, []);
+
+  useEffect(() => {
+    if (isMobile && autoMaximizeOnMobile && !isMaximized) {
+      setPreMaximize({ position, size });
+      setPosition({ x: 0, y: 0 });
+      setSize({ width: window.innerWidth, height: window.innerHeight - 40 });
+      setIsMaximized(true);
+    }
+  }, [isMobile, autoMaximizeOnMobile]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {

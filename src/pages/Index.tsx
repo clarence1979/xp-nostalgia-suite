@@ -29,6 +29,7 @@ interface OpenWindow {
   active: boolean;
   minimized: boolean;
   icon?: React.ReactNode;
+  autoMaximizeOnMobile?: boolean;
 }
 
 interface DesktopIconData {
@@ -405,7 +406,7 @@ const Index = () => {
     }
   };
 
-  const openWindow = (title: string, content: React.ReactNode, icon?: React.ReactNode) => {
+  const openWindow = (title: string, content: React.ReactNode, icon?: React.ReactNode, autoMaximizeOnMobile?: boolean) => {
     const id = `window-${nextWindowId}`;
     setNextWindowId(nextWindowId + 1);
 
@@ -416,6 +417,7 @@ const Index = () => {
       active: true,
       minimized: false,
       icon,
+      autoMaximizeOnMobile,
     };
 
     setWindows((prev) => [
@@ -656,7 +658,8 @@ const Index = () => {
       openWindow(
         icon.name,
         <IframeProgram url={icon.url} title={icon.name} />,
-        <span className="text-base">{icon.icon}</span>
+        <span className="text-base">{icon.icon}</span>,
+        true
       );
     } else if (icon.open_behavior === 'window' && icon.url) {
       openProgram({
@@ -938,6 +941,7 @@ const Index = () => {
             icon={window.icon}
             active={window.active}
             onFocus={() => focusWindow(window.id)}
+            autoMaximizeOnMobile={window.autoMaximizeOnMobile}
           >
             {window.content}
           </Window>
