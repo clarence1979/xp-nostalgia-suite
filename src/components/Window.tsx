@@ -35,6 +35,7 @@ export const Window = ({
   const [isMaximized, setIsMaximized] = useState(false);
   const [preMaximize, setPreMaximize] = useState({ position: initialPosition, size: initialSize });
   const [isMobile, setIsMobile] = useState(false);
+  const [isAutoMaximizedOnMobile, setIsAutoMaximizedOnMobile] = useState(false);
   const windowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,14 +52,35 @@ export const Window = ({
     };
   }, []);
 
+  // Auto-maximize on mobile when first opened
   useEffect(() => {
-    if (isMobile && autoMaximizeOnMobile && !isMaximized) {
+    if (isMobile && autoMaximizeOnMobile && !isMaximized && !isAutoMaximizedOnMobile) {
       setPreMaximize({ position, size });
       setPosition({ x: 0, y: 0 });
       setSize({ width: window.innerWidth, height: window.innerHeight - 40 });
       setIsMaximized(true);
+      setIsAutoMaximizedOnMobile(true);
     }
-  }, [isMobile, autoMaximizeOnMobile]);
+  }, [isMobile, autoMaximizeOnMobile, isMaximized, isAutoMaximizedOnMobile]);
+
+  // Update window size on orientation change when auto-maximized on mobile
+  useEffect(() => {
+    const handleOrientationAndResize = () => {
+      if (isMobile && isAutoMaximizedOnMobile && isMaximized) {
+        // Update the window size to match new screen dimensions
+        setPosition({ x: 0, y: 0 });
+        setSize({ width: window.innerWidth, height: window.innerHeight - 40 });
+      }
+    };
+
+    window.addEventListener('resize', handleOrientationAndResize);
+    window.addEventListener('orientationchange', handleOrientationAndResize);
+
+    return () => {
+      window.removeEventListener('resize', handleOrientationAndResize);
+      window.removeEventListener('orientationchange', handleOrientationAndResize);
+    };
+  }, [isMobile, isAutoMaximizedOnMobile, isMaximized]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -170,6 +192,7 @@ export const Window = ({
       setPosition(preMaximize.position);
       setSize(preMaximize.size);
       setIsMaximized(false);
+      setIsAutoMaximizedOnMobile(false);
     } else {
       // Maximize
       setPreMaximize({ position, size });
