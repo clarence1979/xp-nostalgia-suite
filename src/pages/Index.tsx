@@ -906,7 +906,29 @@ const Index = () => {
                 return landscapePositions[icon.id] || { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
               }
 
-              return { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
+              // Portrait mode - create dynamic grid based on screen dimensions
+              const screenWidth = window.innerWidth;
+              const screenHeight = window.innerHeight - 40; // Subtract taskbar height
+              const iconWidth = 80;
+              const iconHeight = 90;
+              const padding = 10;
+
+              const columns = Math.floor(screenWidth / (iconWidth + padding));
+              const rows = Math.floor(screenHeight / (iconHeight + padding));
+              const totalIconsPerScreen = columns * rows;
+
+              const iconIndex = desktopIcons.findIndex(i => i.id === icon.id);
+              if (iconIndex === -1) {
+                return { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
+              }
+
+              const col = Math.floor(iconIndex / rows);
+              const row = iconIndex % rows;
+
+              const x = padding + (col * (iconWidth + padding));
+              const y = padding + (row * (iconHeight + padding));
+
+              return { x, y };
             };
 
             const canDrag = isAdmin && icon.icon_type !== 'system' && icon.icon_type !== 'theme';
