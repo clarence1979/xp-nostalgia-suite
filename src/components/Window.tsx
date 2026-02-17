@@ -39,13 +39,6 @@ export const Window = ({
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      if (mobile && !isMaximized) {
-        // Auto-maximize on mobile
-        setIsMaximized(true);
-        setPosition({ x: 0, y: 0 });
-        const taskbarHeight = 40;
-        setSize({ width: window.innerWidth, height: window.innerHeight - taskbarHeight });
-      }
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -92,7 +85,23 @@ export const Window = ({
       }
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDragging && !isMaximized) {
+        const touch = e.touches[0];
+        setPosition({
+          x: touch.clientX - dragOffset.x,
+          y: touch.clientY - dragOffset.y,
+        });
+      }
+    };
+
     const handleMouseUp = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+      setResizeDirection('');
+    };
+
+    const handleTouchEnd = () => {
       setIsDragging(false);
       setIsResizing(false);
       setResizeDirection('');
@@ -101,16 +110,19 @@ export const Window = ({
     if (isDragging || isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('touchend', handleTouchEnd);
     }
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
     };
   }, [isDragging, isResizing, dragOffset, position, size, resizeDirection, isMaximized]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (isMobile) return; // Disable dragging on mobile
     if (onFocus) onFocus();
     const rect = windowRef.current?.getBoundingClientRect();
     if (rect) {
@@ -122,8 +134,20 @@ export const Window = ({
     }
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (onFocus) onFocus();
+    const touch = e.touches[0];
+    const rect = windowRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDragOffset({
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+      });
+      setIsDragging(true);
+    }
+  };
+
   const handleResizeMouseDown = (e: React.MouseEvent, direction: string) => {
-    if (isMobile) return; // Disable resizing on mobile
     e.stopPropagation();
     setIsResizing(true);
     setResizeDirection(direction);
@@ -160,6 +184,7 @@ export const Window = ({
       <div
         className={`xp-title-bar ${!active ? 'inactive' : ''}`}
         onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
       >
         <div className="flex items-center gap-1">
           {icon && <div className="w-4 h-4">{icon}</div>}
