@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Plus, Trash2, Edit2, UserCog, Key, ChevronDown, ChevronUp } from 'lucide-react';
+import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
 interface User {
   id: string;
@@ -301,16 +302,22 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
       return;
     }
 
+    const authToken = apiKeyStorage.getAuthToken();
+    if (!authToken) {
+      toast({ title: 'Error', description: 'Not authenticated', variant: 'destructive' });
+      return;
+    }
+
     try {
-      const { error } = await supabase
-        .from('secrets')
-        .insert([{
-          key_name: newApiKey.keyName,
-          key_value: newApiKey.keyValue,
-          description: newApiKey.description
-        }]);
+      const { data, error } = await supabase.rpc('upsert_secret', {
+        p_token: authToken,
+        p_key_name: newApiKey.keyName,
+        p_key_value: newApiKey.keyValue,
+        p_description: newApiKey.description,
+      });
 
       if (error) throw error;
+      if (data && !data.success) throw new Error(data.error || 'Failed to add API key');
 
       toast({
         title: 'Success',
@@ -332,17 +339,23 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
   const handleUpdateApiKey = async () => {
     if (!editingApiKey) return;
 
+    const authToken = apiKeyStorage.getAuthToken();
+    if (!authToken) {
+      toast({ title: 'Error', description: 'Not authenticated', variant: 'destructive' });
+      return;
+    }
+
     try {
-      const { error } = await supabase
-        .from('secrets')
-        .update({
-          key_name: editingApiKey.key_name,
-          key_value: editingApiKey.key_value,
-          description: editingApiKey.description
-        })
-        .eq('id', editingApiKey.id);
+      const { data, error } = await supabase.rpc('update_secret_by_id', {
+        p_token: authToken,
+        p_id: editingApiKey.id,
+        p_key_name: editingApiKey.key_name,
+        p_key_value: editingApiKey.key_value,
+        p_description: editingApiKey.description,
+      });
 
       if (error) throw error;
+      if (data && !data.success) throw new Error(data.error || 'Failed to update API key');
 
       toast({
         title: 'Success',
@@ -378,13 +391,21 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
       return;
     }
 
-    try {
-      const { error } = await supabase
-        .from('secrets')
-        .delete()
-        .in('id', Array.from(selectedApiKeys));
+    const authToken = apiKeyStorage.getAuthToken();
+    if (!authToken) {
+      toast({ title: 'Error', description: 'Not authenticated', variant: 'destructive' });
+      return;
+    }
 
-      if (error) throw error;
+    try {
+      for (const keyId of Array.from(selectedApiKeys)) {
+        const { data, error } = await supabase.rpc('delete_secret_by_id', {
+          p_token: authToken,
+          p_id: keyId,
+        });
+        if (error) throw error;
+        if (data && !data.success) throw new Error(data.error || 'Failed to delete API key');
+      }
 
       toast({
         title: 'Success',
@@ -407,13 +428,20 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
       return;
     }
 
+    const authToken = apiKeyStorage.getAuthToken();
+    if (!authToken) {
+      toast({ title: 'Error', description: 'Not authenticated', variant: 'destructive' });
+      return;
+    }
+
     try {
-      const { error } = await supabase
-        .from('secrets')
-        .delete()
-        .eq('id', keyId);
+      const { data, error } = await supabase.rpc('delete_secret_by_id', {
+        p_token: authToken,
+        p_id: keyId,
+      });
 
       if (error) throw error;
+      if (data && !data.success) throw new Error(data.error || 'Failed to delete API key');
 
       toast({
         title: 'Success',
