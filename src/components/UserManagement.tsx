@@ -309,7 +309,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     }
 
     try {
-      const { data, error } = await supabase.rpc('upsert_secret', {
+      const { error } = await supabase.rpc('upsert_secret', {
         p_token: authToken,
         p_key_name: newApiKey.keyName,
         p_key_value: newApiKey.keyValue,
@@ -317,7 +317,6 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
       });
 
       if (error) throw error;
-      if (data && !data.success) throw new Error(data.error || 'Failed to add API key');
 
       toast({
         title: 'Success',
@@ -346,7 +345,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     }
 
     try {
-      const { data, error } = await supabase.rpc('update_secret_by_id', {
+      const { error } = await supabase.rpc('update_secret_by_id', {
         p_token: authToken,
         p_id: editingApiKey.id,
         p_key_name: editingApiKey.key_name,
@@ -355,7 +354,6 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
       });
 
       if (error) throw error;
-      if (data && !data.success) throw new Error(data.error || 'Failed to update API key');
 
       toast({
         title: 'Success',
@@ -399,12 +397,11 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
 
     try {
       for (const keyId of Array.from(selectedApiKeys)) {
-        const { data, error } = await supabase.rpc('delete_secret_by_id', {
+        const { error } = await supabase.rpc('delete_secret_by_id', {
           p_token: authToken,
           p_id: keyId,
         });
         if (error) throw error;
-        if (data && !data.success) throw new Error(data.error || 'Failed to delete API key');
       }
 
       toast({
@@ -435,13 +432,12 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     }
 
     try {
-      const { data, error } = await supabase.rpc('delete_secret_by_id', {
+      const { error } = await supabase.rpc('delete_secret_by_id', {
         p_token: authToken,
         p_id: keyId,
       });
 
       if (error) throw error;
-      if (data && !data.success) throw new Error(data.error || 'Failed to delete API key');
 
       toast({
         title: 'Success',
