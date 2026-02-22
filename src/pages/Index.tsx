@@ -853,105 +853,140 @@ const Index = () => {
       )}
 
       {/* Desktop Icons */}
-      {!iconsLoading && isAuthenticated && (
-        <>
-          {desktopIcons.map((icon) => {
-            const displayLabel = icon.icon_type === 'theme'
-              ? (theme === 'xp' ? 'Kali Linux Display' : 'Windows Display')
-              : icon.name;
+      {!iconsLoading && isAuthenticated && (() => {
+        const iconWidth = 80;
+        const iconHeight = 90;
+        const padding = 10;
 
-            const displayDescription = icon.icon_type === 'theme'
-              ? (theme === 'xp' ? 'Switch to Kali Linux theme' : 'Switch to Windows XP theme')
-              : icon.description;
+        const getMobileIconAreaSize = () => {
+          const screenHeight = window.innerHeight - 40;
+          if (isLandscape) {
+            const colStep = 85;
+            const rowStep = 80;
+            const numCols = Math.ceil(desktopIcons.length / 6);
+            const totalWidth = Math.max(window.innerWidth, padding + numCols * colStep + iconWidth);
+            const totalHeight = Math.max(window.innerHeight - 40, 6 * rowStep + iconHeight + padding);
+            return { width: totalWidth, height: totalHeight };
+          }
+          const rows = Math.max(1, Math.floor(screenHeight / (iconHeight + padding)));
+          const numCols = Math.ceil(desktopIcons.length / rows);
+          const totalWidth = Math.max(window.innerWidth, padding + numCols * (iconWidth + padding));
+          const totalHeight = Math.max(screenHeight, rows * (iconHeight + padding) + padding);
+          return { width: totalWidth, height: totalHeight };
+        };
 
-            const displayIcon = icon.icon_type === 'theme'
-              ? (theme === 'xp' ? '🐉' : '🖥️')
-              : (icon.icon || '');
+        const getIconPosition = (icon: DesktopIconData) => {
+          if (!isMobile) {
+            return { x: icon.position_x, y: icon.position_y };
+          }
 
-            const getIconPosition = () => {
-              if (!isMobile) {
-                return { x: icon.position_x, y: icon.position_y };
-              }
-
-              if (isLandscape && isMobile) {
-                const landscapePositions: Record<string, { x: number; y: number }> = {
-                  '1': { x: 10, y: 10 },
-                  '2': { x: 10, y: 90 },
-                  '3': { x: 10, y: 170 },
-                  '4': { x: 10, y: 250 },
-                  '5': { x: 10, y: 330 },
-                  '6': { x: 10, y: 410 },
-                  '7': { x: 95, y: 10 },
-                  '8': { x: 95, y: 90 },
-                  '9': { x: 95, y: 170 },
-                  '10': { x: 95, y: 250 },
-                  '11': { x: 95, y: 330 },
-                  '12': { x: 95, y: 410 },
-                  '13': { x: 180, y: 10 },
-                  '14': { x: 180, y: 90 },
-                  '15': { x: 180, y: 170 },
-                  '16': { x: 180, y: 250 },
-                  '17': { x: 180, y: 330 },
-                  '18': { x: 180, y: 410 },
-                  '19': { x: 265, y: 10 },
-                  '20': { x: 265, y: 90 },
-                  '21': { x: 265, y: 170 },
-                  '22': { x: 265, y: 250 },
-                  '23': { x: 265, y: 330 },
-                  '24': { x: 265, y: 410 },
-                  '25': { x: 350, y: 10 },
-                  '26': { x: 350, y: 90 },
-                  '27': { x: 350, y: 170 },
-                  '28': { x: 350, y: 250 },
-                  '29': { x: 350, y: 330 },
-                  '30': { x: 350, y: 410 },
-                };
-                return landscapePositions[icon.id] || { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
-              }
-
-              // Portrait mode - create dynamic grid based on screen dimensions
-              const screenWidth = window.innerWidth;
-              const screenHeight = window.innerHeight - 40; // Subtract taskbar height
-              const iconWidth = 80;
-              const iconHeight = 90;
-              const padding = 10;
-
-              const columns = Math.floor(screenWidth / (iconWidth + padding));
-              const rows = Math.floor(screenHeight / (iconHeight + padding));
-              const totalIconsPerScreen = columns * rows;
-
-              const iconIndex = desktopIcons.findIndex(i => i.id === icon.id);
-              if (iconIndex === -1) {
-                return { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
-              }
-
-              const col = Math.floor(iconIndex / rows);
-              const row = iconIndex % rows;
-
-              const x = padding + (col * (iconWidth + padding));
-              const y = padding + (row * (iconHeight + padding));
-
-              return { x, y };
+          if (isLandscape && isMobile) {
+            const landscapePositions: Record<string, { x: number; y: number }> = {
+              '1': { x: 10, y: 10 },
+              '2': { x: 10, y: 90 },
+              '3': { x: 10, y: 170 },
+              '4': { x: 10, y: 250 },
+              '5': { x: 10, y: 330 },
+              '6': { x: 10, y: 410 },
+              '7': { x: 95, y: 10 },
+              '8': { x: 95, y: 90 },
+              '9': { x: 95, y: 170 },
+              '10': { x: 95, y: 250 },
+              '11': { x: 95, y: 330 },
+              '12': { x: 95, y: 410 },
+              '13': { x: 180, y: 10 },
+              '14': { x: 180, y: 90 },
+              '15': { x: 180, y: 170 },
+              '16': { x: 180, y: 250 },
+              '17': { x: 180, y: 330 },
+              '18': { x: 180, y: 410 },
+              '19': { x: 265, y: 10 },
+              '20': { x: 265, y: 90 },
+              '21': { x: 265, y: 170 },
+              '22': { x: 265, y: 250 },
+              '23': { x: 265, y: 330 },
+              '24': { x: 265, y: 410 },
+              '25': { x: 350, y: 10 },
+              '26': { x: 350, y: 90 },
+              '27': { x: 350, y: 170 },
+              '28': { x: 350, y: 250 },
+              '29': { x: 350, y: 330 },
+              '30': { x: 350, y: 410 },
             };
+            if (landscapePositions[icon.id]) return landscapePositions[icon.id];
+            const iconIndex = desktopIcons.findIndex(i => i.id === icon.id);
+            if (iconIndex === -1) return { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
+            const col = Math.floor(iconIndex / 6);
+            const row = iconIndex % 6;
+            return { x: 10 + col * 85, y: 10 + row * 80 };
+          }
 
-            const canDrag = isAdmin && icon.icon_type !== 'system' && icon.icon_type !== 'theme';
+          const screenHeight = window.innerHeight - 40;
+          const rows = Math.max(1, Math.floor(screenHeight / (iconHeight + padding)));
+          const iconIndex = desktopIcons.findIndex(i => i.id === icon.id);
+          if (iconIndex === -1) {
+            return { x: icon.position_x_mobile || icon.position_x, y: icon.position_y_mobile || icon.position_y };
+          }
+          const col = Math.floor(iconIndex / rows);
+          const row = iconIndex % rows;
+          return { x: padding + col * (iconWidth + padding), y: padding + row * (iconHeight + padding) };
+        };
 
-            return (
-              <DesktopIcon
-                key={icon.id}
-                icon={getIconComponent(displayIcon)}
-                label={displayLabel}
-                onClick={() => handleIconClick(icon)}
-                position={getIconPosition()}
-                description={displayDescription}
-                draggable={canDrag}
-                onContextMenu={isAdmin ? (e) => handleIconRightClick(e, icon) : undefined}
-                onDragEnd={canDrag ? (x, y) => handleIconDragEnd(icon, x, y) : undefined}
-              />
-            );
-          })}
-        </>
-      )}
+        const mobileAreaSize = isMobile ? getMobileIconAreaSize() : null;
+
+        const iconElements = desktopIcons.map((icon) => {
+          const displayLabel = icon.icon_type === 'theme'
+            ? (theme === 'xp' ? 'Kali Linux Display' : 'Windows Display')
+            : icon.name;
+
+          const displayDescription = icon.icon_type === 'theme'
+            ? (theme === 'xp' ? 'Switch to Kali Linux theme' : 'Switch to Windows XP theme')
+            : icon.description;
+
+          const displayIcon = icon.icon_type === 'theme'
+            ? (theme === 'xp' ? '🐉' : '🖥️')
+            : (icon.icon || '');
+
+          const canDrag = isAdmin && icon.icon_type !== 'system' && icon.icon_type !== 'theme';
+
+          return (
+            <DesktopIcon
+              key={icon.id}
+              icon={getIconComponent(displayIcon)}
+              label={displayLabel}
+              onClick={() => handleIconClick(icon)}
+              position={getIconPosition(icon)}
+              description={displayDescription}
+              draggable={canDrag}
+              onContextMenu={isAdmin ? (e) => handleIconRightClick(e, icon) : undefined}
+              onDragEnd={canDrag ? (x, y) => handleIconDragEnd(icon, x, y) : undefined}
+            />
+          );
+        });
+
+        if (isMobile && mobileAreaSize) {
+          return (
+            <div
+              className="absolute top-0 left-0 right-0 bottom-10 overflow-auto z-10"
+              style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+            >
+              <div
+                style={{
+                  position: 'relative',
+                  width: mobileAreaSize.width,
+                  height: mobileAreaSize.height,
+                  minWidth: '100%',
+                  minHeight: '100%',
+                }}
+              >
+                {iconElements}
+              </div>
+            </div>
+          );
+        }
+
+        return <>{iconElements}</>;
+      })()}
 
       {/* Open Windows */}
       {isAuthenticated && windows
