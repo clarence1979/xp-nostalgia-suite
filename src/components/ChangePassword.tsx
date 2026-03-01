@@ -8,9 +8,10 @@ import { Lock } from 'lucide-react';
 interface ChangePasswordProps {
   username: string;
   onPasswordChanged?: () => void;
+  forced?: boolean;
 }
 
-export const ChangePassword = ({ username, onPasswordChanged }: ChangePasswordProps) => {
+export const ChangePassword = ({ username, onPasswordChanged, forced = false }: ChangePasswordProps) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -78,7 +79,7 @@ export const ChangePassword = ({ username, onPasswordChanged }: ChangePasswordPr
 
       const { error: updateError } = await supabase
         .from('users_login')
-        .update({ password: newPassword })
+        .update({ password: newPassword, must_change_password: false })
         .eq('username', username);
 
       if (updateError) throw updateError;
@@ -177,6 +178,12 @@ export const ChangePassword = ({ username, onPasswordChanged }: ChangePasswordPr
           </div>
         </div>
       </div>
+
+      {forced && (
+        <div className="px-6 py-2 bg-yellow-50 border-t border-yellow-200 text-xs text-yellow-800" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+          You must set a new password before continuing. Your default password cannot be used going forward.
+        </div>
+      )}
 
       <div className="border-t border-gray-300 p-3 bg-gray-100">
         <div className="text-xs text-gray-600">

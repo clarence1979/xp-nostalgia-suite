@@ -64,6 +64,7 @@ const Index = () => {
   const [validatedPassword, setValidatedPassword] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showApiKeyLogin, setShowApiKeyLogin] = useState(false);
+  const [showForcedPasswordChange, setShowForcedPasswordChange] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -698,7 +699,7 @@ const Index = () => {
     return <span className={isMobile ? 'text-3xl' : 'text-4xl'}>{normalizedIconName}</span>;
   }, [iconComponentMap, isMobile]);
 
-  const handleApiKeyLogin = (user: string, key: string | null, admin: boolean, userIdParam?: string, authToken?: string) => {
+  const handleApiKeyLogin = (user: string, key: string | null, admin: boolean, userIdParam?: string, authToken?: string, mustChangePassword?: boolean) => {
     console.log('[Index] handleApiKeyLogin called with authToken:', {
       hasToken: !!authToken,
       tokenLength: authToken?.length || 0
@@ -710,10 +711,14 @@ const Index = () => {
     setApiKey(key);
     setIsAdmin(admin);
     setShowApiKeyLogin(false);
-    toast({
-      title: 'Login Successful',
-      description: `Welcome back, ${user}!${admin ? ' (Admin)' : ''}`,
-    });
+    if (mustChangePassword) {
+      setShowForcedPasswordChange(true);
+    } else {
+      toast({
+        title: 'Login Successful',
+        description: `Welcome back, ${user}!${admin ? ' (Admin)' : ''}`,
+      });
+    }
   };
 
   const handleApiKeyCancel = () => {
@@ -1130,6 +1135,30 @@ const Index = () => {
       {!isAuthenticated && (
         <div className="absolute inset-0 z-50 flex items-center justify-center">
           <ApiKeyLogin onLogin={handleApiKeyLogin} onCancel={handleApiKeyCancel} />
+        </div>
+      )}
+
+      {/* Forced Password Change Overlay */}
+      {showForcedPasswordChange && username && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md mx-4 shadow-2xl rounded overflow-hidden border-2 border-gray-400">
+            <div className="bg-gradient-to-b from-[#5A8FD8] to-[#5472B6] px-4 py-2">
+              <h1 className="text-white text-sm font-bold" style={{ fontFamily: 'Tahoma, sans-serif' }}>
+                Password Change Required
+              </h1>
+            </div>
+            <ChangePassword
+              username={username}
+              forced={true}
+              onPasswordChanged={() => {
+                setShowForcedPasswordChange(false);
+                toast({
+                  title: 'Password Changed',
+                  description: `Welcome, ${username}! Your password has been updated.`,
+                });
+              }}
+            />
+          </div>
         </div>
       )}
     </div>

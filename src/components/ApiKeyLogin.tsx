@@ -9,7 +9,7 @@ import { apiCache } from '@/lib/apiCache';
 import { authTokenService } from '@/lib/authTokenService';
 
 interface ApiKeyLoginProps {
-  onLogin: (username: string, apiKey: string | null, isAdmin: boolean, userId?: string, authToken?: string) => void;
+  onLogin: (username: string, apiKey: string | null, isAdmin: boolean, userId?: string, authToken?: string, mustChangePassword?: boolean) => void;
   onCancel: () => void;
 }
 
@@ -62,7 +62,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
     fetchUsernames();
   }, []);
 
-  const validateCredentials = async (user: string, pass: string): Promise<{ valid: boolean; apiKey: string | null; isAdmin: boolean; userId?: string }> => {
+  const validateCredentials = async (user: string, pass: string): Promise<{ valid: boolean; apiKey: string | null; isAdmin: boolean; userId?: string; mustChangePassword?: boolean }> => {
     if (!user || user.trim() === '' || !pass || pass.trim() === '') {
       setError('Please enter both username and password');
       return { valid: false, apiKey: null, isAdmin: false };
@@ -71,7 +71,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
     try {
       const { data, error: dbError } = await supabase
         .from('users_login')
-        .select('id, username, password, api_key, is_admin')
+        .select('id, username, password, api_key, is_admin, must_change_password')
         .eq('username', user)
         .maybeSingle();
 
@@ -91,7 +91,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
         return { valid: false, apiKey: null, isAdmin: false };
       }
 
-      return { valid: true, apiKey: data.api_key || null, isAdmin: data.is_admin || false, userId: data.id };
+      return { valid: true, apiKey: data.api_key || null, isAdmin: data.is_admin || false, userId: data.id, mustChangePassword: data.must_change_password || false };
     } catch (err) {
       console.error('Error during login:', err);
       setError('Network error. Please check your connection.');
@@ -151,7 +151,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
         console.error('[Login] Error during post-login setup:', err);
       }
 
-      onLogin(username, result.apiKey, result.isAdmin, result.userId, generatedAuthToken || undefined);
+      onLogin(username, result.apiKey, result.isAdmin, result.userId, generatedAuthToken || undefined, result.mustChangePassword);
     }
 
     setIsValidating(false);
