@@ -6,7 +6,7 @@ export interface IconInsertData {
   icon: string;
   url: string;
   description: string;
-  open_behavior: 'window' | 'new_tab';
+  open_behavior: 'window' | 'new_tab' | 'iframe';
   position_x: number;
   position_y: number;
 }
@@ -48,11 +48,11 @@ export async function updateDesktopIcon(id: string, data: IconUpdateData) {
   const { error } = await supabase.rpc('admin_update_icon', {
     p_token: token,
     p_icon_id: id,
-    p_name: data.name || null,
-    p_icon: data.icon || null,
-    p_description: data.description || null,
-    p_url: data.url || null,
-    p_open_behavior: data.open_behavior || null,
+    p_name: data.name ?? null,
+    p_icon: data.icon ?? null,
+    p_description: data.description ?? null,
+    p_url: data.url ?? null,
+    p_open_behavior: data.open_behavior ?? null,
   });
 
   if (error) throw error;
