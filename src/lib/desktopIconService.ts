@@ -9,6 +9,7 @@ export interface IconInsertData {
   open_behavior: 'window' | 'new_tab' | 'iframe';
   position_x: number;
   position_y: number;
+  parent_id?: string | null;
 }
 
 export interface IconUpdateData extends Partial<IconInsertData> {
@@ -36,6 +37,7 @@ export async function insertDesktopIcon(data: IconInsertData) {
     p_open_behavior: data.open_behavior,
     p_position_x: data.position_x,
     p_position_y: data.position_y,
+    p_parent_id: data.parent_id ?? null,
   });
 
   if (error) throw error;
@@ -77,6 +79,45 @@ export async function updateIconPosition(id: string, x: number, y: number) {
     p_icon_id: id,
     p_position_x: x,
     p_position_y: y,
+  });
+
+  if (error) throw error;
+}
+
+export async function createFolder(name: string, x: number, y: number, parentId?: string | null) {
+  const token = getAuthToken();
+
+  const { data: result, error } = await supabase.rpc('admin_create_folder', {
+    p_token: token,
+    p_name: name,
+    p_position_x: x,
+    p_position_y: y,
+    p_parent_id: parentId ?? null,
+  });
+
+  if (error) throw error;
+  return result;
+}
+
+export async function moveIconToFolder(iconId: string, targetFolderId: string | null) {
+  const token = getAuthToken();
+
+  const { error } = await supabase.rpc('admin_move_icon', {
+    p_token: token,
+    p_icon_id: iconId,
+    p_target_folder_id: targetFolderId,
+  });
+
+  if (error) throw error;
+}
+
+export async function renameIcon(id: string, name: string) {
+  const token = getAuthToken();
+
+  const { error } = await supabase.rpc('admin_rename_icon', {
+    p_token: token,
+    p_icon_id: id,
+    p_name: name,
   });
 
   if (error) throw error;

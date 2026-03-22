@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Window } from '@/components/Window';
 import { StartMenu } from '@/components/StartMenu';
 import { Taskbar } from '@/components/Taskbar';
@@ -11,16 +11,17 @@ import { ApiKeyLogin } from '@/components/ApiKeyLogin';
 import { UserManagement } from '@/components/UserManagement';
 import { ChangePassword } from '@/components/ChangePassword';
 import { IframeProgram } from '@/components/IframeProgram';
+import { FolderWindow } from '@/components/FolderWindow';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
-import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock, Plus, Pencil, X } from 'lucide-react';
+import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock, Plus, Pencil, X, FolderPlus } from 'lucide-react';
 import { useIsMobile, useIsLandscape } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 import { apiCache } from '@/lib/apiCache';
 import { supabase } from '@/integrations/supabase/client';
 import { IconEditorDialog, type IconFormData } from '@/components/IconEditorDialog';
-import { insertDesktopIcon, updateDesktopIcon, deleteDesktopIcon, updateIconPosition } from '@/lib/desktopIconService';
+import { insertDesktopIcon, updateDesktopIcon, deleteDesktopIcon, updateIconPosition, createFolder, moveIconToFolder, renameIcon } from '@/lib/desktopIconService';
 
 interface OpenWindow {
   id: string;
@@ -46,7 +47,7 @@ interface DesktopIconData {
   category: string | null;
   open_behavior: 'window' | 'new_tab' | 'special' | 'folder' | 'iframe';
   sort_order: number;
-  folder_contents?: DesktopIconData[];
+  parent_id?: string | null;
 }
 
 interface Program {
@@ -60,7 +61,7 @@ interface Program {
 const Index = () => {
   const [showStartMenu, setShowStartMenu] = useState(false);
   const [windows, setWindows] = useState<OpenWindow[]>([]);
-  const [nextWindowId, setNextWindowId] = useState(1);
+  const nextWindowIdRef = useRef(1);
   const [validatedPassword, setValidatedPassword] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showApiKeyLogin, setShowApiKeyLogin] = useState(false);
@@ -225,37 +226,18 @@ const Index = () => {
             }
           }
 
-          const filteredIcons = userId && accessiblePrograms.length > 0
-            ? data.filter(icon => accessiblePrograms.includes(icon.name))
+          const allFilteredIcons = userId && accessiblePrograms.length > 0
+            ? data.filter(icon =>
+                icon.icon_type === 'system' ||
+                icon.icon_type === 'theme' ||
+                icon.icon_type === 'folder' ||
+                accessiblePrograms.includes(icon.name)
+              )
             : data;
 
-          const iconsWithFolderContents = filteredIcons.map((icon) => {
-            if (icon.icon_type === 'folder' && icon.name === 'VCE Software Development') {
-              const folderContents = [
-                { id: '3-1', name: 'VCE Section A', icon: '📝', description: 'VCE Section A exam training', url: 'https://vce-section-a.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 20, position_x_mobile: 20, position_y_mobile: 20, category: null, open_behavior: 'window' as const, sort_order: 1 },
-                { id: '3-2', name: 'VCE Section B', icon: '📊', description: 'VCE Section B exam training', url: 'https://vce.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 120, position_x_mobile: 20, position_y_mobile: 120, category: null, open_behavior: 'window' as const, sort_order: 2 },
-                { id: '3-3', name: 'VCE Section C', icon: '💻', description: 'VCE Section C exam training', url: 'https://vce-section-c.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 220, position_x_mobile: 20, position_y_mobile: 220, category: null, open_behavior: 'window' as const, sort_order: 3 },
-                { id: '3-4', name: 'VCE Pseudocode', icon: '📄', description: 'Interactive pseudocode editor and learning tool', url: 'https://pseudo.bolt.host', icon_type: 'program' as const, position_x: 20, position_y: 320, position_x_mobile: 20, position_y_mobile: 320, category: null, open_behavior: 'iframe' as const, sort_order: 4 },
-                { id: '3-5', name: 'VCE Lists Mastery', icon: '📋', description: 'Python lists practice and mastery tool', url: 'https://pythonlist.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 420, position_x_mobile: 20, position_y_mobile: 420, category: null, open_behavior: 'iframe' as const, sort_order: 5 },
-                { id: '3-6', name: 'VCE Software Requirement Specifications (SRS)', icon: '📑', description: 'Software requirement specifications tool', url: 'https://srs.bolt.host', icon_type: 'program' as const, position_x: 20, position_y: 520, position_x_mobile: 20, position_y_mobile: 520, category: null, open_behavior: 'iframe' as const, sort_order: 6 },
-                { id: '3-7', name: 'Code Critic', icon: '🔍', description: 'AI-powered code review and critique tool', url: 'https://codecritic.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 620, position_x_mobile: 20, position_y_mobile: 620, category: null, open_behavior: 'iframe' as const, sort_order: 7 },
-                { id: '3-8', name: 'SAC Generator', icon: '📐', description: 'Generate School Assessed Coursework tasks', url: 'https://sacgenerator.bolt.host', icon_type: 'program' as const, position_x: 20, position_y: 720, position_x_mobile: 20, position_y_mobile: 720, category: null, open_behavior: 'iframe' as const, sort_order: 8 },
-                { id: '3-9', name: 'VCE SD Exam Analysis', icon: '🧪', description: 'VCE Software Development exam analysis tool', url: 'https://sdexam.bolt.host', icon_type: 'program' as const, position_x: 20, position_y: 820, position_x_mobile: 20, position_y_mobile: 820, category: null, open_behavior: 'iframe' as const, sort_order: 9 },
-              ];
+          const rootIcons = allFilteredIcons.filter(icon => !icon.parent_id);
 
-              const filteredFolderContents = userId && accessiblePrograms.length > 0
-                ? folderContents.filter(item => accessiblePrograms.includes(item.name))
-                : folderContents;
-
-              return {
-                ...icon,
-                folder_contents: filteredFolderContents
-              };
-            }
-            return icon;
-          });
-
-          setDesktopIcons(iconsWithFolderContents as DesktopIconData[]);
+          setDesktopIcons(rootIcons as DesktopIconData[]);
         }
       } catch (error) {
         console.error('Error fetching desktop icons:', error);
@@ -308,26 +290,8 @@ const Index = () => {
 
       if (error) throw error;
       if (data) {
-        const iconsWithFolderContents = data.map((icon: DesktopIconData) => {
-          if (icon.icon_type === 'folder' && icon.name === 'VCE Software Development') {
-            return {
-              ...icon,
-              folder_contents: [
-                { id: '3-1', name: 'VCE Section A', icon: '\u{1F4DD}', description: 'VCE Section A exam training', url: 'https://vce-section-a.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 20, position_x_mobile: 20, position_y_mobile: 20, category: null, open_behavior: 'window' as const, sort_order: 1 },
-                { id: '3-2', name: 'VCE Section B', icon: '\u{1F4CA}', description: 'VCE Section B exam training', url: 'https://vce.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 120, position_x_mobile: 20, position_y_mobile: 120, category: null, open_behavior: 'window' as const, sort_order: 2 },
-                { id: '3-3', name: 'VCE Section C', icon: '\u{1F4BB}', description: 'VCE Section C exam training', url: 'https://vce-section-c.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 220, position_x_mobile: 20, position_y_mobile: 220, category: null, open_behavior: 'window' as const, sort_order: 3 },
-                { id: '3-4', name: 'VCE Pseudocode', icon: '\u{1F4C4}', description: 'Interactive pseudocode editor and learning tool', url: 'https://pseudo.bolt.host', icon_type: 'program' as const, position_x: 20, position_y: 320, position_x_mobile: 20, position_y_mobile: 320, category: null, open_behavior: 'iframe' as const, sort_order: 4 },
-                { id: '3-5', name: 'VCE Lists Mastery', icon: '\u{1F4CB}', description: 'Python lists practice and mastery tool', url: 'https://pythonlist.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 420, position_x_mobile: 20, position_y_mobile: 420, category: null, open_behavior: 'iframe' as const, sort_order: 5 },
-                { id: '3-6', name: 'VCE Software Requirement Specifications (SRS)', icon: '\u{1F4D1}', description: 'Software requirement specifications tool', url: 'https://srs.bolt.host', icon_type: 'program' as const, position_x: 20, position_y: 520, position_x_mobile: 20, position_y_mobile: 520, category: null, open_behavior: 'iframe' as const, sort_order: 6 },
-                { id: '3-7', name: 'Code Critic', icon: '\u{1F50D}', description: 'AI-powered code review and critique tool', url: 'https://codecritic.bolt.host/', icon_type: 'program' as const, position_x: 20, position_y: 620, position_x_mobile: 20, position_y_mobile: 620, category: null, open_behavior: 'iframe' as const, sort_order: 7 },
-                { id: '3-8', name: 'SAC Generator', icon: '\u{1F4D0}', description: 'Generate School Assessed Coursework tasks', url: 'https://sacgenerator.bolt.host', icon_type: 'program' as const, position_x: 20, position_y: 720, position_x_mobile: 20, position_y_mobile: 720, category: null, open_behavior: 'iframe' as const, sort_order: 8 },
-                { id: '3-9', name: 'VCE SD Exam Analysis', icon: '\u{1F9EA}', description: 'VCE Software Development exam analysis tool', url: 'https://sdexam.bolt.host', icon_type: 'program' as const, position_x: 20, position_y: 820, position_x_mobile: 20, position_y_mobile: 820, category: null, open_behavior: 'iframe' as const, sort_order: 9 },
-              ]
-            };
-          }
-          return icon;
-        });
-        setDesktopIcons(iconsWithFolderContents as DesktopIconData[]);
+        const rootIcons = (data as DesktopIconData[]).filter(icon => !icon.parent_id);
+        setDesktopIcons(rootIcons);
       }
     } catch (err) {
       console.error('Error refetching icons:', err);
@@ -342,11 +306,51 @@ const Index = () => {
     setContextMenu(null);
   };
 
+  const handleCreateFolder = async () => {
+    const pos = contextMenu || { x: 100, y: 100 };
+    setContextMenu(null);
+    const name = window.prompt('Folder name:');
+    if (!name?.trim()) return;
+    try {
+      await createFolder(name.trim(), pos.x, pos.y, null);
+      await refetchIcons();
+      toast({ title: 'Folder created', description: `"${name.trim()}" created on desktop` });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to create folder', variant: 'destructive' });
+    }
+  };
+
+  const handleDropOnFolder = async (folderId: string, droppedIconId: string) => {
+    if (folderId === droppedIconId) return;
+    try {
+      await moveIconToFolder(droppedIconId, folderId);
+      await refetchIcons();
+      toast({ title: 'Moved', description: 'Icon moved into folder' });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to move icon', variant: 'destructive' });
+    }
+  };
+
   const handleEditIconClick = () => {
     if (!iconContextMenu) return;
     setEditingIcon(iconContextMenu.icon);
     setShowIconEditor(true);
     setIconContextMenu(null);
+  };
+
+  const handleRenameIconClick = async () => {
+    if (!iconContextMenu) return;
+    const icon = iconContextMenu.icon;
+    setIconContextMenu(null);
+    const newName = window.prompt('Rename to:', icon.name);
+    if (!newName?.trim() || newName.trim() === icon.name) return;
+    try {
+      await renameIcon(icon.id, newName.trim());
+      await refetchIcons();
+      toast({ title: 'Renamed', description: `Renamed to "${newName.trim()}"` });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to rename', variant: 'destructive' });
+    }
   };
 
   const handleDeleteIconClick = async () => {
@@ -414,9 +418,8 @@ const Index = () => {
     }
   };
 
-  const openWindow = (title: string, content: React.ReactNode, icon?: React.ReactNode, autoMaximizeOnMobile?: boolean) => {
-    const id = `window-${nextWindowId}`;
-    setNextWindowId(nextWindowId + 1);
+  const openWindow = useCallback((title: string, content: React.ReactNode, icon?: React.ReactNode, autoMaximizeOnMobile?: boolean) => {
+    const id = `window-${nextWindowIdRef.current++}`;
 
     const newWindow: OpenWindow = {
       id,
@@ -432,7 +435,7 @@ const Index = () => {
       ...prev.map((w) => ({ ...w, active: false })),
       newWindow,
     ]);
-  };
+  }, []);
 
   const closeWindow = (id: string) => {
     setWindows((prev) => prev.filter((w) => w.id !== id));
@@ -605,25 +608,24 @@ const Index = () => {
     );
   };
 
+  const openFolderWindow = useCallback((folderId: string, folderName: string) => {
+    const folderContent = (
+      <FolderWindow
+        folderId={folderId}
+        folderName={folderName}
+        isAdmin={isAdmin}
+        theme={theme}
+        onOpenProgram={(item) => handleIconClick(item as unknown as DesktopIconData)}
+        onOpenFolder={(id, name) => openFolderWindow(id, name)}
+      />
+    );
+    openWindow(folderName, folderContent, <Folder className="w-4 h-4" />);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, theme, openWindow]);
+
   const handleIconClick = (icon: DesktopIconData) => {
-    if (icon.open_behavior === 'folder' && icon.folder_contents) {
-      const folderContent = (
-        <div className="p-4 bg-white h-full overflow-auto">
-          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))' }}>
-            {icon.folder_contents.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-col items-center cursor-pointer hover:bg-blue-100 p-2 rounded"
-                onClick={() => handleIconClick(item)}
-              >
-                <div className="text-4xl mb-1">{item.icon}</div>
-                <div className="text-xs text-center break-words">{item.name}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-      openWindow(icon.name, folderContent, <Folder className="w-4 h-4" />);
+    if (icon.open_behavior === 'folder') {
+      openFolderWindow(icon.id, icon.name);
     } else if (icon.open_behavior === 'special' && icon.icon_type === 'system') {
       switch (icon.name) {
         case 'My Computer':
@@ -957,10 +959,12 @@ const Index = () => {
             : (icon.icon || '');
 
           const canDrag = isAdmin && icon.icon_type !== 'system' && icon.icon_type !== 'theme';
+          const isFolder = icon.icon_type === 'folder';
 
           return (
             <DesktopIcon
               key={icon.id}
+              iconId={icon.id}
               icon={getIconComponent(displayIcon)}
               label={displayLabel}
               onClick={() => handleIconClick(icon)}
@@ -969,6 +973,8 @@ const Index = () => {
               draggable={canDrag}
               onContextMenu={isAdmin ? (e) => handleIconRightClick(e, icon) : undefined}
               onDragEnd={canDrag ? (x, y) => handleIconDragEnd(icon, x, y) : undefined}
+              isDropTarget={isAdmin && isFolder}
+              onDropIcon={isAdmin && isFolder ? (droppedId) => handleDropOnFolder(icon.id, droppedId) : undefined}
             />
           );
         });
@@ -1068,14 +1074,24 @@ const Index = () => {
           }}
         >
           {isAdmin && (
-            <button
-              onClick={handleAddNewIcon}
-              className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
-              style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
-            >
-              <Plus className="w-4 h-4" />
-              Add New Icon
-            </button>
+            <>
+              <button
+                onClick={handleAddNewIcon}
+                className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
+                style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
+              >
+                <Plus className="w-4 h-4" />
+                Add New Icon
+              </button>
+              <button
+                onClick={handleCreateFolder}
+                className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
+                style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
+              >
+                <FolderPlus className="w-4 h-4" />
+                New Folder
+              </button>
+            </>
           )}
           <button
             onClick={switchTheme}
@@ -1098,13 +1114,23 @@ const Index = () => {
             background: theme === 'kali' ? 'hsl(var(--kali-menu-bg))' : 'hsl(var(--menu-bg))',
           }}
         >
+          {iconContextMenu.icon.icon_type !== 'folder' && (
+            <button
+              onClick={handleEditIconClick}
+              className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
+              style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit Icon
+            </button>
+          )}
           <button
-            onClick={handleEditIconClick}
+            onClick={handleRenameIconClick}
             className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
             style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
           >
             <Pencil className="w-3.5 h-3.5" />
-            Edit Icon
+            Rename
           </button>
           {iconContextMenu.icon.icon_type !== 'system' && (
             <button
@@ -1112,7 +1138,7 @@ const Index = () => {
               className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-red-100 transition-colors flex items-center gap-2 text-red-600"
             >
               <X className="w-3.5 h-3.5" />
-              Delete Icon
+              Delete
             </button>
           )}
         </div>
