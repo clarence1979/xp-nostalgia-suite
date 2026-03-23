@@ -3,8 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Trash2, Edit2, UserCog, Key, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw } from 'lucide-react';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
+
+interface LoginLog {
+  id: string;
+  username: string;
+  ip_address: string;
+  city: string;
+  region: string;
+  country: string;
+  country_code: string;
+  latitude: number | null;
+  longitude: number | null;
+  logged_at: string;
+}
 
 interface User {
   id: string;
@@ -34,7 +47,7 @@ interface UserManagementProps {
 }
 
 export const UserManagement = ({ currentUsername }: UserManagementProps) => {
-  const [activeTab, setActiveTab] = useState<'users' | 'apikeys'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'apikeys' | 'login-logs'>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,13 +72,26 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
   const [showAddApiKey, setShowAddApiKey] = useState(false);
   const [newApiKey, setNewApiKey] = useState({ keyName: '', keyValue: '', description: '' });
 
+  const [loginLogs, setLoginLogs] = useState<LoginLog[]>([]);
+  const [loginLogsLoading, setLoginLogsLoading] = useState(false);
+  const [loginLogFilter, setLoginLogFilter] = useState('');
+  const [loginFrequency, setLoginFrequency] = useState<Record<string, number>>({});
+  const [revealedPasswords, setRevealedPasswords] = useState<Set<string>>(new Set());
+
   const { toast } = useToast();
 
   useEffect(() => {
     fetchUsers();
     fetchApiKeys();
     fetchAvailablePrograms();
+    fetchLoginFrequency();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'login-logs') {
+      fetchLoginLogs();
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (searchTerm) {
@@ -289,6 +315,44 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
         description: 'Failed to load API keys',
         variant: 'destructive',
       });
+    }
+  };
+
+  const fetchLoginLogs = async (usernameFilter?: string) => {
+    const token = apiKeyStorage.getAuthToken();
+    if (!token) return;
+    setLoginLogsLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('get_login_logs_admin', {
+        p_token: token,
+        p_limit: 300,
+        p_username_filter: usernameFilter || null,
+      });
+      if (error) throw error;
+      setLoginLogs((data as LoginLog[]) || []);
+    } catch (err) {
+      console.error('Error fetching login logs:', err);
+      toast({ title: 'Error', description: 'Failed to load login logs', variant: 'destructive' });
+    } finally {
+      setLoginLogsLoading(false);
+    }
+  };
+
+  const fetchLoginFrequency = async () => {
+    const token = apiKeyStorage.getAuthToken();
+    if (!token) return;
+    try {
+      const { data, error } = await supabase.rpc('get_login_frequency_24h', { p_token: token });
+      if (error) throw error;
+      const freq: Record<string, number> = {};
+      if (data) {
+        (data as { username: string; login_count: number }[]).forEach(r => {
+          freq[r.username] = r.login_count;
+        });
+      }
+      setLoginFrequency(freq);
+    } catch (err) {
+      console.error('Error fetching login frequency:', err);
     }
   };
 
@@ -689,6 +753,17 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
             <Key className="w-4 h-4 inline mr-1" />
             API Keys
           </button>
+          <button
+            onClick={() => setActiveTab('login-logs')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'login-logs'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <Activity className="w-4 h-4 inline mr-1" />
+            Login Logs
+          </button>
         </div>
 
         {activeTab === 'users' && (
@@ -1026,6 +1101,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                 </th>
                 <th className="p-2 text-left">Username</th>
                 <th className="p-2 text-left">Password</th>
+                <th className="p-2 text-left w-16">24h Logins</th>
                 <th className="p-2 text-left w-20">Admin</th>
                 <th className="p-2 text-left w-32">Actions</th>
               </tr>
@@ -1060,7 +1136,45 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                         {user.username}
                       </div>
                     </td>
-                    <td className="p-2 text-gray-600">{'•'.repeat(user.password.length)}</td>
+                    <td className="p-2 text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <span className="font-mono text-xs">
+                          {revealedPasswords.has(user.id) ? user.password : '•'.repeat(Math.min(user.password.length, 12))}
+                        </span>
+                        <button
+                          onClick={() => setRevealedPasswords(prev => {
+                            const next = new Set(prev);
+                            if (next.has(user.id)) next.delete(user.id);
+                            else next.add(user.id);
+                            return next;
+                          })}
+                          className="text-gray-400 hover:text-gray-700 transition-colors p-0.5 rounded"
+                          title={revealedPasswords.has(user.id) ? 'Hide password' : 'Show password'}
+                        >
+                          {revealedPasswords.has(user.id)
+                            ? <EyeOff className="w-3.5 h-3.5" />
+                            : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-2">
+                      <div className="flex items-center gap-1">
+                        {(loginFrequency[user.username] || 0) > 0 && (
+                          <span className={`inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+                            (loginFrequency[user.username] || 0) >= 5
+                              ? 'bg-red-100 text-red-700'
+                              : (loginFrequency[user.username] || 0) >= 3
+                              ? 'bg-orange-100 text-orange-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}>
+                            {loginFrequency[user.username]}
+                          </span>
+                        )}
+                        {(loginFrequency[user.username] || 0) === 0 && (
+                          <span className="text-gray-400 text-xs">0</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="p-2">
                       {user.is_admin && (
                         <UserCog className="w-4 h-4 text-blue-600" />
@@ -1182,6 +1296,91 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
             </tbody>
           </table>
         )}
+
+        {activeTab === 'login-logs' && (
+          <div className="h-full flex flex-col">
+            <div className="flex items-center gap-2 p-2 border-b border-gray-200 bg-gray-50">
+              <div className="relative flex-1 max-w-xs">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Filter by username..."
+                  value={loginLogFilter}
+                  onChange={(e) => setLoginLogFilter(e.target.value)}
+                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
+                />
+              </div>
+              <button
+                onClick={() => fetchLoginLogs(loginLogFilter || undefined)}
+                className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              >
+                <RefreshCw className="w-3 h-3" />
+                Refresh
+              </button>
+            </div>
+
+            {loginLogsLoading ? (
+              <div className="flex-1 flex items-center justify-center text-sm text-gray-500">Loading login logs...</div>
+            ) : loginLogs.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center text-sm text-gray-400">No login records found</div>
+            ) : (
+              <div className="flex-1 overflow-auto">
+                <table className="w-full text-xs border-collapse">
+                  <thead className="sticky top-0 bg-gray-200 border-b-2 border-gray-400">
+                    <tr>
+                      <th className="p-2 text-left whitespace-nowrap">
+                        <span className="flex items-center gap-1">
+                          <UserCog className="w-3 h-3" /> Username
+                        </span>
+                      </th>
+                      <th className="p-2 text-left whitespace-nowrap">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> Time
+                        </span>
+                      </th>
+                      <th className="p-2 text-left whitespace-nowrap">IP Address</th>
+                      <th className="p-2 text-left whitespace-nowrap">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" /> Location
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loginLogs
+                      .filter(log => !loginLogFilter || log.username.toLowerCase().includes(loginLogFilter.toLowerCase()))
+                      .map((log, i) => {
+                        const dt = new Date(log.logged_at);
+                        const diffMs = Date.now() - dt.getTime();
+                        const diffMins = Math.floor(diffMs / 60000);
+                        const diffHours = Math.floor(diffMins / 60);
+                        const diffDays = Math.floor(diffHours / 24);
+                        const relativeTime = diffMins < 1 ? 'just now'
+                          : diffMins < 60 ? `${diffMins}m ago`
+                          : diffHours < 24 ? `${diffHours}h ago`
+                          : `${diffDays}d ago`;
+                        const locationParts = [log.city, log.region, log.country].filter(Boolean);
+                        const location = locationParts.length > 0 ? locationParts.join(', ') : '—';
+                        return (
+                          <tr key={log.id} className={`border-b border-gray-100 hover:bg-blue-50 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                            <td className="p-2 font-medium text-gray-800">{log.username}</td>
+                            <td className="p-2 text-gray-600">
+                              <div title={dt.toLocaleString()} className="cursor-default">
+                                <span className="text-gray-800">{relativeTime}</span>
+                                <span className="text-gray-400 ml-1 hidden sm:inline">· {dt.toLocaleDateString()} {dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                            </td>
+                            <td className="p-2 font-mono text-gray-700">{log.ip_address || '—'}</td>
+                            <td className="p-2 text-gray-600">{location}</td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="border-t border-gray-300 p-2 bg-gray-100 text-xs text-gray-600">
@@ -1190,6 +1389,9 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
         )}
         {activeTab === 'apikeys' && (
           <>Total API Keys: {filteredApiKeys.length} | Selected: {selectedApiKeys.size}</>
+        )}
+        {activeTab === 'login-logs' && (
+          <>Total Logs: {loginLogs.filter(l => !loginLogFilter || l.username.toLowerCase().includes(loginLogFilter.toLowerCase())).length}</>
         )}
       </div>
     </div>
