@@ -65,6 +65,13 @@ Deno.serve(async (req: Request) => {
 
     const data = await geminiRes.json();
 
+    EdgeRuntime.waitUntil(
+      supabase.rpc("log_api_key_usage", {
+        p_key_name: "GEMINI_API_KEY",
+        p_proxy_name: "gemini-proxy",
+      }).then(() => {})
+    );
+
     return new Response(JSON.stringify(data), {
       status: geminiRes.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

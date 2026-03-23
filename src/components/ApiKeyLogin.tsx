@@ -48,6 +48,13 @@ const logLoginEvent = async (loggedUsername: string) => {
       latitude,
       longitude,
     });
+
+    await supabase.rpc('record_user_login', {
+      p_username: loggedUsername,
+      p_ip: ip_address,
+      p_city: city,
+      p_country: country,
+    });
   } catch {
   }
 };

@@ -70,6 +70,13 @@ Deno.serve(async (req: Request) => {
 
     const data = await anthropicRes.json();
 
+    EdgeRuntime.waitUntil(
+      supabase.rpc("log_api_key_usage", {
+        p_key_name: "CLAUDE_API_KEY",
+        p_proxy_name: "anthropic-proxy",
+      }).then(() => {})
+    );
+
     return new Response(JSON.stringify(data), {
       status: anthropicRes.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

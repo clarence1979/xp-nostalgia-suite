@@ -70,6 +70,13 @@ Deno.serve(async (req: Request) => {
 
     const data = await openaiRes.json();
 
+    EdgeRuntime.waitUntil(
+      supabase.rpc("log_api_key_usage", {
+        p_key_name: "OPENAI_API_KEY",
+        p_proxy_name: "openai-proxy",
+      }).then(() => {})
+    );
+
     return new Response(JSON.stringify(data), {
       status: openaiRes.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
