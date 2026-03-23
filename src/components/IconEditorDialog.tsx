@@ -43,6 +43,7 @@ export const IconEditorDialog = ({ open, onClose, onSave, initialData, theme }: 
   const [customEmoji, setCustomEmoji] = useState('');
 
   useEffect(() => {
+    if (!open) return;
     if (initialData) {
       setName(initialData.name);
       setIcon(initialData.icon);
@@ -58,7 +59,8 @@ export const IconEditorDialog = ({ open, onClose, onSave, initialData, theme }: 
       setOpenBehavior('window');
       setCustomEmoji('');
     }
-  }, [initialData, open]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleSave = () => {
     if (!name.trim() || !url.trim()) return;
