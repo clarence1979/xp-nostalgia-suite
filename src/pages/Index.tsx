@@ -95,8 +95,14 @@ const Index = () => {
       setIsLoading(false);
       const session = apiKeyStorage.getSession();
       if (session) {
-        if (session.isAdmin && session.authToken) {
-          const tokenData = await authTokenService.validateToken(session.authToken);
+        if (session.isAdmin) {
+          const storedToken = apiKeyStorage.getAuthToken();
+          if (!storedToken) {
+            apiKeyStorage.clearSession();
+            setShowApiKeyLogin(true);
+            return;
+          }
+          const tokenData = await authTokenService.validateToken(storedToken);
           if (!tokenData) {
             apiKeyStorage.clearSession();
             setShowApiKeyLogin(true);
@@ -442,7 +448,7 @@ const Index = () => {
       setShowIconEditor(false);
       setEditingIcon(null);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : '';
+      const msg = (err instanceof Error ? err.message : (err as { message?: string })?.message) ?? '';
       if (msg.includes('Unauthorized') || msg.includes('expired') || msg.includes('Invalid')) {
         apiKeyStorage.clearSession();
         setApiKey(null);
