@@ -19,6 +19,7 @@ import { useIsMobile, useIsLandscape } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 import { apiCache } from '@/lib/apiCache';
+import { authTokenService } from '@/lib/authTokenService';
 import { supabase } from '@/integrations/supabase/client';
 import { IconEditorDialog, type IconFormData } from '@/components/IconEditorDialog';
 import { FolderPropertiesDialog, type FolderFormData, colorToFolderIcon } from '@/components/FolderPropertiesDialog';
@@ -90,10 +91,19 @@ const Index = () => {
   useEffect(() => {
     apiCache.initializeSupabaseValues();
 
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       setIsLoading(false);
       const session = apiKeyStorage.getSession();
       if (session) {
+        if (session.isAdmin && session.authToken) {
+          const tokenData = await authTokenService.validateToken(session.authToken);
+          if (!tokenData) {
+            apiKeyStorage.clearSession();
+            setShowApiKeyLogin(true);
+            return;
+          }
+        }
+
         setUsername(session.username);
         setUserId(session.userId || null);
         setApiKey(session.apiKey);
@@ -431,8 +441,21 @@ const Index = () => {
       await refetchIcons();
       setShowIconEditor(false);
       setEditingIcon(null);
-    } catch {
-      toast({ title: 'Error', description: 'Failed to save icon', variant: 'destructive' });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('Unauthorized') || msg.includes('expired') || msg.includes('Invalid')) {
+        apiKeyStorage.clearSession();
+        setApiKey(null);
+        setUsername(null);
+        setUserId(null);
+        setIsAdmin(false);
+        setShowIconEditor(false);
+        setEditingIcon(null);
+        toast({ title: 'Session expired', description: 'Your session has expired. Please log in again.', variant: 'destructive' });
+        setShowApiKeyLogin(true);
+      } else {
+        toast({ title: 'Error', description: 'Failed to save icon', variant: 'destructive' });
+      }
     }
   };
 
