@@ -84,7 +84,7 @@ export async function updateIconPosition(id: string, x: number, y: number) {
   if (error) throw error;
 }
 
-export async function createFolder(name: string, x: number, y: number, parentId?: string | null) {
+export async function createFolder(name: string, x: number, y: number, parentId?: string | null, icon?: string) {
   const token = getAuthToken();
 
   const { data: result, error } = await supabase.rpc('admin_create_folder', {
@@ -93,6 +93,7 @@ export async function createFolder(name: string, x: number, y: number, parentId?
     p_position_x: x,
     p_position_y: y,
     p_parent_id: parentId ?? null,
+    p_icon: icon ?? 'Folder',
   });
 
   if (error) throw error;

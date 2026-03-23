@@ -21,6 +21,7 @@ import { apiKeyStorage } from '@/lib/apiKeyStorage';
 import { apiCache } from '@/lib/apiCache';
 import { supabase } from '@/integrations/supabase/client';
 import { IconEditorDialog, type IconFormData } from '@/components/IconEditorDialog';
+import { FolderPropertiesDialog, type FolderFormData, colorToFolderIcon } from '@/components/FolderPropertiesDialog';
 import { insertDesktopIcon, updateDesktopIcon, deleteDesktopIcon, updateIconPosition, createFolder, moveIconToFolder, renameIcon } from '@/lib/desktopIconService';
 
 interface OpenWindow {
@@ -78,6 +79,10 @@ const Index = () => {
   const [showIconEditor, setShowIconEditor] = useState(false);
   const [editingIcon, setEditingIcon] = useState<DesktopIconData | null>(null);
   const [addIconPosition, setAddIconPosition] = useState({ x: 100, y: 100 });
+  const [showFolderDialog, setShowFolderDialog] = useState(false);
+  const [folderDialogMode, setFolderDialogMode] = useState<'create' | 'edit'>('create');
+  const [folderDialogPosition, setFolderDialogPosition] = useState({ x: 100, y: 100 });
+  const [folderDialogTarget, setFolderDialogTarget] = useState<DesktopIconData | null>(null);
   const isMobile = useIsMobile();
   const isLandscape = useIsLandscape();
   const { toast } = useToast();
@@ -306,17 +311,42 @@ const Index = () => {
     setContextMenu(null);
   };
 
-  const handleCreateFolder = async () => {
+  const handleCreateFolder = () => {
     const pos = contextMenu || { x: 100, y: 100 };
     setContextMenu(null);
-    const name = window.prompt('Folder name:');
-    if (!name?.trim()) return;
+    setFolderDialogMode('create');
+    setFolderDialogPosition({ x: pos.x, y: pos.y });
+    setFolderDialogTarget(null);
+    setShowFolderDialog(true);
+  };
+
+  const handleEditFolderProperties = () => {
+    if (!iconContextMenu) return;
+    const icon = iconContextMenu.icon;
+    setIconContextMenu(null);
+    setFolderDialogMode('edit');
+    setFolderDialogPosition({ x: icon.position_x, y: icon.position_y });
+    setFolderDialogTarget(icon);
+    setShowFolderDialog(true);
+  };
+
+  const handleFolderDialogSave = async (formData: FolderFormData) => {
+    const iconValue = colorToFolderIcon(formData.color);
     try {
-      await createFolder(name.trim(), pos.x, pos.y, null);
-      await refetchIcons();
-      toast({ title: 'Folder created', description: `"${name.trim()}" created on desktop` });
-    } catch {
-      toast({ title: 'Error', description: 'Failed to create folder', variant: 'destructive' });
+      if (folderDialogMode === 'create') {
+        await createFolder(formData.name, folderDialogPosition.x, folderDialogPosition.y, null, iconValue);
+        await refetchIcons();
+        toast({ title: 'Folder created', description: `"${formData.name}" added to desktop` });
+      } else if (folderDialogTarget) {
+        await updateDesktopIcon(folderDialogTarget.id, { name: formData.name, icon: iconValue });
+        await refetchIcons();
+        toast({ title: 'Updated', description: 'Folder updated' });
+      }
+      setShowFolderDialog(false);
+      setFolderDialogTarget(null);
+    } catch (err) {
+      console.error('Folder save error:', err);
+      toast({ title: 'Error', description: String(err), variant: 'destructive' });
     }
   };
 
@@ -697,6 +727,17 @@ const Index = () => {
     }
 
     const normalizedIconName = iconName.trim();
+
+    if (normalizedIconName.startsWith('Folder:')) {
+      const colorKey = normalizedIconName.replace('Folder:', '');
+      const colorMap: Record<string, string> = {
+        yellow: 'text-yellow-400', blue: 'text-blue-400', red: 'text-red-400',
+        green: 'text-green-400', orange: 'text-orange-400', teal: 'text-teal-400',
+        pink: 'text-pink-400', gray: 'text-gray-400',
+      };
+      const colorClass = colorMap[colorKey] || 'text-yellow-400';
+      return <Folder className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} ${colorClass}`} />;
+    }
 
     if (iconComponentMap[normalizedIconName]) {
       return iconComponentMap[normalizedIconName];
@@ -1114,24 +1155,35 @@ const Index = () => {
             background: theme === 'kali' ? 'hsl(var(--kali-menu-bg))' : 'hsl(var(--menu-bg))',
           }}
         >
-          {iconContextMenu.icon.icon_type !== 'folder' && (
+          {iconContextMenu.icon.icon_type === 'folder' ? (
             <button
-              onClick={handleEditIconClick}
+              onClick={handleEditFolderProperties}
               className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
               style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
             >
               <Pencil className="w-3.5 h-3.5" />
-              Edit Icon
+              Folder Properties
             </button>
+          ) : (
+            <>
+              <button
+                onClick={handleEditIconClick}
+                className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
+                style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Edit Icon
+              </button>
+              <button
+                onClick={handleRenameIconClick}
+                className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
+                style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Rename
+              </button>
+            </>
           )}
-          <button
-            onClick={handleRenameIconClick}
-            className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
-            style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
-          >
-            <Pencil className="w-3.5 h-3.5" />
-            Rename
-          </button>
           {iconContextMenu.icon.icon_type !== 'system' && (
             <button
               onClick={handleDeleteIconClick}
@@ -1157,6 +1209,18 @@ const Index = () => {
             description: editingIcon.description,
             open_behavior: (editingIcon.open_behavior === 'window' || editingIcon.open_behavior === 'new_tab' || editingIcon.open_behavior === 'iframe') ? editingIcon.open_behavior : 'window',
           } : null}
+          theme={theme}
+        />
+      )}
+
+      {/* Folder Properties Dialog */}
+      {isAdmin && (
+        <FolderPropertiesDialog
+          open={showFolderDialog}
+          onClose={() => { setShowFolderDialog(false); setFolderDialogTarget(null); }}
+          onSave={handleFolderDialogSave}
+          initialData={folderDialogTarget ? { name: folderDialogTarget.name, icon: folderDialogTarget.icon } : null}
+          mode={folderDialogMode}
           theme={theme}
         />
       )}

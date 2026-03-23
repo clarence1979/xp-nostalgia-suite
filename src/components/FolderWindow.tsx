@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, FolderPlus, Pencil, X, Check } from 'lucide-react';
+import { Plus, FolderPlus, Pencil, X, Check, Folder as FolderIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { IconEditorDialog, type IconFormData } from '@/components/IconEditorDialog';
+import { FolderPropertiesDialog, type FolderFormData, colorToFolderIcon, getFolderColorClass } from '@/components/FolderPropertiesDialog';
 import { insertDesktopIcon, deleteDesktopIcon, updateDesktopIcon, createFolder, moveIconToFolder, renameIcon } from '@/lib/desktopIconService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -37,6 +38,9 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
   const [renameValue, setRenameValue] = useState('');
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const dragIconRef = useRef<string | null>(null);
+  const [showFolderDialog, setShowFolderDialog] = useState(false);
+  const [folderDialogMode, setFolderDialogMode] = useState<'create' | 'edit'>('create');
+  const [folderDialogTarget, setFolderDialogTarget] = useState<FolderIconData | null>(null);
   const { toast } = useToast();
 
   const fetchIcons = useCallback(async () => {
@@ -94,16 +98,39 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
     setContextMenu(null);
   };
 
-  const handleAddNewFolder = async () => {
+  const handleAddNewFolder = () => {
     setContextMenu(null);
-    const name = window.prompt('Folder name:');
-    if (!name?.trim()) return;
+    setFolderDialogMode('create');
+    setFolderDialogTarget(null);
+    setShowFolderDialog(true);
+  };
+
+  const handleFolderProperties = () => {
+    if (!iconContextMenu) return;
+    const icon = iconContextMenu.icon;
+    setIconContextMenu(null);
+    setFolderDialogMode('edit');
+    setFolderDialogTarget(icon);
+    setShowFolderDialog(true);
+  };
+
+  const handleFolderDialogSave = async (formData: FolderFormData) => {
+    const iconValue = colorToFolderIcon(formData.color);
     try {
-      await createFolder(name.trim(), 20, 20, folderId);
-      await fetchIcons();
-      toast({ title: 'Folder created', description: `"${name.trim()}" created` });
-    } catch {
-      toast({ title: 'Error', description: 'Failed to create folder', variant: 'destructive' });
+      if (folderDialogMode === 'create') {
+        await createFolder(formData.name, 20, 20, folderId, iconValue);
+        await fetchIcons();
+        toast({ title: 'Folder created', description: `"${formData.name}" created` });
+      } else if (folderDialogTarget) {
+        await updateDesktopIcon(folderDialogTarget.id, { name: formData.name, icon: iconValue });
+        await fetchIcons();
+        toast({ title: 'Updated', description: 'Folder updated' });
+      }
+      setShowFolderDialog(false);
+      setFolderDialogTarget(null);
+    } catch (err) {
+      console.error('Folder dialog save error:', err);
+      toast({ title: 'Error', description: String(err), variant: 'destructive' });
     }
   };
 
@@ -258,7 +285,11 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
             >
               {renameTarget?.id === icon.id ? (
                 <div className="flex flex-col items-center gap-1 w-full">
-                  <span className="text-4xl">{icon.icon_type === 'folder' ? '📁' : icon.icon}</span>
+                  <span>
+                    {icon.icon_type === 'folder'
+                      ? <FolderIcon className={getFolderColorClass(icon.icon, 'md')} />
+                      : <span className="text-4xl">{icon.icon}</span>}
+                  </span>
                   <input
                     className="text-xs text-center w-full border border-blue-400 rounded px-1 outline-none"
                     value={renameValue}
@@ -274,8 +305,10 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
                 </div>
               ) : (
                 <>
-                  <span className="text-4xl mb-1">
-                    {icon.icon_type === 'folder' ? '📁' : icon.icon}
+                  <span className="mb-1">
+                    {icon.icon_type === 'folder'
+                      ? <FolderIcon className={getFolderColorClass(icon.icon, 'md')} />
+                      : <span className="text-4xl">{icon.icon}</span>}
                   </span>
                   <span className="text-xs text-center break-words leading-tight max-w-full">{icon.name}</span>
                   {icon.description && (
@@ -321,24 +354,37 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
           style={{ left: iconContextMenu.x, top: iconContextMenu.y, background: menuBg, borderColor: menuBorder }}
           onClick={(e) => e.stopPropagation()}
         >
-          {iconContextMenu.icon.icon_type !== 'system' && iconContextMenu.icon.icon_type !== 'folder' && (
+          {iconContextMenu.icon.icon_type === 'folder' ? (
             <button
-              onClick={handleEditIcon}
+              onClick={handleFolderProperties}
               className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
               style={{ color: menuFg }}
             >
               <Pencil className="w-3.5 h-3.5" />
-              Edit Icon
+              Folder Properties
             </button>
+          ) : (
+            <>
+              {iconContextMenu.icon.icon_type !== 'system' && (
+                <button
+                  onClick={handleEditIcon}
+                  className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
+                  style={{ color: menuFg }}
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  Edit Icon
+                </button>
+              )}
+              <button
+                onClick={handleStartRename}
+                className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
+                style={{ color: menuFg }}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Rename
+              </button>
+            </>
           )}
-          <button
-            onClick={handleStartRename}
-            className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
-            style={{ color: menuFg }}
-          >
-            <Pencil className="w-3.5 h-3.5" />
-            Rename
-          </button>
           {iconContextMenu.icon.icon_type !== 'system' && (
             <button
               onClick={handleDeleteIcon}
@@ -363,6 +409,17 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
             description: editingIcon.description,
             open_behavior: (editingIcon.open_behavior === 'window' || editingIcon.open_behavior === 'new_tab' || editingIcon.open_behavior === 'iframe') ? editingIcon.open_behavior : 'window',
           } : null}
+          theme={theme}
+        />
+      )}
+
+      {isAdmin && (
+        <FolderPropertiesDialog
+          open={showFolderDialog}
+          onClose={() => { setShowFolderDialog(false); setFolderDialogTarget(null); }}
+          onSave={handleFolderDialogSave}
+          initialData={folderDialogTarget ? { name: folderDialogTarget.name, icon: folderDialogTarget.icon } : null}
+          mode={folderDialogMode}
           theme={theme}
         />
       )}
