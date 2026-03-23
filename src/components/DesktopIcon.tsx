@@ -52,8 +52,11 @@ export const DesktopIcon = ({
     const desktopRect = desktopArea.getBoundingClientRect();
     const rawX = Math.max(0, e.clientX - desktopRect.left - dragOffset.current.x);
     const rawY = Math.max(0, e.clientY - desktopRect.top - dragOffset.current.y);
-    const gridSize = 80;
-    onDragEnd(Math.round(rawX / gridSize) * gridSize, Math.round(rawY / gridSize) * gridSize);
+    const gridSize = 100;
+    const gridOffset = 20;
+    const snappedX = Math.round((rawX - gridOffset) / gridSize) * gridSize + gridOffset;
+    const snappedY = Math.round((rawY - gridOffset) / gridSize) * gridSize + gridOffset;
+    onDragEnd(Math.max(gridOffset, snappedX), Math.max(gridOffset, snappedY));
   };
 
   const handleDragOver = (e: React.DragEvent) => {
