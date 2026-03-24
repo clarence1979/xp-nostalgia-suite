@@ -155,14 +155,17 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
       setRenameTarget(null);
       return;
     }
-    try {
-      await renameIcon(renameTarget.id, renameValue.trim());
-      await fetchIcons();
-      toast({ title: 'Renamed', description: `Renamed to "${renameValue.trim()}"` });
-    } catch {
-      toast({ title: 'Error', description: 'Failed to rename', variant: 'destructive' });
-    }
+    const newName = renameValue.trim();
+    const targetId = renameTarget.id;
     setRenameTarget(null);
+    try {
+      await renameIcon(targetId, newName);
+      setIcons(prev => prev.map(i => i.id === targetId ? { ...i, name: newName } : i));
+      toast({ title: 'Renamed', description: `Renamed to "${newName}"` });
+    } catch (err) {
+      toast({ title: 'Error', description: `Failed to rename: ${err}`, variant: 'destructive' });
+      await fetchIcons();
+    }
   };
 
   const handleDeleteIcon = async () => {
