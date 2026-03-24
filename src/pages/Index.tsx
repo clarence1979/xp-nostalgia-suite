@@ -64,6 +64,7 @@ const Index = () => {
   const [showStartMenu, setShowStartMenu] = useState(false);
   const [windows, setWindows] = useState<OpenWindow[]>([]);
   const nextWindowIdRef = useRef(1);
+  const refetchIconsRef = useRef<(() => Promise<void>) | null>(null);
   const [validatedPassword, setValidatedPassword] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showApiKeyLogin, setShowApiKeyLogin] = useState(false);
@@ -318,6 +319,7 @@ const Index = () => {
       console.error('Error refetching icons:', err);
     }
   };
+  refetchIconsRef.current = refetchIcons;
 
   const handleAddNewIcon = () => {
     const pos = contextMenu || { x: 100, y: 100 };
@@ -374,6 +376,29 @@ const Index = () => {
       toast({ title: 'Moved', description: 'Icon moved into folder' });
     } catch {
       toast({ title: 'Error', description: 'Failed to move icon', variant: 'destructive' });
+    }
+  };
+
+  const handleDesktopDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    if (!isAdmin) return;
+    const iconId = e.dataTransfer.getData('text/plain');
+    if (!iconId) return;
+    if (desktopIcons.some(i => i.id === iconId)) return;
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const rawX = Math.max(0, e.clientX - rect.left);
+    const rawY = Math.max(0, e.clientY - rect.top);
+    const gridSize = 100;
+    const gridOffset = 20;
+    const snappedX = Math.round((rawX - gridOffset) / gridSize) * gridSize + gridOffset;
+    const snappedY = Math.round((rawY - gridOffset) / gridSize) * gridSize + gridOffset;
+    try {
+      await moveIconToFolder(iconId, null);
+      await updateIconPosition(iconId, Math.max(gridOffset, snappedX), Math.max(gridOffset, snappedY));
+      await refetchIcons();
+      toast({ title: 'Moved', description: 'Icon moved to desktop' });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to move icon to desktop', variant: 'destructive' });
     }
   };
 
@@ -676,6 +701,7 @@ const Index = () => {
         theme={theme}
         onOpenProgram={(item) => handleIconClick(item as unknown as DesktopIconData)}
         onOpenFolder={(id, name) => openFolderWindow(id, name)}
+        onExternalIconDropped={() => refetchIconsRef.current?.()}
       />
     );
     openWindow(folderName, folderContent, <Folder className="w-4 h-4" />);
@@ -923,7 +949,8 @@ const Index = () => {
       }}
       onContextMenu={handleContextMenu}
       onClick={handleClick}
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }}
+      onDrop={handleDesktopDrop}
     >
       {/* Blur overlay when not authenticated */}
       {!isAuthenticated && (

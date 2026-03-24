@@ -25,9 +25,10 @@ interface FolderWindowProps {
   theme: 'xp' | 'kali';
   onOpenProgram: (icon: FolderIconData) => void;
   onOpenFolder: (folderId: string, folderName: string) => void;
+  onExternalIconDropped?: () => void;
 }
 
-export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgram, onOpenFolder }: FolderWindowProps) => {
+export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgram, onOpenFolder, onExternalIconDropped }: FolderWindowProps) => {
   const [icons, setIcons] = useState<FolderIconData[]>([]);
   const [loading, setLoading] = useState(true);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -37,6 +38,7 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
   const [renameTarget, setRenameTarget] = useState<FolderIconData | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
+  const [isDragOverBackground, setIsDragOverBackground] = useState(false);
   const dragIconRef = useRef<string | null>(null);
   const [showFolderDialog, setShowFolderDialog] = useState(false);
   const [folderDialogMode, setFolderDialogMode] = useState<'create' | 'edit'>('create');
@@ -247,6 +249,42 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
     }
   };
 
+  const handleBackgroundDragOver = (e: React.DragEvent) => {
+    if (!isAdmin) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOverBackground(true);
+  };
+
+  const handleBackgroundDragLeave = (e: React.DragEvent) => {
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setIsDragOverBackground(false);
+  };
+
+  const handleBackgroundDrop = async (e: React.DragEvent) => {
+    if (!isAdmin) return;
+    e.preventDefault();
+    setIsDragOverBackground(false);
+    const iconId = e.dataTransfer.getData('text/plain') || dragIconRef.current;
+    dragIconRef.current = null;
+    if (!iconId || iconId === folderId) return;
+    if (icons.some(i => i.id === iconId)) return;
+    try {
+      await moveIconToFolder(iconId, folderId);
+      await fetchIcons();
+      onExternalIconDropped?.();
+      toast({ title: 'Moved', description: `Icon moved into ${folderName}` });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to move icon into folder', variant: 'destructive' });
+    }
+  };
+
+  const handleIconDragEnd = (e: React.DragEvent) => {
+    if (e.dataTransfer.dropEffect === 'move') {
+      fetchIcons();
+    }
+  };
+
   const isKali = theme === 'kali';
   const menuBg = isKali ? 'hsl(var(--kali-menu-bg))' : 'hsl(var(--menu-bg))';
   const menuBorder = isKali ? 'hsl(var(--kali-border))' : 'hsl(var(--border))';
@@ -254,9 +292,12 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
 
   return (
     <div
-      className="w-full h-full bg-white overflow-auto relative"
+      className={`w-full h-full bg-white overflow-auto relative transition-colors ${isDragOverBackground ? 'bg-blue-50 ring-2 ring-inset ring-blue-400' : ''}`}
       onContextMenu={handleBackgroundContextMenu}
       onClick={handleCloseMenus}
+      onDragOver={handleBackgroundDragOver}
+      onDragLeave={handleBackgroundDragLeave}
+      onDrop={handleBackgroundDrop}
     >
       {loading ? (
         <div className="flex items-center justify-center h-full text-gray-400 text-sm">Loading...</div>
@@ -278,6 +319,7 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
               onContextMenu={(e) => handleIconContextMenu(e, icon)}
               draggable={isAdmin}
               onDragStart={isAdmin ? (e) => handleDragStart(e, icon) : undefined}
+              onDragEnd={isAdmin ? handleIconDragEnd : undefined}
               onDragOver={icon.open_behavior === 'folder' ? (e) => handleDragOver(e, icon.id) : undefined}
               onDragLeave={icon.open_behavior === 'folder' ? handleDragLeave : undefined}
               onDrop={icon.open_behavior === 'folder' ? (e) => handleDrop(e, icon.id) : undefined}
