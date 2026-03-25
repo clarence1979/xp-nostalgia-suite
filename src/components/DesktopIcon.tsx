@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 
 interface DesktopIconProps {
   icon: React.ReactNode;
@@ -27,37 +27,85 @@ export const DesktopIcon = ({
   isDropTarget = false,
   onDropIcon,
 }: DesktopIconProps) => {
-  const dragOffset = useRef({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const dragMoved = useRef(false);
 
-  const handleDragStart = (e: React.DragEvent) => {
-    const rect = (e.target as HTMLElement).getBoundingClientRect();
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!draggable || e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    dragMoved.current = false;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', iconId || '');
-    setIsDragging(true);
-    const desktopEl = document.querySelector('.desktop-area');
-    if (desktopEl) desktopEl.classList.add('show-grid');
-  };
 
-  const handleDragEnd = (e: React.DragEvent) => {
-    setIsDragging(false);
-    const desktopEl = document.querySelector('.desktop-area');
-    if (desktopEl) desktopEl.classList.remove('show-grid');
-    if (!onDragEnd) return;
-    if (e.dataTransfer.dropEffect === 'move') return;
-    const desktopArea = (e.target as HTMLElement).closest('.desktop-area');
-    if (!desktopArea) return;
-    const desktopRect = desktopArea.getBoundingClientRect();
-    const rawX = Math.max(0, e.clientX - desktopRect.left - dragOffset.current.x);
-    const rawY = Math.max(0, e.clientY - desktopRect.top - dragOffset.current.y);
-    const gridSize = 100;
-    const gridOffset = 20;
-    const snappedX = Math.round((rawX - gridOffset) / gridSize) * gridSize + gridOffset;
-    const snappedY = Math.round((rawY - gridOffset) / gridSize) * gridSize + gridOffset;
-    onDragEnd(Math.max(gridOffset, snappedX), Math.max(gridOffset, snappedY));
-  };
+    const handleMouseMove = (ev: MouseEvent) => {
+      if (!dragMoved.current) {
+        const dx = Math.abs(ev.clientX - startX);
+        const dy = Math.abs(ev.clientY - startY);
+        if (dx < 4 && dy < 4) return;
+        dragMoved.current = true;
+        setIsDragging(true);
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'grabbing';
+      }
+
+      const desktopArea = document.querySelector('.desktop-area');
+      if (!desktopArea) return;
+      const desktopRect = desktopArea.getBoundingClientRect();
+      const x = Math.max(0, ev.clientX - desktopRect.left - dragOffset.current.x);
+      const y = Math.max(0, ev.clientY - desktopRect.top - dragOffset.current.y);
+      setDragPos({ x, y });
+    };
+
+    const handleMouseUp = (ev: MouseEvent) => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+
+      if (!dragMoved.current) {
+        setIsDragging(false);
+        setDragPos(null);
+        return;
+      }
+
+      const desktopArea = document.querySelector('.desktop-area');
+      const desktopRect = desktopArea?.getBoundingClientRect();
+
+      setIsDragging(false);
+      setDragPos(null);
+
+      const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
+      for (const el of elements) {
+        const iconEl = el.closest('[data-icon-id]') as HTMLElement | null;
+        if (
+          iconEl &&
+          iconEl.getAttribute('data-is-folder') === 'true' &&
+          iconEl.getAttribute('data-icon-id') !== iconId
+        ) {
+          const folderId = iconEl.getAttribute('data-icon-id');
+          if (folderId && onDropIcon) {
+            onDropIcon(folderId);
+            return;
+          }
+        }
+      }
+
+      if (!onDragEnd || !desktopRect) return;
+      const x = Math.max(0, ev.clientX - desktopRect.left - dragOffset.current.x);
+      const y = Math.max(0, ev.clientY - desktopRect.top - dragOffset.current.y);
+      onDragEnd(x, y);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [draggable, iconId, onDropIcon, onDragEnd]);
 
   const handleDragOver = (e: React.DragEvent) => {
     if (!isDropTarget) return;
@@ -90,29 +138,31 @@ export const DesktopIcon = ({
     }
   };
 
+  const currentPos = dragPos ?? position;
+
   return (
     <div
-      className={`desktop-icon absolute group ${draggable ? 'cursor-move hover:scale-105 transition-transform' : 'cursor-pointer'} ${isDragging ? 'opacity-50 scale-110' : ''} ${isDragOver ? 'scale-110' : ''}`}
-      style={position ? { left: position.x, top: position.y } : undefined}
+      data-icon-id={iconId}
+      data-is-folder={isDropTarget ? 'true' : undefined}
+      className={`desktop-icon absolute group ${draggable ? 'cursor-grab' : 'cursor-pointer'} ${isDragging ? 'opacity-70' : ''} ${isDragOver ? 'scale-110' : ''}`}
+      style={currentPos ? {
+        left: currentPos.x,
+        top: currentPos.y,
+        zIndex: isDragging ? 999 : undefined,
+        cursor: isDragging ? 'grabbing' : undefined,
+        transition: isDragging ? 'none' : undefined,
+      } : undefined}
       onDoubleClick={onClick}
       onContextMenu={handleContext}
-      title={description}
-      draggable={draggable}
-      onDragStart={draggable ? handleDragStart : undefined}
-      onDragEnd={draggable ? handleDragEnd : undefined}
+      onMouseDown={handleMouseDown}
       onDragOver={isDropTarget ? handleDragOver : undefined}
       onDragLeave={isDropTarget ? handleDragLeave : undefined}
       onDrop={isDropTarget ? handleDrop : undefined}
     >
-      <div className={`text-4xl transition-transform ${isDragOver ? 'scale-125' : ''}`}>{icon}</div>
+      <div className={`text-4xl ${isDragOver ? 'scale-125 transition-transform' : ''}`}>{icon}</div>
       <span className={`text-white text-xs text-center drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] ${isDragOver ? 'text-yellow-200' : ''}`}>{label}</span>
       {isDragOver && (
         <div className="absolute inset-0 rounded-lg ring-2 ring-yellow-300 ring-offset-1 pointer-events-none" />
-      )}
-      {draggable && !isDragging && !isDragOver && (
-        <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-[8px] px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          DRAG
-        </div>
       )}
       {description && !isDragging && !isDragOver && (
         <div className="absolute hidden group-hover:block bg-yellow-100 border border-gray-800 text-black text-xs p-2 rounded shadow-lg z-50 w-64 left-1/2 transform -translate-x-1/2 top-full mt-1 pointer-events-none">

@@ -386,15 +386,11 @@ const Index = () => {
     if (desktopIcons.some(i => i.id === iconId)) return;
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
-    const rawX = Math.max(0, e.clientX - rect.left);
-    const rawY = Math.max(0, e.clientY - rect.top);
-    const gridSize = 100;
-    const gridOffset = 20;
-    const snappedX = Math.round((rawX - gridOffset) / gridSize) * gridSize + gridOffset;
-    const snappedY = Math.round((rawY - gridOffset) / gridSize) * gridSize + gridOffset;
+    const x = Math.max(0, e.clientX - rect.left);
+    const y = Math.max(0, e.clientY - rect.top);
     try {
       await moveIconToFolder(iconId, null);
-      await updateIconPosition(iconId, Math.max(gridOffset, snappedX), Math.max(gridOffset, snappedY));
+      await updateIconPosition(iconId, x, y);
       await refetchIcons();
       toast({ title: 'Moved', description: 'Icon moved to desktop' });
     } catch {
