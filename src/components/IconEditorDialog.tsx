@@ -63,7 +63,7 @@ export const IconEditorDialog = ({ open, onClose, onSave, initialData, theme }: 
   }, [open]);
 
   const handleSave = () => {
-    if (!name.trim() || !url.trim()) return;
+    if (!name.trim()) return;
     onSave({
       name: name.trim(),
       icon: icon,
@@ -196,7 +196,7 @@ export const IconEditorDialog = ({ open, onClose, onSave, initialData, theme }: 
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave} disabled={!name.trim() || !url.trim()}>
+          <Button onClick={handleSave} disabled={!name.trim()}>
             {initialData ? 'Save Changes' : 'Add Icon'}
           </Button>
         </DialogFooter>
