@@ -1251,6 +1251,7 @@ const Index = () => {
       {/* Icon Editor Dialog */}
       {isAdmin && (
         <IconEditorDialog
+          key={editingIcon ? editingIcon.id : 'new-icon'}
           open={showIconEditor}
           onClose={() => { setShowIconEditor(false); setEditingIcon(null); }}
           onSave={handleSaveIcon}

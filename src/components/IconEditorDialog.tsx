@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
 const ICON_OPTIONS = [
@@ -119,11 +120,11 @@ export const IconEditorDialog = ({ open, onClose, onSave, initialData, theme }: 
 
           <div className="space-y-2">
             <Label>Description</Label>
-            <Input
+            <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Short description"
-              maxLength={100}
+              maxLength={200}
             />
           </div>
 
