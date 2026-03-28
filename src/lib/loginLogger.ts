@@ -23,7 +23,7 @@ async function fetchGeoData() {
   return { ip_address: 'unknown', city: '', region: '', country: '', country_code: '', latitude: null, longitude: null };
 }
 
-export async function logLogin(username: string): Promise<void> {
+export async function logLoginEvent(username: string): Promise<void> {
   try {
     const geo = await fetchGeoData();
     await supabase.from('login_logs').insert({
@@ -46,13 +46,19 @@ export async function logLogin(username: string): Promise<void> {
   }
 }
 
-export function logLoginIfDue(username: string): void {
+export function shouldLogSessionRefresh(username: string): boolean {
   const key = LAST_LOG_KEY_PREFIX + username;
   const lastLog = localStorage.getItem(key);
   const now = Date.now();
-
   if (!lastLog || now - parseInt(lastLog, 10) > LOG_INTERVAL_MS) {
     localStorage.setItem(key, String(now));
-    logLogin(username);
+    return true;
+  }
+  return false;
+}
+
+export function logLoginIfDue(username: string): void {
+  if (shouldLogSessionRefresh(username)) {
+    logLoginEvent(username);
   }
 }
