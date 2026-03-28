@@ -24,6 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { IconEditorDialog, type IconFormData } from '@/components/IconEditorDialog';
 import { FolderPropertiesDialog, type FolderFormData, colorToFolderIcon } from '@/components/FolderPropertiesDialog';
 import { insertDesktopIcon, updateDesktopIcon, deleteDesktopIcon, updateIconPosition, createFolder, moveIconToFolder, renameIcon } from '@/lib/desktopIconService';
+import { logLoginEvent, shouldLogSessionRefresh } from '@/lib/loginLogger';
 
 interface OpenWindow {
   id: string;
@@ -115,6 +116,10 @@ const Index = () => {
         setUserId(session.userId || null);
         setApiKey(session.apiKey);
         setIsAdmin(session.isAdmin || false);
+
+        if (shouldLogSessionRefresh(session.username)) {
+          logLoginEvent(session.username);
+        }
 
         apiCache.saveAll({
           username: session.username,

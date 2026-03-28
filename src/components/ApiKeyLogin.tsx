@@ -7,57 +7,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 import { apiCache } from '@/lib/apiCache';
 import { authTokenService } from '@/lib/authTokenService';
+import { logLoginEvent } from '@/lib/loginLogger';
 
 interface ApiKeyLoginProps {
   onLogin: (username: string, apiKey: string | null, isAdmin: boolean, userId?: string, authToken?: string, mustChangePassword?: boolean) => void;
   onCancel: () => void;
 }
-
-const logLoginEvent = async (loggedUsername: string) => {
-  try {
-    let ip_address = 'unknown';
-    let city = '';
-    let region = '';
-    let country = '';
-    let country_code = '';
-    let latitude: number | null = null;
-    let longitude: number | null = null;
-
-    try {
-      const geoRes = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) });
-      if (geoRes.ok) {
-        const geo = await geoRes.json();
-        ip_address = geo.ip || 'unknown';
-        city = geo.city || '';
-        region = geo.region || '';
-        country = geo.country_name || '';
-        country_code = geo.country_code || '';
-        latitude = typeof geo.latitude === 'number' ? geo.latitude : null;
-        longitude = typeof geo.longitude === 'number' ? geo.longitude : null;
-      }
-    } catch {
-    }
-
-    await supabase.from('login_logs').insert({
-      username: loggedUsername,
-      ip_address,
-      city,
-      region,
-      country,
-      country_code,
-      latitude,
-      longitude,
-    });
-
-    await supabase.rpc('record_user_login', {
-      p_username: loggedUsername,
-      p_ip: ip_address,
-      p_city: city,
-      p_country: country,
-    });
-  } catch {
-  }
-};
 
 export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
   const [username, setUsername] = useState('');
