@@ -4,7 +4,7 @@ import { Key } from 'lucide-react';
 
 interface TaskbarProps {
   onStartClick: () => void;
-  windows: Array<{ id: string; title: string; active: boolean }>;
+  windows: Array<{ id: string; title: string; active: boolean; icon?: React.ReactNode }>;
   onWindowClick: (id: string) => void;
   theme: 'xp' | 'kali';
   hasApiKey?: boolean;
@@ -97,7 +97,14 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey
             }}
             onClick={() => onWindowClick(window.id)}
           >
-            {window.title}
+            <span className="flex items-center gap-1.5 truncate">
+              {window.icon && (
+                <span className="flex-shrink-0 flex items-center text-sm leading-none">
+                  {window.icon}
+                </span>
+              )}
+              <span className="truncate">{window.title}</span>
+            </span>
           </button>
         ))}
       </div>

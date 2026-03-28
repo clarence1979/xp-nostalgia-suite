@@ -1155,6 +1155,7 @@ const Index = () => {
             id: w.id,
             title: w.title,
             active: w.active,
+            icon: w.icon,
           }))}
           onWindowClick={focusWindow}
           theme={theme}
