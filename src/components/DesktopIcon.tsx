@@ -155,11 +155,12 @@ export const DesktopIcon = ({
       onDoubleClick={onClick}
       onContextMenu={handleContext}
       onMouseDown={handleMouseDown}
+      onDragStart={(e) => e.preventDefault()}
       onDragOver={isDropTarget ? handleDragOver : undefined}
       onDragLeave={isDropTarget ? handleDragLeave : undefined}
       onDrop={isDropTarget ? handleDrop : undefined}
     >
-      <div className={`text-4xl ${isDragOver ? 'scale-125 transition-transform' : ''}`}>{icon}</div>
+      <div className={`text-4xl ${isDragOver ? 'scale-125 transition-transform' : ''}`} draggable={false}>{icon}</div>
       <span className={`text-white text-xs text-center drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] ${isDragOver ? 'text-yellow-200' : ''}`}>{label}</span>
       {isDragOver && (
         <div className="absolute inset-0 rounded-lg ring-2 ring-yellow-300 ring-offset-1 pointer-events-none" />
