@@ -59,13 +59,13 @@ function getDefaults(id: string, taskbarH: number): Config {
 
   switch (id) {
     case 'weather':
-      return { x: sw - m - 290, y: m, w: 290, h: fullH, minimized: false };
+      return { x: sw - m - 290, y: m, w: 290, h: fullH, minimized: true};
     case 'news':
-      return { x: sw - m - 290 - gap - 310, y: m, w: 310, h: fullH, minimized: false };
+      return { x: sw - m - 290 - gap - 310, y: m, w: 310, h: fullH, minimized: true};
     case 'notices':
-      return { x: sw - m - 290 - gap - 310 - gap - 270, y: m, w: 270, h: 340, minimized: false };
+      return { x: sw - m - 290 - gap - 310 - gap - 270, y: m, w: 270, h: 340, minimized: true};
     default:
-      return { x: 100, y: m, w: 300, h: 400, minimized: false };
+      return { x: 100, y: m, w: 300, h: 400, minimized: true};
   }
 }
 
@@ -86,7 +86,7 @@ async function saveWidgetState(id: string, cfg: Config) {
 export function WidgetContainer({ id, title, icon, theme, isAdmin, children }: Props) {
   const isMobile = useIsMobile();
   const [cfg, setCfg] = useState<Config | null>(null);
-  const cfgRef = useRef<Config>({ x: 0, y: 0, w: 300, h: 500, minimized: false });
+  const cfgRef = useRef<Config>({ x: 0, y: 0, w: 300, h: 500, minimized: true});
   const dragRef = useRef({ active: false, ox: 0, oy: 0 });
   const resizeRef = useRef({ active: false, sx: 0, sy: 0, sw: 0, sh: 0 });
 

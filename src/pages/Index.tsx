@@ -1062,7 +1062,7 @@ const Index = () => {
             ? (theme === 'xp' ? '🐉' : '🖥️')
             : (icon.icon || '');
 
-          const canDrag = isAdmin && icon.icon_type !== 'system' && icon.icon_type !== 'theme';
+          const canDrag = isAdmin;
           const isFolder = icon.icon_type === 'folder';
 
           return (
