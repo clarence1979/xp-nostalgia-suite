@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { WidgetContainer } from './WidgetContainer';
 
 const LAT = -37.8136;
 const LON = 144.9631;
@@ -64,60 +64,32 @@ interface WeatherData {
   };
 }
 
+interface Props {
+  theme: 'xp' | 'kali';
+  isAdmin: boolean;
+}
+
 const XP = {
-  bg: 'rgba(236,233,216,0.97)',
-  headerBg: 'linear-gradient(180deg,#2868D9 0%,#1247BA 100%)',
-  headerText: '#fff',
-  headerSub: 'rgba(255,255,255,0.7)',
-  headerUpdated: 'rgba(255,255,255,0.6)',
-  body: '#1c1c1c',
-  muted: '#555',
-  sectionBg: 'rgba(255,255,255,0.7)',
-  sectionBorder: '1px solid #c8c8c8',
-  divider: '#d0d0d0',
-  border: '2px solid #7BABD4',
-  accent: '#245EDC',
-  hourlyBg: 'rgba(255,255,255,0.8)',
-  statBg: 'rgba(37,94,220,0.08)',
-  toggleActive: '#245EDC',
-  toggleActiveText: '#fff',
-  toggleInactive: 'rgba(255,255,255,0.6)',
-  toggleInactiveText: '#444',
-  chartGrid: '#e0e0e0',
-  chartHumidity: '#1565c0',
-  chartWind: '#2e7d32',
-  tooltipBg: '#fff',
-  retryBg: '#245EDC',
+  body: '#1c1c1c', muted: '#555',
+  sectionBg: 'rgba(255,255,255,0.7)', sectionBorder: '1px solid #c8c8c8',
+  divider: '#d0d0d0', statBg: 'rgba(37,94,220,0.08)',
+  hourlyBg: 'rgba(255,255,255,0.8)', accent: '#245EDC',
+  toggleActive: '#245EDC', toggleActiveText: '#fff',
+  toggleInactive: 'rgba(255,255,255,0.6)', toggleInactiveText: '#444',
+  chartGrid: '#e0e0e0', chartHum: '#1565c0', chartWind: '#2e7d32', tooltipBg: '#fff',
 };
 
 const KALI = {
-  bg: 'rgba(8,8,8,0.95)',
-  headerBg: 'rgba(0,20,20,0.85)',
-  headerText: 'hsl(180 100% 70%)',
-  headerSub: 'rgba(0,255,255,0.55)',
-  headerUpdated: 'rgba(0,255,255,0.45)',
-  body: '#cef3f3',
-  muted: '#80deea',
-  sectionBg: 'rgba(0,255,255,0.04)',
-  sectionBorder: '1px solid rgba(0,255,255,0.15)',
-  divider: 'rgba(0,255,255,0.12)',
-  border: '1px solid rgba(0,255,255,0.3)',
-  accent: '#00e5ff',
-  hourlyBg: 'rgba(0,255,255,0.06)',
-  statBg: 'rgba(0,255,255,0.06)',
-  toggleActive: 'rgba(0,100,100,0.9)',
-  toggleActiveText: 'hsl(180 100% 70%)',
-  toggleInactive: 'rgba(0,255,255,0.08)',
-  toggleInactiveText: '#80deea',
-  chartGrid: 'rgba(0,255,255,0.08)',
-  chartHumidity: '#00b0ff',
-  chartWind: '#00e676',
-  tooltipBg: '#0a0a0a',
-  retryBg: 'rgba(0,100,100,0.9)',
+  body: '#cef3f3', muted: '#80deea',
+  sectionBg: 'rgba(0,255,255,0.04)', sectionBorder: '1px solid rgba(0,255,255,0.15)',
+  divider: 'rgba(0,255,255,0.12)', statBg: 'rgba(0,255,255,0.06)',
+  hourlyBg: 'rgba(0,255,255,0.06)', accent: '#00e5ff',
+  toggleActive: 'rgba(0,100,100,0.9)', toggleActiveText: 'hsl(180 100% 70%)',
+  toggleInactive: 'rgba(0,255,255,0.08)', toggleInactiveText: '#80deea',
+  chartGrid: 'rgba(0,255,255,0.08)', chartHum: '#00b0ff', chartWind: '#00e676', tooltipBg: '#0a0a0a',
 };
 
-export function WeatherWidget({ theme }: { theme: 'xp' | 'kali' }) {
-  const isMobile = useIsMobile();
+export function WeatherWidget({ theme, isAdmin }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<WeatherData | null>(null);
@@ -131,14 +103,11 @@ export function WeatherWidget({ theme }: { theme: 'xp' | 'kali' }) {
     setError(null);
     try {
       const params = [
-        `latitude=${LAT}`,
-        `longitude=${LON}`,
+        `latitude=${LAT}`, `longitude=${LON}`,
         `current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure,visibility,cloud_cover,uv_index`,
         `hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code`,
         `daily=weather_code,temperature_2m_max,temperature_2m_min`,
-        `timezone=Australia%2FMelbourne`,
-        `forecast_days=6`,
-        `wind_speed_unit=kmh`,
+        `timezone=Australia%2FMelbourne`, `forecast_days=6`, `wind_speed_unit=kmh`,
       ].join('&');
       const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
       if (!res.ok) throw new Error(`API error ${res.status}`);
@@ -158,32 +127,24 @@ export function WeatherWidget({ theme }: { theme: 'xp' | 'kali' }) {
     return () => clearInterval(t);
   }, [fetchWeather]);
 
-  if (isMobile) return null;
-
   const p = theme === 'xp' ? XP : KALI;
   const font = "'Tahoma','Segoe UI',sans-serif";
-  const taskbarH = theme === 'xp' ? 40 : 44;
 
-  // Find current hour slot in hourly data
   let startIdx = 0;
   if (data) {
     const now = new Date();
-    const idx = data.hourly.time.findIndex((t) => new Date(t + ':00') >= now);
+    const idx = data.hourly.time.findIndex(t => new Date(t + ':00') >= now);
     startIdx = idx >= 0 ? idx : 0;
   }
 
-  // 8 slots × every 3rd hour = 24 hrs
   const hourlySlots = data
-    ? Array.from({ length: 8 }, (_, i) => startIdx + i * 3).filter(
-        (i) => i < data.hourly.time.length
-      )
+    ? Array.from({ length: 8 }, (_, i) => startIdx + i * 3).filter(i => i < data.hourly.time.length)
     : [];
 
-  // 24 consecutive hourly points for chart
   const chartData = data
     ? Array.from({ length: 24 }, (_, i) => startIdx + i)
-        .filter((i) => i < data.hourly.time.length)
-        .map((i) => ({
+        .filter(i => i < data.hourly.time.length)
+        .map(i => ({
           time: fmtHour(data.hourly.time[i]),
           temp: Math.round(data.hourly.temperature_2m[i]),
           humidity: Math.round(data.hourly.relative_humidity_2m[i]),
@@ -191,302 +152,157 @@ export function WeatherWidget({ theme }: { theme: 'xp' | 'kali' }) {
         }))
     : [];
 
-  // 5-day forecast (skip today at index 0)
   const forecastDays = data ? data.daily.time.slice(1, 6) : [];
   const cur = data?.current;
   const curInfo = cur ? wmoInfo(cur.weather_code) : null;
 
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        right: 16,
-        top: 16,
-        bottom: taskbarH + 8,
-        width: 340,
-        zIndex: 15,
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: 8,
-        overflow: 'hidden',
-        background: p.bg,
-        border: p.border,
-        boxShadow: theme === 'xp'
-          ? '0 4px 20px rgba(0,0,0,0.35)'
-          : '0 0 24px rgba(0,255,255,0.18),0 4px 20px rgba(0,0,0,0.6)',
-        fontFamily: font,
-        fontSize: 12,
-        color: p.body,
-      }}
-    >
-      {/* ── Header ── */}
-      <div
-        style={{
-          background: p.headerBg,
-          padding: '10px 14px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-          borderBottom: theme === 'xp'
-            ? '1px solid #1247BA'
-            : '1px solid rgba(0,255,255,0.2)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 20 }}>🇦🇺</span>
-          <div>
-            <div style={{ color: p.headerText, fontWeight: 'bold', fontSize: 14 }}>
-              Melbourne
-            </div>
-            <div style={{ color: p.headerSub, fontSize: 11 }}>
-              Victoria, Australia
-            </div>
-          </div>
+  const divider = <div style={{ height: 1, background: p.divider, margin: '0 12px' }} />;
+
+  const content = (
+    <div style={{ color: p.body, fontFamily: font, fontSize: 12 }}>
+      {/* Loading */}
+      {loading && (
+        <div style={{ padding: 32, textAlign: 'center', color: p.muted }}>
+          <div style={{ fontSize: 28, marginBottom: 8 }}>🌐</div>
+          <div>Fetching Melbourne weather…</div>
         </div>
-        {lastUpdated && (
-          <div style={{ color: p.headerUpdated, fontSize: 10, textAlign: 'right' }}>
-            Updated<br />{fmtTime(lastUpdated)}
-          </div>
-        )}
-      </div>
+      )}
 
-      {/* ── Scrollable body ── */}
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+      {/* Error */}
+      {!loading && error && (
+        <div style={{ padding: 24, textAlign: 'center', color: p.muted }}>
+          <div style={{ fontSize: 28, marginBottom: 8 }}>⚠️</div>
+          <div style={{ marginBottom: 12 }}>{error}</div>
+          <button
+            onClick={fetchWeather}
+            style={{ background: p.accent, color: '#fff', border: 'none', borderRadius: 4, padding: '6px 16px', cursor: 'pointer', fontFamily: font, fontSize: 12 }}
+          >Retry</button>
+        </div>
+      )}
 
-        {/* Loading */}
-        {loading && (
-          <div style={{ padding: 32, textAlign: 'center', color: p.muted }}>
-            <div style={{ fontSize: 28, marginBottom: 8 }}>🌐</div>
-            <div>Fetching Melbourne weather…</div>
-          </div>
-        )}
+      {/* Last updated row */}
+      {!loading && !error && lastUpdated && (
+        <div style={{ padding: '6px 12px 2px', textAlign: 'right', color: p.muted, fontSize: 10 }}>
+          Updated {fmtTime(lastUpdated)}
+          <button onClick={fetchWeather} style={{ marginLeft: 6, background: 'none', border: 'none', color: p.muted, cursor: 'pointer', fontSize: 10, padding: 0 }}>↻</button>
+        </div>
+      )}
 
-        {/* Error */}
-        {!loading && error && (
-          <div style={{ padding: 24, textAlign: 'center', color: p.muted }}>
-            <div style={{ fontSize: 28, marginBottom: 8 }}>⚠️</div>
-            <div style={{ marginBottom: 12 }}>{error}</div>
-            <button
-              onClick={fetchWeather}
-              style={{
-                background: p.retryBg,
-                color: '#fff',
-                border: 'none',
-                borderRadius: 4,
-                padding: '6px 16px',
-                cursor: 'pointer',
-                fontFamily: font,
-                fontSize: 12,
-              }}
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {/* Main content */}
-        {!loading && !error && data && cur && curInfo && (
-          <>
-            {/* ── Current conditions ── */}
-            <div style={{ padding: '12px 14px 8px' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 44, fontWeight: 'bold', lineHeight: 1 }}>
-                      {Math.round(cur.temperature_2m)}°
-                    </span>
-                    <span style={{ fontSize: 36 }}>{curInfo.emoji}</span>
+      {/* Main content */}
+      {!loading && !error && data && cur && curInfo && (
+        <>
+          {/* Current conditions */}
+          <div style={{ padding: '10px 12px 8px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 42, fontWeight: 'bold', lineHeight: 1 }}>{Math.round(cur.temperature_2m)}°</span>
+                  <span style={{ fontSize: 34 }}>{curInfo.emoji}</span>
+                </div>
+                <div style={{ color: p.muted, fontSize: 12, marginTop: 2 }}>{curInfo.desc}</div>
+                <div style={{ color: p.muted, fontSize: 11, marginTop: 1 }}>
+                  {new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 10px', background: p.statBg, borderRadius: 6, padding: '7px 9px', border: p.sectionBorder, flexShrink: 0 }}>
+                {([
+                  ['Feels like', `${Math.round(cur.apparent_temperature)}°C`],
+                  ['Humidity', `${cur.relative_humidity_2m}%`],
+                  ['Wind', `${Math.round(cur.wind_speed_10m)} km/h`],
+                  ['Pressure', `${Math.round(cur.surface_pressure)} hPa`],
+                  ['Visibility', `${(cur.visibility / 1000).toFixed(1)} km`],
+                  ['UV / Cloud', `${Math.round(cur.uv_index)} / ${cur.cloud_cover}%`],
+                ] as [string, string][]).map(([label, value]) => (
+                  <div key={label}>
+                    <div style={{ color: p.muted, fontSize: 10 }}>{label}</div>
+                    <div style={{ fontWeight: 'bold', fontSize: 11 }}>{value}</div>
                   </div>
-                  <div style={{ color: p.muted, fontSize: 12, marginTop: 2 }}>{curInfo.desc}</div>
-                  <div style={{ color: p.muted, fontSize: 11, marginTop: 1 }}>
-                    {new Date().toLocaleDateString('en-AU', {
-                      weekday: 'long', day: 'numeric', month: 'long',
-                    })}
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {divider}
+
+          {/* Hourly strip */}
+          <div style={{ padding: '8px 12px' }}>
+            <div style={{ fontSize: 10, fontWeight: 'bold', color: p.muted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+              Next 24 h <span style={{ fontWeight: 'normal', textTransform: 'none' }}>(3-hourly)</span>
+            </div>
+            <div style={{ display: 'flex', gap: 5, overflowX: 'auto', paddingBottom: 2 }}>
+              {hourlySlots.map(i => {
+                const info = wmoInfo(data.hourly.weather_code[i]);
+                return (
+                  <div key={i} style={{ flexShrink: 0, background: p.hourlyBg, border: p.sectionBorder, borderRadius: 6, padding: '5px 6px', textAlign: 'center', minWidth: 50 }}>
+                    <div style={{ color: p.muted, fontSize: 10 }}>{fmtHour(data.hourly.time[i])}</div>
+                    <div style={{ fontSize: 17, margin: '2px 0' }}>{info.emoji}</div>
+                    <div style={{ fontWeight: 'bold', fontSize: 12 }}>{Math.round(data.hourly.temperature_2m[i])}°</div>
+                    <div style={{ color: p.muted, fontSize: 10 }}>{Math.round(data.hourly.wind_speed_10m[i])}</div>
                   </div>
-                </div>
+                );
+              })}
+            </div>
+          </div>
 
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '4px 10px',
-                    background: p.statBg,
-                    borderRadius: 6,
-                    padding: '8px 10px',
-                    border: p.sectionBorder,
-                    flexShrink: 0,
-                  }}
-                >
-                  {[
-                    ['Feels like', `${Math.round(cur.apparent_temperature)}°C`],
-                    ['Humidity', `${cur.relative_humidity_2m}%`],
-                    ['Wind', `${Math.round(cur.wind_speed_10m)} km/h`],
-                    ['Pressure', `${Math.round(cur.surface_pressure)} hPa`],
-                    ['Visibility', `${(cur.visibility / 1000).toFixed(1)} km`],
-                    ['UV / Cloud', `${Math.round(cur.uv_index)} / ${cur.cloud_cover}%`],
-                  ].map(([label, value]) => (
-                    <div key={label}>
-                      <div style={{ color: p.muted, fontSize: 10 }}>{label}</div>
-                      <div style={{ fontWeight: 'bold', fontSize: 11 }}>{value}</div>
-                    </div>
-                  ))}
-                </div>
+          {divider}
+
+          {/* 24-hour chart */}
+          <div style={{ padding: '8px 12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div style={{ fontSize: 10, fontWeight: 'bold', color: p.muted, textTransform: 'uppercase', letterSpacing: 0.5 }}>24-Hour Trends</div>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {([['🌡', showTemp, setShowTemp], ['💧', showHumidity, setShowHumidity], ['💨', showWind, setShowWind]] as [string, boolean, (v: boolean) => void][]).map(([lbl, active, set]) => (
+                  <button key={lbl} onClick={() => set(!active)} style={{
+                    background: active ? p.toggleActive : p.toggleInactive,
+                    color: active ? p.toggleActiveText : p.toggleInactiveText,
+                    border: 'none', borderRadius: 4, padding: '2px 6px', fontSize: 10,
+                    cursor: 'pointer', fontFamily: font, opacity: active ? 1 : 0.55, transition: 'all 0.15s',
+                  }}>{lbl}</button>
+                ))}
               </div>
             </div>
+            <ResponsiveContainer width="100%" height={110}>
+              <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -24 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={p.chartGrid} />
+                <XAxis dataKey="time" tick={{ fontSize: 9, fill: p.muted, fontFamily: font }} interval={5} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 9, fill: p.muted, fontFamily: font }} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ background: p.tooltipBg, border: p.sectionBorder, borderRadius: 4, fontSize: 11, fontFamily: font }} labelStyle={{ color: p.muted }} />
+                {showTemp && <Line type="monotone" dataKey="temp" name="Temp °C" stroke="#ff7043" strokeWidth={1.5} dot={false} />}
+                {showHumidity && <Line type="monotone" dataKey="humidity" name="Humidity %" stroke={p.chartHum} strokeWidth={1.5} dot={false} />}
+                {showWind && <Line type="monotone" dataKey="wind" name="Wind km/h" stroke={p.chartWind} strokeWidth={1.5} dot={false} />}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
 
-            <div style={{ height: 1, background: p.divider, margin: '0 14px' }} />
+          {divider}
 
-            {/* ── Hourly strip ── */}
-            <div style={{ padding: '10px 14px 8px' }}>
-              <div style={{ fontSize: 10, fontWeight: 'bold', color: p.muted, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 6 }}>
-                Next 24 Hours <span style={{ fontWeight: 'normal', textTransform: 'none' }}>(3-hourly)</span>
-              </div>
-              <div style={{ display: 'flex', gap: 5, overflowX: 'auto', paddingBottom: 4 }}>
-                {hourlySlots.map((i) => {
-                  const info = wmoInfo(data.hourly.weather_code[i]);
-                  return (
-                    <div
-                      key={i}
-                      style={{
-                        flexShrink: 0,
-                        background: p.hourlyBg,
-                        border: p.sectionBorder,
-                        borderRadius: 6,
-                        padding: '6px 7px',
-                        textAlign: 'center',
-                        minWidth: 52,
-                      }}
-                    >
-                      <div style={{ color: p.muted, fontSize: 10 }}>{fmtHour(data.hourly.time[i])}</div>
-                      <div style={{ fontSize: 18, margin: '3px 0' }}>{info.emoji}</div>
-                      <div style={{ fontWeight: 'bold', fontSize: 12 }}>
-                        {Math.round(data.hourly.temperature_2m[i])}°
-                      </div>
-                      <div style={{ color: p.muted, fontSize: 10 }}>
-                        {Math.round(data.hourly.wind_speed_10m[i])} km
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+          {/* 5-day forecast */}
+          <div style={{ padding: '8px 12px 14px' }}>
+            <div style={{ fontSize: 10, fontWeight: 'bold', color: p.muted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>5-Day Forecast</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {forecastDays.map((dayStr, i) => {
+                const di = i + 1;
+                const info = wmoInfo(data.daily.weather_code[di]);
+                return (
+                  <div key={dayStr} style={{ display: 'flex', alignItems: 'center', gap: 6, background: p.sectionBg, border: p.sectionBorder, borderRadius: 5, padding: '5px 9px' }}>
+                    <span style={{ width: 90, fontSize: 11 }}>{fmtDay(dayStr)}</span>
+                    <span style={{ fontSize: 16 }}>{info.emoji}</span>
+                    <span style={{ flex: 1, fontSize: 10, color: p.muted, textAlign: 'center' }}>{info.desc}</span>
+                    <span style={{ fontWeight: 'bold', fontSize: 12, color: '#ff7043' }}>{Math.round(data.daily.temperature_2m_max[di])}°</span>
+                    <span style={{ color: p.muted, fontSize: 11, marginLeft: 4 }}>{Math.round(data.daily.temperature_2m_min[di])}°</span>
+                  </div>
+                );
+              })}
             </div>
-
-            <div style={{ height: 1, background: p.divider, margin: '0 14px' }} />
-
-            {/* ── 24-hour chart ── */}
-            <div style={{ padding: '10px 14px 8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <div style={{ fontSize: 10, fontWeight: 'bold', color: p.muted, textTransform: 'uppercase', letterSpacing: 0.6 }}>
-                  24-Hour Trends
-                </div>
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {([
-                    { label: '🌡 Temp', active: showTemp, toggle: () => setShowTemp((v) => !v) },
-                    { label: '💧 Hum', active: showHumidity, toggle: () => setShowHumidity((v) => !v) },
-                    { label: '💨 Wind', active: showWind, toggle: () => setShowWind((v) => !v) },
-                  ] as const).map(({ label, active, toggle }) => (
-                    <button
-                      key={label}
-                      onClick={toggle}
-                      style={{
-                        background: active ? p.toggleActive : p.toggleInactive,
-                        color: active ? p.toggleActiveText : p.toggleInactiveText,
-                        border: 'none',
-                        borderRadius: 4,
-                        padding: '2px 6px',
-                        fontSize: 10,
-                        cursor: 'pointer',
-                        fontFamily: font,
-                        opacity: active ? 1 : 0.55,
-                        transition: 'all 0.15s',
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <ResponsiveContainer width="100%" height={120}>
-                <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -24 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={p.chartGrid} />
-                  <XAxis
-                    dataKey="time"
-                    tick={{ fontSize: 9, fill: p.muted, fontFamily: font }}
-                    interval={5}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 9, fill: p.muted, fontFamily: font }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: p.tooltipBg,
-                      border: p.border,
-                      borderRadius: 4,
-                      fontSize: 11,
-                      fontFamily: font,
-                      color: p.body,
-                    }}
-                    labelStyle={{ color: p.muted }}
-                    itemStyle={{ color: p.body }}
-                  />
-                  {showTemp && (
-                    <Line type="monotone" dataKey="temp" name="Temp °C" stroke="#ff7043" strokeWidth={1.5} dot={false} />
-                  )}
-                  {showHumidity && (
-                    <Line type="monotone" dataKey="humidity" name="Humidity %" stroke={p.chartHumidity} strokeWidth={1.5} dot={false} />
-                  )}
-                  {showWind && (
-                    <Line type="monotone" dataKey="wind" name="Wind km/h" stroke={p.chartWind} strokeWidth={1.5} dot={false} />
-                  )}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div style={{ height: 1, background: p.divider, margin: '0 14px' }} />
-
-            {/* ── 5-day forecast ── */}
-            <div style={{ padding: '10px 14px 14px' }}>
-              <div style={{ fontSize: 10, fontWeight: 'bold', color: p.muted, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 6 }}>
-                5-Day Forecast
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {forecastDays.map((dayStr, i) => {
-                  const di = i + 1;
-                  const info = wmoInfo(data.daily.weather_code[di]);
-                  const max = Math.round(data.daily.temperature_2m_max[di]);
-                  const min = Math.round(data.daily.temperature_2m_min[di]);
-                  return (
-                    <div
-                      key={dayStr}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        background: p.sectionBg,
-                        border: p.sectionBorder,
-                        borderRadius: 5,
-                        padding: '5px 10px',
-                        gap: 6,
-                      }}
-                    >
-                      <span style={{ width: 96, fontSize: 11 }}>{fmtDay(dayStr)}</span>
-                      <span style={{ fontSize: 17 }}>{info.emoji}</span>
-                      <span style={{ fontSize: 10, color: p.muted, flex: 1, textAlign: 'center' }}>{info.desc}</span>
-                      <span style={{ fontWeight: 'bold', fontSize: 12, color: '#ff7043' }}>{max}°</span>
-                      <span style={{ color: p.muted, fontSize: 11, marginLeft: 4 }}>{min}°</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
     </div>
+  );
+
+  return (
+    <WidgetContainer id="weather" title="Melbourne Weather" icon="🌦" theme={theme} isAdmin={isAdmin}>
+      {content}
+    </WidgetContainer>
   );
 }

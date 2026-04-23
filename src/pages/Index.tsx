@@ -13,6 +13,8 @@ import { ChangePassword } from '@/components/ChangePassword';
 import { IframeProgram } from '@/components/IframeProgram';
 import { FolderWindow } from '@/components/FolderWindow';
 import { WeatherWidget } from '@/components/WeatherWidget';
+import { NewsWidget } from '@/components/NewsWidget';
+import { NoticesWidget } from '@/components/NoticesWidget';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock, Plus, Pencil, X, FolderPlus } from 'lucide-react';
@@ -1166,7 +1168,9 @@ const Index = () => {
       )}
 
       {/* Weather Widget */}
-      {isAuthenticated && <WeatherWidget theme={theme} />}
+      {isAuthenticated && <WeatherWidget theme={theme} isAdmin={isAdmin} />}
+      {isAuthenticated && <NewsWidget theme={theme} isAdmin={isAdmin} />}
+      {isAuthenticated && <NoticesWidget theme={theme} isAdmin={isAdmin} />}
 
       {/* Desktop Context Menu */}
       {isAuthenticated && contextMenu && (
