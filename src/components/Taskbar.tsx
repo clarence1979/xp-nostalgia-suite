@@ -9,9 +9,10 @@ interface TaskbarProps {
   theme: 'xp' | 'kali';
   hasApiKey?: boolean;
   onApiKeyClick?: () => void;
+  username?: string | null;
 }
 
-export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey = false, onApiKeyClick }: TaskbarProps) => {
+export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey = false, onApiKeyClick, username }: TaskbarProps) => {
   const [time, setTime] = useState(new Date());
   const [isMobile, setIsMobile] = useState(false);
 
@@ -178,6 +179,21 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey
         />
       </a>
       
+      {/* Logged-in username */}
+      {username && (
+        <div
+          className={`flex items-center ${isMobile ? 'px-1' : 'px-2'} h-[32px]`}
+          title={`Logged in as ${username}`}
+        >
+          <span
+            className={`${isMobile ? 'text-[10px]' : 'text-xs'} font-bold`}
+            style={{ color: theme === 'xp' ? '#ffffff' : 'hsl(180 100% 70%)' }}
+          >
+            {isMobile ? username.slice(0, 8) : username}
+          </span>
+        </div>
+      )}
+
       <div
         className={`flex items-center gap-2 ${isMobile ? 'px-1' : 'px-3'} h-[32px] rounded-sm border`}
         style={{

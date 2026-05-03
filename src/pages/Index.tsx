@@ -1164,6 +1164,7 @@ const Index = () => {
           theme={theme}
           hasApiKey={username !== null}
           onApiKeyClick={handleApiKeyIconClick}
+          username={username}
         />
       )}
 
