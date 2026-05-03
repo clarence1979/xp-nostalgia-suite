@@ -77,8 +77,8 @@ export async function updateIconPosition(id: string, x: number, y: number) {
   const { error } = await supabase.rpc('admin_update_icon_position', {
     p_token: token,
     p_icon_id: id,
-    p_position_x: x,
-    p_position_y: y,
+    p_position_x: Math.round(x),
+    p_position_y: Math.round(y),
   });
 
   if (error) throw error;
