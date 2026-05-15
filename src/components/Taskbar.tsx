@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import logo from '@/assets/cla_sol.png';
-import { Key } from 'lucide-react';
+import { Key, LogOut, Lock } from 'lucide-react';
 
 interface TaskbarProps {
   onStartClick: () => void;
@@ -9,12 +9,15 @@ interface TaskbarProps {
   theme: 'xp' | 'kali';
   hasApiKey?: boolean;
   onApiKeyClick?: () => void;
+  onChangePasswordClick?: () => void;
   username?: string | null;
 }
 
-export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey = false, onApiKeyClick, username }: TaskbarProps) => {
+export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey = false, onApiKeyClick, onChangePasswordClick, username }: TaskbarProps) => {
   const [time, setTime] = useState(new Date());
   const [isMobile, setIsMobile] = useState(false);
+  const [showKeyMenu, setShowKeyMenu] = useState(false);
+  const keyMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -29,6 +32,17 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (!showKeyMenu) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (keyMenuRef.current && !keyMenuRef.current.contains(e.target as Node)) {
+        setShowKeyMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showKeyMenu]);
 
   return (
     <div
@@ -115,19 +129,54 @@ export const Taskbar = ({ onStartClick, windows, onWindowClick, theme, hasApiKey
 
       {/* API Key Status Icon */}
       {onApiKeyClick && (
-        <button
-          onClick={onApiKeyClick}
-          className="flex items-center justify-center h-[32px] px-2 hover:bg-white/10 rounded-sm transition-colors"
-          title={hasApiKey ? 'API Key configured (click to logout)' : 'Click to configure API Key'}
-        >
-          <Key
-            className="w-4 h-4"
-            style={{
-              color: hasApiKey ? '#00ff00' : '#ff0000',
-              filter: hasApiKey ? 'drop-shadow(0 0 2px #00ff00)' : 'drop-shadow(0 0 2px #ff0000)'
-            }}
-          />
-        </button>
+        <div className="relative" ref={keyMenuRef}>
+          <button
+            onClick={() => hasApiKey ? setShowKeyMenu((v) => !v) : onApiKeyClick()}
+            className="flex items-center justify-center h-[32px] px-2 hover:bg-white/10 rounded-sm transition-colors"
+            title={hasApiKey ? `Logged in as ${username}` : 'Click to login'}
+          >
+            <Key
+              className="w-4 h-4"
+              style={{
+                color: hasApiKey ? '#00ff00' : '#ff0000',
+                filter: hasApiKey ? 'drop-shadow(0 0 2px #00ff00)' : 'drop-shadow(0 0 2px #ff0000)'
+              }}
+            />
+          </button>
+
+          {showKeyMenu && hasApiKey && (
+            <div
+              className="absolute bottom-full mb-1 right-0 rounded shadow-lg border overflow-hidden z-[100] min-w-[160px]"
+              style={{
+                background: theme === 'xp' ? '#f0f0f0' : 'hsl(0 0% 14%)',
+                borderColor: theme === 'xp' ? '#999' : 'hsl(180 100% 30%)',
+                boxShadow: theme === 'kali' ? '0 0 12px rgba(0,255,255,0.25)' : '0 4px 12px rgba(0,0,0,0.3)',
+              }}
+            >
+              <button
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors"
+                style={{ color: theme === 'xp' ? '#222' : 'hsl(180 100% 70%)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'xp' ? '#d0e4f7' : 'hsl(180 100% 15%)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                onClick={() => { setShowKeyMenu(false); onChangePasswordClick?.(); }}
+              >
+                <Lock className="w-3.5 h-3.5 flex-shrink-0" />
+                Change Password
+              </button>
+              <div style={{ height: '1px', background: theme === 'xp' ? '#ccc' : 'hsl(180 100% 20%)' }} />
+              <button
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors"
+                style={{ color: theme === 'xp' ? '#222' : 'hsl(180 100% 70%)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'xp' ? '#d0e4f7' : 'hsl(180 100% 15%)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                onClick={() => { setShowKeyMenu(false); onApiKeyClick(); }}
+              >
+                <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Email Address */}
