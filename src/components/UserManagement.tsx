@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle } from 'lucide-react';
+import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CheckCircle } from 'lucide-react';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
 interface LoginLog {
@@ -24,6 +24,7 @@ interface User {
   username: string;
   password: string;
   is_admin: boolean;
+  is_active: boolean;
   api_key: string | null;
   created_at: string;
   last_login_at: string | null;
@@ -284,6 +285,25 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
       fetchUsers();
     } catch (error: any) {
       toast({ title: 'Error', description: error.message || 'Failed to delete user', variant: 'destructive' });
+    }
+  };
+
+  const handleToggleActive = async (userId: string, username: string, currentlyActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('users_login')
+        .update({ is_active: !currentlyActive })
+        .eq('id', userId);
+      if (error) throw error;
+      toast({
+        title: currentlyActive ? 'Account deactivated' : 'Account reactivated',
+        description: currentlyActive
+          ? `"${username}" can no longer log in.`
+          : `"${username}" can now log in again.`,
+      });
+      fetchUsers();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to update account status', variant: 'destructive' });
     }
   };
 
@@ -768,7 +788,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                 const rowExtraStyle = getUserRowStyle(user);
                 return (
                   <Fragment key={user.id}>
-                    <tr className={`border-b border-gray-200 hover:bg-blue-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${rowExtraStyle}`}>
+                    <tr className={`border-b border-gray-200 hover:bg-blue-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${rowExtraStyle} ${!user.is_active ? 'opacity-50' : ''}`}>
                       <td className="p-2">
                         <input type="checkbox" checked={selectedUsers.has(user.id)} onChange={() => toggleUserSelection(user.id)} />
                       </td>
@@ -779,6 +799,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                           </button>
                           <span className={isSuspicious ? 'text-red-700 font-bold' : ''}>{user.username}</span>
                           {isSuspicious && <AlertTriangle className="w-3.5 h-3.5 text-red-600 ml-0.5" />}
+                          {!user.is_active && <span className="ml-1 text-[10px] font-bold text-red-600 bg-red-100 px-1 rounded">INACTIVE</span>}
                         </div>
                       </td>
                       <td className="p-2 text-gray-600">
@@ -848,6 +869,17 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                             title="Quick reset password"
                           >
                             <Shield className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            onClick={() => handleToggleActive(user.id, user.username, user.is_active)}
+                            className="text-xs h-6 px-2"
+                            variant="outline"
+                            size="sm"
+                            title={user.is_active ? 'Deactivate account' : 'Reactivate account'}
+                          >
+                            {user.is_active
+                              ? <Ban className="w-3 h-3 text-orange-500" />
+                              : <CheckCircle className="w-3 h-3 text-green-600" />}
                           </Button>
                           <Button onClick={() => handleDeleteUser(user.id, user.username)} className="text-xs h-6 px-2" variant="destructive" size="sm" title="Delete user">
                             <Trash2 className="w-3 h-3" />

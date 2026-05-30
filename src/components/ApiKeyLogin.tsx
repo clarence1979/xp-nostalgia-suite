@@ -46,6 +46,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
         const { data, error } = await supabase
           .from('users_login')
           .select('username')
+          .eq('is_active', true)
           .order('username', { ascending: true });
 
         if (error) {
@@ -72,7 +73,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
     try {
       const { data, error: dbError } = await supabase
         .from('users_login')
-        .select('id, username, password, api_key, is_admin, must_change_password')
+        .select('id, username, password, api_key, is_admin, is_active, must_change_password')
         .eq('username', user)
         .maybeSingle();
 
@@ -84,6 +85,11 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
 
       if (!data) {
         setError('Invalid username or password');
+        return { valid: false, apiKey: null, isAdmin: false };
+      }
+
+      if (!data.is_active) {
+        setError('This account has been deactivated. Please contact your administrator.');
         return { valid: false, apiKey: null, isAdmin: false };
       }
 
@@ -228,6 +234,11 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
                     </option>
                   ))}
                 </select>
+                {!isLoadingUsernames && (
+                  <div className={`mt-1 ${isMobile ? 'text-[9px]' : 'text-[9px]'} text-gray-500`} style={{ fontFamily: 'Tahoma, sans-serif', paddingLeft: isMobile ? 0 : '0px' }}>
+                    If your username is not listed, please contact your administrator.
+                  </div>
+                )}
               </div>
 
               <div className={`flex items-center ${isMobile ? 'flex-col items-stretch' : ''}`}>
