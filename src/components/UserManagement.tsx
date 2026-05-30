@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CircleCheck } from 'lucide-react';
+import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CircleCheck, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
 interface LoginLog {
@@ -110,6 +110,11 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
   const [quickResetUserId, setQuickResetUserId] = useState<string | null>(null);
   const [quickResetPassword, setQuickResetPassword] = useState('');
 
+  type SortKey = 'username' | 'loginCount' | 'last_login_at' | 'is_admin' | 'is_active';
+  type SortDir = 'asc' | 'desc';
+  const [sortKey, setSortKey] = useState<SortKey>('username');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -127,16 +132,30 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
   }, [activeTab]);
 
   useEffect(() => {
-    if (searchTerm) {
-      setFilteredUsers(
-        users.filter(user =>
-          user.username.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredUsers(users);
-    }
-  }, [searchTerm, users]);
+    let base = searchTerm
+      ? users.filter(u => u.username.toLowerCase().includes(searchTerm.toLowerCase()))
+      : [...users];
+
+    base.sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'username') {
+        cmp = a.username.localeCompare(b.username);
+      } else if (sortKey === 'loginCount') {
+        cmp = (loginFrequency[a.username] || 0) - (loginFrequency[b.username] || 0);
+      } else if (sortKey === 'last_login_at') {
+        const ta = a.last_login_at ? new Date(a.last_login_at).getTime() : 0;
+        const tb = b.last_login_at ? new Date(b.last_login_at).getTime() : 0;
+        cmp = ta - tb;
+      } else if (sortKey === 'is_admin') {
+        cmp = (a.is_admin ? 1 : 0) - (b.is_admin ? 1 : 0);
+      } else if (sortKey === 'is_active') {
+        cmp = (a.is_active ? 1 : 0) - (b.is_active ? 1 : 0);
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    setFilteredUsers(base);
+  }, [searchTerm, users, sortKey, sortDir, loginFrequency]);
 
   useEffect(() => {
     if (apiKeySearchTerm) {
@@ -560,6 +579,22 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     }
   };
 
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-40 inline" />;
+    return sortDir === 'asc'
+      ? <ArrowUp className="w-3 h-3 ml-1 text-blue-600 inline" />
+      : <ArrowDown className="w-3 h-3 ml-1 text-blue-600 inline" />;
+  };
+
   const getLoginCountStyle = (count: number) => {
     if (count >= SUSPICIOUS_LOGIN_THRESHOLD) return 'bg-red-100 text-red-800 ring-1 ring-red-300';
     if (count >= WARNING_LOGIN_THRESHOLD) return 'bg-orange-100 text-orange-700';
@@ -783,11 +818,22 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                 <th className="p-2 text-left w-8">
                   <input type="checkbox" checked={selectedUsers.size === filteredUsers.length && filteredUsers.length > 0} onChange={toggleSelectAll} />
                 </th>
-                <th className="p-2 text-left">Username</th>
+                <th className="p-2 text-left cursor-pointer select-none hover:bg-gray-300 transition-colors" onClick={() => handleSort('username')}>
+                  Username<SortIcon col="username" />
+                </th>
                 <th className="p-2 text-left">Password</th>
-                <th className="p-2 text-left w-16">24h</th>
-                <th className="p-2 text-left">Last Login</th>
-                <th className="p-2 text-left w-14">Admin</th>
+                <th className="p-2 text-left w-16 cursor-pointer select-none hover:bg-gray-300 transition-colors" onClick={() => handleSort('loginCount')}>
+                  24h<SortIcon col="loginCount" />
+                </th>
+                <th className="p-2 text-left cursor-pointer select-none hover:bg-gray-300 transition-colors" onClick={() => handleSort('last_login_at')}>
+                  Last Login<SortIcon col="last_login_at" />
+                </th>
+                <th className="p-2 text-left w-14 cursor-pointer select-none hover:bg-gray-300 transition-colors" onClick={() => handleSort('is_admin')}>
+                  Admin<SortIcon col="is_admin" />
+                </th>
+                <th className="p-2 text-left w-20 cursor-pointer select-none hover:bg-gray-300 transition-colors" onClick={() => handleSort('is_active')}>
+                  Is Active<SortIcon col="is_active" />
+                </th>
                 <th className="p-2 text-left w-36">Actions</th>
               </tr>
             </thead>
@@ -867,6 +913,11 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                         {user.is_admin && <UserCog className="w-4 h-4 text-blue-600" />}
                       </td>
                       <td className="p-2">
+                        {user.is_active
+                          ? <span className="text-green-700 font-medium">Yes</span>
+                          : <span className="text-red-600 font-medium">No</span>}
+                      </td>
+                      <td className="p-2">
                         <div className="flex gap-1">
                           <Button onClick={() => setEditingUser(user)} className="text-xs h-6 px-2" variant="outline" size="sm" title="Edit user">
                             <Edit2 className="w-3 h-3" />
@@ -890,7 +941,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                     {/* Quick Password Reset Row */}
                     {quickResetUserId === user.id && (
                       <tr>
-                        <td colSpan={7} className="p-3 bg-orange-50 border-b-2 border-orange-200">
+                        <td colSpan={8} className="p-3 bg-orange-50 border-b-2 border-orange-200">
                           <div className="flex items-center gap-2">
                             <Shield className="w-4 h-4 text-orange-600 flex-shrink-0" />
                             <span className="text-xs font-bold text-orange-800">Reset password for {user.username}:</span>
@@ -924,7 +975,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                     {/* Programs Management Row */}
                     {managingProgramsUserId === user.id && (
                       <tr>
-                        <td colSpan={7} className="p-4 bg-blue-50 border-b-2 border-blue-200">
+                        <td colSpan={8} className="p-4 bg-blue-50 border-b-2 border-blue-200">
                           <div className="text-sm font-bold mb-3">Program Access for {user.username}</div>
                           {loadingPrograms ? (
                             <div className="text-xs text-gray-600">Loading programs...</div>
