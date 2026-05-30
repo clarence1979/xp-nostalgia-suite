@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CheckCircle } from 'lucide-react';
+import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CircleCheck as CheckCircle } from 'lucide-react';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
 interface LoginLog {
@@ -778,7 +778,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                 <th className="p-2 text-left w-16">24h</th>
                 <th className="p-2 text-left">Last Login</th>
                 <th className="p-2 text-left w-14">Admin</th>
-                <th className="p-2 text-left w-36">Actions</th>
+                <th className="p-2 text-left w-48">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -857,7 +857,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                         {user.is_admin && <UserCog className="w-4 h-4 text-blue-600" />}
                       </td>
                       <td className="p-2">
-                        <div className="flex gap-1">
+                        <div className="flex flex-wrap gap-1">
                           <Button onClick={() => setEditingUser(user)} className="text-xs h-6 px-2" variant="outline" size="sm" title="Edit user">
                             <Edit2 className="w-3 h-3" />
                           </Button>
@@ -871,15 +871,15 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                             <Shield className="w-3 h-3" />
                           </Button>
                           <Button
-                            onClick={() => handleToggleActive(user.id, user.username, user.is_active)}
+                            onClick={() => handleToggleActive(user.id, user.username, user.is_active ?? true)}
                             className="text-xs h-6 px-2"
                             variant="outline"
                             size="sm"
                             title={user.is_active ? 'Deactivate account' : 'Reactivate account'}
                           >
                             {user.is_active
-                              ? <Ban className="w-3 h-3 text-orange-500" />
-                              : <CheckCircle className="w-3 h-3 text-green-600" />}
+                              ? <><Ban className="w-3 h-3 text-orange-500 mr-1" /><span className="text-orange-500">Off</span></>
+                              : <><CheckCircle className="w-3 h-3 text-green-600 mr-1" /><span className="text-green-600">On</span></>}
                           </Button>
                           <Button onClick={() => handleDeleteUser(user.id, user.username)} className="text-xs h-6 px-2" variant="destructive" size="sm" title="Delete user">
                             <Trash2 className="w-3 h-3" />
