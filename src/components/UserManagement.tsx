@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CircleCheck as CheckCircle } from 'lucide-react';
+import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CircleCheck } from 'lucide-react';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
 interface LoginLog {
@@ -288,22 +288,26 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     }
   };
 
-  const handleToggleActive = async (userId: string, username: string, currentlyActive: boolean) => {
+  const handleBulkSetActive = async (active: boolean) => {
+    if (selectedUsers.size === 0) return;
+    const ids = Array.from(selectedUsers);
+    const names = ids.map(id => users.find(u => u.id === id)?.username).filter(Boolean);
+    const action = active ? 'activate' : 'deactivate';
+    if (!window.confirm(`${active ? 'Activate' : 'Deactivate'} ${ids.length} user(s)?\n${names.join(', ')}`)) return;
     try {
       const { error } = await supabase
         .from('users_login')
-        .update({ is_active: !currentlyActive })
-        .eq('id', userId);
+        .update({ is_active: active })
+        .in('id', ids);
       if (error) throw error;
       toast({
-        title: currentlyActive ? 'Account deactivated' : 'Account reactivated',
-        description: currentlyActive
-          ? `"${username}" can no longer log in.`
-          : `"${username}" can now log in again.`,
+        title: active ? 'Accounts activated' : 'Accounts deactivated',
+        description: `${ids.length} user(s) ${action}d.`,
       });
+      setSelectedUsers(new Set());
       fetchUsers();
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Failed to update account status', variant: 'destructive' });
+      toast({ title: 'Error', description: error.message || `Failed to ${action} users`, variant: 'destructive' });
     }
   };
 
@@ -626,6 +630,12 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                     <Button onClick={handleDeleteSelected} className="text-xs h-7 px-3" variant="destructive">
                       <Trash2 className="w-3 h-3 mr-1" /> Delete ({selectedUsers.size})
                     </Button>
+                    <Button onClick={() => handleBulkSetActive(false)} className="text-xs h-7 px-3 border-orange-300 text-orange-700 hover:bg-orange-50" variant="outline">
+                      <Ban className="w-3 h-3 mr-1" /> Deactivate ({selectedUsers.size})
+                    </Button>
+                    <Button onClick={() => handleBulkSetActive(true)} className="text-xs h-7 px-3 border-green-300 text-green-700 hover:bg-green-50" variant="outline">
+                      <CircleCheck className="w-3 h-3 mr-1" /> Activate ({selectedUsers.size})
+                    </Button>
                     <Button onClick={() => setShowBulkProgramManager(!showBulkProgramManager)} className="text-xs h-7 px-3" variant="outline">
                       <UserCog className="w-3 h-3 mr-1" /> Bulk Program Access
                     </Button>
@@ -778,7 +788,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                 <th className="p-2 text-left w-16">24h</th>
                 <th className="p-2 text-left">Last Login</th>
                 <th className="p-2 text-left w-14">Admin</th>
-                <th className="p-2 text-left w-48">Actions</th>
+                <th className="p-2 text-left w-36">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -857,7 +867,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                         {user.is_admin && <UserCog className="w-4 h-4 text-blue-600" />}
                       </td>
                       <td className="p-2">
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex gap-1">
                           <Button onClick={() => setEditingUser(user)} className="text-xs h-6 px-2" variant="outline" size="sm" title="Edit user">
                             <Edit2 className="w-3 h-3" />
                           </Button>
@@ -869,17 +879,6 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
                             title="Quick reset password"
                           >
                             <Shield className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            onClick={() => handleToggleActive(user.id, user.username, user.is_active ?? true)}
-                            className="text-xs h-6 px-2"
-                            variant="outline"
-                            size="sm"
-                            title={user.is_active ? 'Deactivate account' : 'Reactivate account'}
-                          >
-                            {user.is_active
-                              ? <><Ban className="w-3 h-3 text-orange-500 mr-1" /><span className="text-orange-500">Off</span></>
-                              : <><CheckCircle className="w-3 h-3 text-green-600 mr-1" /><span className="text-green-600">On</span></>}
                           </Button>
                           <Button onClick={() => handleDeleteUser(user.id, user.username)} className="text-xs h-6 px-2" variant="destructive" size="sm" title="Delete user">
                             <Trash2 className="w-3 h-3" />
