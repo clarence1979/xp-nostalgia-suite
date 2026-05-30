@@ -1049,7 +1049,9 @@ const Index = () => {
 
         const mobileAreaSize = isMobile ? getMobileIconAreaSize() : null;
 
-        const iconElements = desktopIcons.map((icon) => {
+        const iconElements = desktopIcons
+          .filter(icon => !(icon.name === 'User Management' && !isAdmin))
+          .map((icon) => {
           const displayLabel = icon.icon_type === 'theme'
             ? (theme === 'xp' ? 'Kali Linux Display' : 'Windows Display')
             : icon.name;
