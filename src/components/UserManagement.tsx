@@ -193,6 +193,21 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
       return;
     }
     try {
+      const { data: existing } = await supabase
+        .from('users_login')
+        .select('username')
+        .eq('username', newUser.username)
+        .maybeSingle();
+
+      if (existing) {
+        toast({
+          title: 'Username taken',
+          description: `"${newUser.username}" is already in use. Please choose a different username.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('users_login')
         .insert([{ username: newUser.username, password: newUser.password, is_admin: newUser.isAdmin }]);
