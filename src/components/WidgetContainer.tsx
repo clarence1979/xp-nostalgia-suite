@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
+import { adminRpc } from '@/lib/adminRpc';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const HEADER_H = 38;
@@ -72,7 +73,7 @@ function getDefaults(id: string, taskbarH: number): Config {
 async function saveWidgetState(id: string, cfg: Config) {
   const token = apiKeyStorage.getAuthToken();
   if (!token) return;
-  await supabase.rpc('admin_update_widget_state', {
+  await adminRpc('admin_update_widget_state', {
     p_token: token,
     p_widget_id: id,
     p_x: Math.round(cfg.x),

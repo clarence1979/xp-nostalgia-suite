@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { adminRpc } from './adminRpc';
 
 export interface AuthTokenData {
   username: string;
@@ -14,7 +15,7 @@ export const authTokenService = {
       const token = crypto.randomUUID() + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2);
 
       console.log('[AuthTokenService] Calling create_auth_token RPC...');
-      const { error } = await supabase.rpc('create_auth_token', {
+      const { error } = await adminRpc('create_auth_token', {
         p_username: username,
         p_token: token,
         p_is_admin: isAdmin,

@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { adminRpc } from './adminRpc';
 
 const LAST_LOG_KEY_PREFIX = 'last_login_log_';
 const LOG_INTERVAL_MS = 24 * 60 * 60 * 1000;
@@ -36,7 +37,7 @@ export async function logLoginEvent(username: string): Promise<void> {
       latitude: geo.latitude,
       longitude: geo.longitude,
     });
-    await supabase.rpc('record_user_login', {
+    await adminRpc('record_user_login', {
       p_username: username,
       p_ip: geo.ip_address,
       p_city: geo.city,

@@ -24,6 +24,7 @@ import { apiKeyStorage } from '@/lib/apiKeyStorage';
 import { apiCache } from '@/lib/apiCache';
 import { authTokenService } from '@/lib/authTokenService';
 import { supabase } from '@/integrations/supabase/client';
+import { adminRpc } from '@/lib/adminRpc';
 import { IconEditorDialog, type IconFormData } from '@/components/IconEditorDialog';
 import { FolderPropertiesDialog, type FolderFormData, colorToFolderIcon } from '@/components/FolderPropertiesDialog';
 import { insertDesktopIcon, updateDesktopIcon, deleteDesktopIcon, updateIconPosition, createFolder, moveIconToFolder, renameIcon } from '@/lib/desktopIconService';
@@ -248,8 +249,8 @@ const Index = () => {
 
           if (userId) {
             try {
-              const { data: programsData, error: programsError } = await supabase
-                .rpc('get_accessible_programs_for_user', { target_user_id: userId });
+              const { data: programsData, error: programsError } = await adminRpc<{ program_name: string }[]>(
+                'get_accessible_programs_for_user', { target_user_id: userId });
 
               if (!programsError && programsData) {
                 accessiblePrograms = programsData.map((p: { program_name: string }) => p.program_name);

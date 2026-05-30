@@ -1,5 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { adminRpc } from '@/lib/adminRpc';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -193,7 +194,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     const token = apiKeyStorage.getAuthToken();
     if (!token) return;
     try {
-      const { data, error } = await supabase.rpc('get_api_key_usage_stats_admin', { p_token: token });
+      const { data, error } = await adminRpc<ApiKeyUsageStat[]>('get_api_key_usage_stats_admin', { p_token: token });
       if (error) throw error;
       const stats: Record<string, ApiKeyUsageStat> = {};
       if (data && Array.isArray(data)) {
@@ -359,7 +360,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     if (!token) return;
     setLoginLogsLoading(true);
     try {
-      const { data, error } = await supabase.rpc('get_login_logs_admin', {
+      const { data, error } = await adminRpc<LoginLog[]>('get_login_logs_admin', {
         p_token: token, p_limit: 300, p_username_filter: usernameFilter || null,
       });
       if (error) throw error;
@@ -376,7 +377,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     const token = apiKeyStorage.getAuthToken();
     if (!token) return;
     try {
-      const { data, error } = await supabase.rpc('get_login_frequency_24h', { p_token: token });
+      const { data, error } = await adminRpc<{ username: string; login_count: number }[]>('get_login_frequency_24h', { p_token: token });
       if (error) throw error;
       const freq: Record<string, number> = {};
       if (data) {
@@ -396,7 +397,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     const authToken = apiKeyStorage.getAuthToken();
     if (!authToken) { toast({ title: 'Error', description: 'Not authenticated', variant: 'destructive' }); return; }
     try {
-      const { error } = await supabase.rpc('upsert_secret', {
+      const { error } = await adminRpc('upsert_secret', {
         p_token: authToken, p_key_name: newApiKey.keyName, p_key_value: newApiKey.keyValue, p_description: newApiKey.description,
       });
       if (error) throw error;
@@ -415,7 +416,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     const authToken = apiKeyStorage.getAuthToken();
     if (!authToken) { toast({ title: 'Error', description: 'Not authenticated', variant: 'destructive' }); return; }
     try {
-      const { error } = await supabase.rpc('update_secret_by_id', {
+      const { error } = await adminRpc('update_secret_by_id', {
         p_token: authToken, p_id: editingApiKey.id, p_key_name: editingApiKey.key_name, p_key_value: editingApiKey.key_value, p_description: editingApiKey.description,
       });
       if (error) throw error;
@@ -438,7 +439,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     if (!authToken) { toast({ title: 'Error', description: 'Not authenticated', variant: 'destructive' }); return; }
     try {
       for (const keyId of Array.from(selectedApiKeys)) {
-        const { error } = await supabase.rpc('delete_secret_by_id', { p_token: authToken, p_id: keyId });
+        const { error } = await adminRpc('delete_secret_by_id', { p_token: authToken, p_id: keyId });
         if (error) throw error;
       }
       toast({ title: 'Success', description: `${selectedApiKeys.size} API key(s) deleted successfully` });
@@ -454,7 +455,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     const authToken = apiKeyStorage.getAuthToken();
     if (!authToken) { toast({ title: 'Error', description: 'Not authenticated', variant: 'destructive' }); return; }
     try {
-      const { error } = await supabase.rpc('delete_secret_by_id', { p_token: authToken, p_id: keyId });
+      const { error } = await adminRpc('delete_secret_by_id', { p_token: authToken, p_id: keyId });
       if (error) throw error;
       toast({ title: 'Success', description: `API key ${keyName} deleted successfully` });
       fetchApiKeys();
@@ -478,7 +479,9 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
   const fetchUserPrograms = async (userId: string) => {
     setLoadingPrograms(true);
     try {
-      const { data, error } = await supabase.rpc('get_user_program_permissions', { target_user_id: userId });
+      const token = apiKeyStorage.getAuthToken();
+      if (!token) throw new Error('Not authenticated');
+      const { data, error } = await adminRpc<ProgramPermission[]>('get_user_program_permissions', { p_token: token, target_user_id: userId });
       if (error) throw error;
       setUserPrograms(data || []);
     } catch (error: any) {
@@ -490,7 +493,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
 
   const handleToggleProgramAccess = async (userId: string, programName: string, currentAccess: boolean) => {
     try {
-      const { error } = await supabase.rpc('update_user_program_permission', {
+      const { error } = await adminRpc('update_user_program_permission', {
         target_user_id: userId, program_name: programName, has_access: !currentAccess,
       });
       if (error) throw error;
@@ -534,7 +537,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     try {
       for (const userId of Array.from(selectedUsers)) {
         try {
-          const { error } = await supabase.rpc('update_user_program_permission', {
+          const { error } = await adminRpc('update_user_program_permission', {
             target_user_id: userId, program_name: selectedProgramForBulk, has_access: true,
           });
           if (error) throw error;
@@ -562,7 +565,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     try {
       for (const userId of Array.from(selectedUsers)) {
         try {
-          const { error } = await supabase.rpc('update_user_program_permission', {
+          const { error } = await adminRpc('update_user_program_permission', {
             target_user_id: userId, program_name: selectedProgramForBulk, has_access: false,
           });
           if (error) throw error;

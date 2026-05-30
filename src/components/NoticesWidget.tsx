@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
+import { adminRpc } from '@/lib/adminRpc';
 import { WidgetContainer } from './WidgetContainer';
 
 interface Notice {
@@ -94,7 +95,7 @@ export function NoticesWidget({ theme, isAdmin }: Props) {
     const token = apiKeyStorage.getAuthToken();
     if (!token) { setFormError('Not authenticated.'); setPosting(false); return; }
 
-    const { error } = await supabase.rpc('admin_post_notice', {
+    const { error } = await adminRpc('admin_post_notice', {
       p_token: token,
       p_title: formTitle.trim(),
       p_content: formContent.trim(),
@@ -114,14 +115,14 @@ export function NoticesWidget({ theme, isAdmin }: Props) {
   const handleDelete = async (id: string) => {
     const token = apiKeyStorage.getAuthToken();
     if (!token) return;
-    await supabase.rpc('admin_delete_notice', { p_token: token, p_notice_id: id });
+    await adminRpc('admin_delete_notice', { p_token: token, p_notice_id: id });
     await loadNotices();
   };
 
   const handlePin = async (id: string, pinned: boolean) => {
     const token = apiKeyStorage.getAuthToken();
     if (!token) return;
-    await supabase.rpc('admin_pin_notice', { p_token: token, p_notice_id: id, p_pinned: !pinned });
+    await adminRpc('admin_pin_notice', { p_token: token, p_notice_id: id, p_pinned: !pinned });
     await loadNotices();
   };
 

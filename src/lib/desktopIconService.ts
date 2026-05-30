@@ -1,5 +1,5 @@
-import { supabase } from '@/integrations/supabase/client';
 import { apiKeyStorage } from './apiKeyStorage';
+import { adminRpc } from './adminRpc';
 
 export interface IconInsertData {
   name: string;
@@ -28,7 +28,7 @@ function getAuthToken(): string {
 export async function insertDesktopIcon(data: IconInsertData) {
   const token = getAuthToken();
 
-  const { data: result, error } = await supabase.rpc('admin_insert_icon', {
+  const { data: result, error } = await adminRpc('admin_insert_icon', {
     p_token: token,
     p_name: data.name,
     p_icon: data.icon,
@@ -47,7 +47,7 @@ export async function insertDesktopIcon(data: IconInsertData) {
 export async function updateDesktopIcon(id: string, data: IconUpdateData) {
   const token = getAuthToken();
 
-  const { error } = await supabase.rpc('admin_update_icon', {
+  const { error } = await adminRpc('admin_update_icon', {
     p_token: token,
     p_icon_id: id,
     p_name: data.name ?? null,
@@ -63,7 +63,7 @@ export async function updateDesktopIcon(id: string, data: IconUpdateData) {
 export async function deleteDesktopIcon(id: string) {
   const token = getAuthToken();
 
-  const { error } = await supabase.rpc('admin_delete_icon', {
+  const { error } = await adminRpc('admin_delete_icon', {
     p_token: token,
     p_icon_id: id,
   });
@@ -74,7 +74,7 @@ export async function deleteDesktopIcon(id: string) {
 export async function updateIconPosition(id: string, x: number, y: number) {
   const token = getAuthToken();
 
-  const { error } = await supabase.rpc('admin_update_icon_position', {
+  const { error } = await adminRpc('admin_update_icon_position', {
     p_token: token,
     p_icon_id: id,
     p_position_x: Math.round(x),
@@ -87,7 +87,7 @@ export async function updateIconPosition(id: string, x: number, y: number) {
 export async function createFolder(name: string, x: number, y: number, parentId?: string | null, icon?: string) {
   const token = getAuthToken();
 
-  const { data: result, error } = await supabase.rpc('admin_create_folder', {
+  const { data: result, error } = await adminRpc('admin_create_folder', {
     p_token: token,
     p_name: name,
     p_position_x: x,
@@ -103,7 +103,7 @@ export async function createFolder(name: string, x: number, y: number, parentId?
 export async function moveIconToFolder(iconId: string, targetFolderId: string | null) {
   const token = getAuthToken();
 
-  const { error } = await supabase.rpc('admin_move_icon', {
+  const { error } = await adminRpc('admin_move_icon', {
     p_token: token,
     p_icon_id: iconId,
     p_target_folder_id: targetFolderId,
@@ -115,7 +115,7 @@ export async function moveIconToFolder(iconId: string, targetFolderId: string | 
 export async function renameIcon(id: string, name: string) {
   const token = getAuthToken();
 
-  const { error } = await supabase.rpc('admin_rename_icon', {
+  const { error } = await adminRpc('admin_rename_icon', {
     p_token: token,
     p_icon_id: id,
     p_name: name,
