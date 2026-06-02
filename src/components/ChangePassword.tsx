@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Lock } from 'lucide-react';
+import { adminRpc } from '@/lib/adminRpc';
 
 interface ChangePasswordProps {
   username: string;
@@ -49,40 +49,13 @@ export const ChangePassword = ({ username, onPasswordChanged, forced = false }: 
     setIsChanging(true);
 
     try {
-      const { data: user, error: fetchError } = await supabase
-        .from('users_login')
-        .select('password')
-        .eq('username', username)
-        .maybeSingle();
+      const { error } = await adminRpc('change_user_password', {
+        p_username: username,
+        p_current_password: currentPassword,
+        p_new_password: newPassword,
+      });
 
-      if (fetchError) throw fetchError;
-
-      if (!user) {
-        toast({
-          title: 'Error',
-          description: 'User not found',
-          variant: 'destructive',
-        });
-        setIsChanging(false);
-        return;
-      }
-
-      if (user.password !== currentPassword) {
-        toast({
-          title: 'Error',
-          description: 'Current password is incorrect',
-          variant: 'destructive',
-        });
-        setIsChanging(false);
-        return;
-      }
-
-      const { error: updateError } = await supabase
-        .from('users_login')
-        .update({ password: newPassword, must_change_password: false })
-        .eq('username', username);
-
-      if (updateError) throw updateError;
+      if (error) throw new Error(error.message);
 
       toast({
         title: 'Success',
