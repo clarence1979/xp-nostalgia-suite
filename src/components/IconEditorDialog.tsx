@@ -12,12 +12,46 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
 const ICON_OPTIONS = [
-  '🌐', '📱', '💻', '🎮', '🎨', '📊', '📈', '🔧',
-  '⚙️', '📝', '📚', '🎵', '🎬', '📷', '🗂️', '📁',
-  '🤖', '🧠', '💡', '🔬', '🧪', '🎯', '🏆', '⭐',
-  '🚀', '🔒', '🛒', '💬', '📧', '🗺️', '⏰', '📅',
-  '🖥️', '🖨️', '🔊', '🎲', '✏️', '🧮', '📐', '🔍',
+  // Computing & Devices
+  '💻', '🖥️', '📱', '⌨️', '🖱', '🖲', '🕹', '📺', '📟', '📠',
+  // Storage & Media
+  '💽', '💾', '💿', '📀', '📼', '📹', '📷', '🎥', '📽', '🎞',
+  // Power & Connectivity
+  '🔋', '🔌', '📡', '🛰', '🛜', '📶', '📞', '🌐',
+  // Science & Lab
+  '🔬', '🧪', '⚗️', '🧫', '🦠', '🧬', '🌡', '🔭', '⚛️', '🪐',
+  // Robotics & AI
+  '🤖', '🧠', '💡', '⚙️', '🔧', '🛠', '🔩', '🧲', '⛓', '🧰',
+  // Tools & Engineering
+  '🪛', '🪚', '⛏', '🔨', '⚒', '🪜', '🧱',
+  // Security & Keys
+  '🔒', '🔓', '🔐', '🔑', '🗝', '🛡',
+  // Office & Files
+  '📁', '🗂️', '📋', '🗃', '🗄', '📎', '🖇', '📌', '🔗', '🏷',
+  // Mail & Packages
+  '📧', '📨', '📩', '📤', '📥', '📦',
+  // Documents & Writing
+  '📝', '📚', '📖', '📓', '📄', '📜', '✏️', '🖊', '🖋', '🖌',
+  // Data & Charts
+  '📊', '📈', '📉', '🗒', '🧾',
+  // Math & Measurement
+  '🧮', '📐', '📏', '♾', '🔍',
+  // Communication & Sound
+  '💬', '🗯', '🎙', '🎚', '🎛', '🔊', '📢',
+  // Time
+  '⏰', '⏱', '⏲', '📅', '⌛',
+  // Entertainment & Games
+  '🎮', '🎲', '🧩', '🎯', '🎬', '🎵', '🎨',
+  // Building & Industry
+  '🏗', '🏭', '🏢',
+  // Transport & Space
+  '🚀', '🛸', '✈️',
+  // Money & Commerce
+  '💳', '💰', '🛒', '💎',
+  // Misc Objects
+  '🔮', '🪄', '🗺️', '🏆', '⭐', '🖨️', '🪪', '🕳',
 ];
+
 
 interface IconEditorDialogProps {
   open: boolean;
@@ -152,7 +186,7 @@ export const IconEditorDialog = ({ open, onClose, onSave, initialData, theme }: 
                 </Button>
               </div>
             </div>
-            <div className="grid grid-cols-8 gap-1 max-h-32 overflow-y-auto p-1 border rounded">
+            <div className="grid grid-cols-8 gap-1 max-h-48 overflow-y-auto p-1 border rounded">
               {ICON_OPTIONS.map((emoji) => (
                 <button
                   key={emoji}
