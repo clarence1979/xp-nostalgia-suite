@@ -109,7 +109,7 @@ export function WeatherWidget({ theme, isAdmin }: Props) {
         `daily=weather_code,temperature_2m_max,temperature_2m_min`,
         `timezone=Australia%2FMelbourne`, `forecast_days=6`, `wind_speed_unit=kmh`,
       ].join('&');
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weather-proxy?${params}`);
       if (!res.ok) throw new Error(`API error ${res.status}`);
       const json: WeatherData = await res.json();
       setData(json);
