@@ -102,30 +102,8 @@ export function WeatherWidget({ theme, isAdmin }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const params = [
-        `latitude=${LAT}`, `longitude=${LON}`,
-        `current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure,visibility,cloud_cover,uv_index`,
-        `hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code`,
-        `daily=weather_code,temperature_2m_max,temperature_2m_min`,
-        `timezone=Australia%2FMelbourne`, `forecast_days=6`, `wind_speed_unit=kmh`,
-      ].join('&');
-
-      const directUrl = `https://api.open-meteo.com/v1/forecast?${params}`;
-      const proxyUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weather-proxy?${params}`;
-
-      let res: Response;
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-        res = await fetch(directUrl, { signal: controller.signal });
-        clearTimeout(timeout);
-      } catch {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000);
-        res = await fetch(proxyUrl, { signal: controller.signal });
-        clearTimeout(timeout);
-      }
-
+      const params = `latitude=${LAT}&longitude=${LON}`;
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weather-proxy?${params}`);
       if (!res.ok) throw new Error(`API error ${res.status}`);
       const json: WeatherData = await res.json();
       setData(json);
