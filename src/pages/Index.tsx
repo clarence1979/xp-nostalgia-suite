@@ -15,6 +15,7 @@ import { FolderWindow } from '@/components/FolderWindow';
 import { WeatherWidget } from '@/components/WeatherWidget';
 import { NewsWidget } from '@/components/NewsWidget';
 import { NoticesWidget } from '@/components/NoticesWidget';
+import { TextSelectionContextMenu } from '@/components/TextSelectionContextMenu';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
 import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock, Plus, Pencil, X, FolderPlus } from 'lucide-react';
@@ -1330,6 +1331,8 @@ const Index = () => {
           </div>
         </div>
       )}
+
+      <TextSelectionContextMenu theme={theme} />
     </div>
   );
 };
