@@ -805,6 +805,10 @@ const Index = () => {
 
     const normalizedIconName = iconName.trim();
 
+    if (normalizedIconName.startsWith('data:image/')) {
+      return <img src={normalizedIconName} alt="" className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} object-contain`} draggable={false} />;
+    }
+
     if (normalizedIconName.startsWith('Folder:')) {
       const colorKey = normalizedIconName.replace('Folder:', '');
       const colorMap: Record<string, string> = {

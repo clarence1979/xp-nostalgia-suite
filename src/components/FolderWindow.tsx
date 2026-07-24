@@ -333,7 +333,9 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
                   <span>
                     {icon.icon_type === 'folder'
                       ? <FolderIcon className={getFolderColorClass(icon.icon, 'md')} />
-                      : <span className="text-4xl">{icon.icon}</span>}
+                      : icon.icon.startsWith('data:image/')
+                        ? <img src={icon.icon} alt="" className="w-10 h-10 object-contain" draggable={false} />
+                        : <span className="text-4xl">{icon.icon}</span>}
                   </span>
                   <input
                     className="text-xs text-center w-full border border-blue-400 rounded px-1 outline-none"
@@ -353,7 +355,9 @@ export const FolderWindow = ({ folderId, folderName, isAdmin, theme, onOpenProgr
                   <span className="mb-1">
                     {icon.icon_type === 'folder'
                       ? <FolderIcon className={getFolderColorClass(icon.icon, 'md')} />
-                      : <span className="text-4xl">{icon.icon}</span>}
+                      : icon.icon.startsWith('data:image/')
+                        ? <img src={icon.icon} alt="" className="w-10 h-10 object-contain" draggable={false} />
+                        : <span className="text-4xl">{icon.icon}</span>}
                   </span>
                   <span className="text-xs text-center break-words leading-tight max-w-full">{icon.name}</span>
                   {icon.description && (
