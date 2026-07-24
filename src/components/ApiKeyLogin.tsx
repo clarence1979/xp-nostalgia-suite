@@ -20,49 +20,22 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState('');
-  const [usernames, setUsernames] = useState<string[]>([]);
-  const [isLoadingUsernames, setIsLoadingUsernames] = useState(true);
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    const fetchUsernames = async () => {
+    const savedCredentials = localStorage.getItem('rememberedLogin');
+    if (savedCredentials) {
       try {
-        const { data, error } = await supabase
-          .from('users_login')
-          .select('username')
-          .eq('is_active', true)
-          .order('username', { ascending: true });
-
-        if (error) {
-          console.error('Error fetching usernames:', error);
-        } else if (data) {
-          const activeNames = data.map(u => u.username);
-          setUsernames(activeNames);
-
-          const savedCredentials = localStorage.getItem('rememberedLogin');
-          if (savedCredentials) {
-            try {
-              const { username: savedUsername, password: savedPassword } = JSON.parse(savedCredentials);
-              if (savedUsername && activeNames.includes(savedUsername)) {
-                setUsername(savedUsername);
-                setPassword(savedPassword || '');
-                setRememberMe(true);
-              } else {
-                localStorage.removeItem('rememberedLogin');
-              }
-            } catch (err) {
-              console.error('Failed to load saved credentials:', err);
-            }
-          }
+        const { username: savedUsername, password: savedPassword } = JSON.parse(savedCredentials);
+        if (savedUsername) {
+          setUsername(savedUsername);
+          setPassword(savedPassword || '');
+          setRememberMe(true);
         }
       } catch (err) {
-        console.error('Failed to load usernames:', err);
-      } finally {
-        setIsLoadingUsernames(false);
+        console.error('Failed to load saved credentials:', err);
       }
-    };
-
-    fetchUsernames();
+    }
   }, []);
 
   const validateCredentials = async (user: string, pass: string): Promise<{ valid: boolean; apiKey: string | null; isAdmin: boolean; userId?: string; mustChangePassword?: boolean }> => {
@@ -75,7 +48,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
       const { data, error: dbError } = await supabase
         .from('users_login')
         .select('id, username, password, api_key, is_admin, is_active, must_change_password')
-        .eq('username', user)
+        .eq('username', user.trim())
         .maybeSingle();
 
       if (dbError) {
@@ -217,30 +190,21 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
                 <label className={`${isMobile ? 'text-xs mb-1.5' : 'text-xs w-20'} font-normal`} style={{ fontFamily: 'Tahoma, sans-serif' }}>
                   Username:
                 </label>
-                <select
+                <Input
+                  type="text"
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);
                     setError('');
                   }}
                   onKeyDown={handleKeyPress}
-                  className={`${isMobile ? 'w-full py-2' : 'flex-1'} px-2 py-1 border border-[#7F9DB9] bg-white ${isMobile ? 'text-xs' : 'text-xs'} focus:outline-none focus:border-[#0054E3]`}
+                  placeholder="Enter username"
+                  className={`${isMobile ? 'w-full py-2' : 'flex-1'} px-2 py-1 border border-[#7F9DB9] bg-white ${isMobile ? 'text-xs' : 'text-xs'} focus:outline-none focus:border-[#0054E3] rounded-none`}
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
-                  disabled={isValidating || isLoadingUsernames}
+                  disabled={isValidating}
                   autoFocus
-                >
-                  <option value="">Select a username</option>
-                  {usernames.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-                {!isLoadingUsernames && (
-                  <div className={`mt-1 ${isMobile ? 'text-[9px]' : 'text-[9px]'} text-gray-500`} style={{ fontFamily: 'Tahoma, sans-serif', paddingLeft: isMobile ? 0 : '0px' }}>
-                    If your username is not listed, please contact your administrator.
-                  </div>
-                )}
+                  autoComplete="off"
+                />
               </div>
 
               <div className={`flex items-center ${isMobile ? 'flex-col items-stretch' : ''}`}>
@@ -256,7 +220,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
                   }}
                   onKeyDown={handleKeyPress}
                   placeholder="Enter password"
-                  className={`${isMobile ? 'w-full py-2' : 'flex-1'} px-2 py-1 border border-[#7F9DB9] bg-white ${isMobile ? 'text-xs' : 'text-xs'} focus:outline-none focus:border-[#0054E3]`}
+                  className={`${isMobile ? 'w-full py-2' : 'flex-1'} px-2 py-1 border border-[#7F9DB9] bg-white ${isMobile ? 'text-xs' : 'text-xs'} focus:outline-none focus:border-[#0054E3] rounded-none`}
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
                   disabled={isValidating}
                 />
