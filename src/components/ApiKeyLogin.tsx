@@ -25,22 +25,6 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    const savedCredentials = localStorage.getItem('rememberedLogin');
-    if (savedCredentials) {
-      try {
-        const { username: savedUsername, password: savedPassword } = JSON.parse(savedCredentials);
-        if (savedUsername && savedPassword) {
-          setUsername(savedUsername);
-          setPassword(savedPassword);
-          setRememberMe(true);
-        }
-      } catch (err) {
-        console.error('Failed to load saved credentials:', err);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
     const fetchUsernames = async () => {
       try {
         const { data, error } = await supabase
@@ -52,7 +36,24 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
         if (error) {
           console.error('Error fetching usernames:', error);
         } else if (data) {
-          setUsernames(data.map(u => u.username));
+          const activeNames = data.map(u => u.username);
+          setUsernames(activeNames);
+
+          const savedCredentials = localStorage.getItem('rememberedLogin');
+          if (savedCredentials) {
+            try {
+              const { username: savedUsername, password: savedPassword } = JSON.parse(savedCredentials);
+              if (savedUsername && activeNames.includes(savedUsername)) {
+                setUsername(savedUsername);
+                setPassword(savedPassword || '');
+                setRememberMe(true);
+              } else {
+                localStorage.removeItem('rememberedLogin');
+              }
+            } catch (err) {
+              console.error('Failed to load saved credentials:', err);
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to load usernames:', err);
@@ -90,6 +91,7 @@ export const ApiKeyLogin = ({ onLogin, onCancel }: ApiKeyLoginProps) => {
 
       if (!data.is_active) {
         setError('This account has been deactivated. Please contact your administrator.');
+        localStorage.removeItem('rememberedLogin');
         return { valid: false, apiKey: null, isAdmin: false };
       }
 

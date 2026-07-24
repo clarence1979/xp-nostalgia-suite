@@ -103,6 +103,19 @@ const Index = () => {
       setIsLoading(false);
       const session = apiKeyStorage.getSession();
       if (session) {
+        const { data: activeCheck } = await supabase
+          .from('users_login')
+          .select('is_active')
+          .eq('username', session.username)
+          .maybeSingle();
+
+        if (!activeCheck || !activeCheck.is_active) {
+          apiKeyStorage.clearSession();
+          localStorage.removeItem('rememberedLogin');
+          setShowApiKeyLogin(true);
+          return;
+        }
+
         if (session.isAdmin) {
           const storedToken = apiKeyStorage.getAuthToken();
           if (!storedToken) {

@@ -25,7 +25,7 @@ async function validateUser(
   try {
     const { data, error } = await supabase
       .from('users_login')
-      .select('username, is_admin, password')
+      .select('username, is_admin, password, is_active')
       .eq('username', username)
       .maybeSingle();
 
@@ -33,7 +33,10 @@ async function validateUser(
       return null;
     }
 
-    // Direct password comparison (passwords are stored as plain text for educational purposes)
+    if (!data.is_active) {
+      return null;
+    }
+
     if (data.password !== password) {
       return null;
     }

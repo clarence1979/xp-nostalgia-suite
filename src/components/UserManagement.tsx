@@ -286,6 +286,9 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     const selectedUsernames = Array.from(selectedUsers).map(id => users.find(u => u.id === id)?.username).filter(Boolean);
     if (!window.confirm(`Are you sure you want to delete ${selectedUsers.size} user(s)?\n${selectedUsernames.join(', ')}`)) return;
     try {
+      for (const uname of selectedUsernames) {
+        await supabase.from('auth_tokens').delete().eq('username', uname);
+      }
       const { error } = await supabase.from('users_login').delete().in('id', Array.from(selectedUsers));
       if (error) throw error;
       toast({ title: 'Success', description: `${selectedUsers.size} user(s) deleted successfully` });
@@ -320,6 +323,14 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
         .update({ is_active: active })
         .in('id', ids);
       if (error) throw error;
+
+      if (!active) {
+        const usernames = ids.map(id => users.find(u => u.id === id)?.username).filter(Boolean);
+        for (const uname of usernames) {
+          await supabase.from('auth_tokens').delete().eq('username', uname);
+        }
+      }
+
       toast({
         title: active ? 'Accounts activated' : 'Accounts deactivated',
         description: `${ids.length} user(s) ${action}d.`,

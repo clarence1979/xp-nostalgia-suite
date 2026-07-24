@@ -47,6 +47,20 @@ export const authTokenService = {
         return null;
       }
 
+      const { data: user, error: userError } = await supabase
+        .from('users_login')
+        .select('is_active')
+        .eq('username', data.username)
+        .maybeSingle();
+
+      if (userError || !user || !user.is_active) {
+        await supabase
+          .from('auth_tokens')
+          .delete()
+          .eq('username', data.username);
+        return null;
+      }
+
       await supabase
         .from('auth_tokens')
         .update({ last_used_at: new Date().toISOString() })
