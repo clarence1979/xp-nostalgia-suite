@@ -710,7 +710,9 @@ const Index = () => {
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-storage-access-by-user-activation allow-top-navigation allow-top-navigation-by-user-activation"
         referrerPolicy="no-referrer-when-downgrade"
       />,
-      <span className="text-base">{program.icon}</span>
+      program.icon.startsWith('data:image/')
+        ? <img src={program.icon} alt="" className="w-4 h-4 object-contain" />
+        : <span className="text-base">{program.icon}</span>
     );
   };
 
@@ -775,7 +777,9 @@ const Index = () => {
       openWindow(
         icon.name,
         <IframeProgram url={icon.url} title={icon.name} />,
-        <span className="text-base">{icon.icon}</span>,
+        icon.icon.startsWith('data:image/')
+          ? <img src={icon.icon} alt="" className="w-4 h-4 object-contain" />
+          : <span className="text-base">{icon.icon}</span>,
         true
       );
     } else if (icon.open_behavior === 'window' && icon.url) {
