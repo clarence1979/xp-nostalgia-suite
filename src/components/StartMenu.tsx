@@ -23,6 +23,15 @@ interface Category {
   subcategories?: SubCategory[];
 }
 
+interface StartMenuItem {
+  id: string;
+  name: string;
+  icon: string;
+  url: string;
+  description: string;
+  open_behavior: string;
+}
+
 interface StartMenuProps {
   onClose: () => void;
   onProgramClick: (program: Program) => void;
@@ -34,6 +43,9 @@ interface StartMenuProps {
   onLogout?: () => void;
   hasApiKey?: boolean;
   onChangePasswordClick?: () => void;
+  startMenuItems?: StartMenuItem[];
+  onSendToDesktop?: (id: string) => void;
+  isAdmin?: boolean;
 }
 
 const categories: Category[] = [
@@ -194,7 +206,7 @@ const categories: Category[] = [
 ];
 
 
-export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle, programs, onLogout, hasApiKey, onChangePasswordClick }: StartMenuProps) => {
+export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick, theme, onThemeToggle, programs, onLogout, hasApiKey, onChangePasswordClick, startMenuItems, onSendToDesktop, isAdmin }: StartMenuProps) => {
   const dynamicCategories: Category[] = programs && programs.length > 0 ? [
     {
       name: 'General Tools',
@@ -276,6 +288,40 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
         </div>
         
         <div className={`py-2 overflow-y-auto flex-1 ${isMobile ? 'px-2' : ''}`}>
+          {/* Pinned Start Menu Items */}
+          {startMenuItems && startMenuItems.length > 0 && (
+            <>
+              {startMenuItems.map((item) => (
+                <div
+                  key={item.id}
+                  className={`xp-menu-item ${isMobile ? 'text-base py-3' : ''} group relative`}
+                  onClick={() => {
+                    onProgramClick({ name: item.name, url: item.url, icon: item.icon, description: item.description });
+                    onClose();
+                  }}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (isAdmin && onSendToDesktop) {
+                      onSendToDesktop(item.id);
+                    }
+                  }}
+                >
+                  <span className={`${isMobile ? 'text-xl' : 'text-lg'}`}>
+                    {item.icon.startsWith('data:image/')
+                      ? <img src={item.icon} alt="" className="w-5 h-5 object-contain inline-block" draggable={false} />
+                      : item.icon}
+                  </span>
+                  <span className={`flex-1 ${isMobile ? 'text-base' : 'text-sm'}`}>{item.name}</span>
+                  {isAdmin && (
+                    <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">right-click to move back</span>
+                  )}
+                </div>
+              ))}
+              <div className="border-t my-1" style={{ borderColor: 'hsl(var(--border))' }} />
+            </>
+          )}
+
           <div
             className={`xp-menu-item ${isMobile ? 'text-base py-3' : ''}`}
             onClick={() => setShowPrograms(!showPrograms)}
@@ -287,11 +333,11 @@ export const StartMenu = ({ onClose, onProgramClick, onNotepadClick, onInfoClick
           </div>
               
           {showPrograms && (
-            <div className={`${isMobile ? 'pl-4 pb-2' : 'fixed w-[300px] border-2'} ${isMobile ? '' : 'shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[calc(100vh-100px)]'} overflow-y-auto z-50`}
+            <div className={`${isMobile ? 'pl-4 pb-2' : 'fixed w-[300px] border-2 border-l-0'} ${isMobile ? '' : 'shadow-lg'} ${isMobile ? 'max-h-none' : 'max-h-[calc(100vh-100px)]'} overflow-y-auto z-50`}
               style={{
                 background: 'hsl(var(--menu-bg))',
                 borderColor: isMobile ? 'transparent' : 'hsl(var(--window-border))',
-                left: !isMobile ? '320px' : undefined,
+                left: !isMobile ? '318px' : undefined,
                 top: !isMobile ? `${submenuTop}px` : undefined,
               }}
               onMouseLeave={() => !isMobile && (() => {

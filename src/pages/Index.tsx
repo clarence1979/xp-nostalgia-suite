@@ -18,7 +18,7 @@ import { NoticesWidget } from '@/components/NoticesWidget';
 import { TextSelectionContextMenu } from '@/components/TextSelectionContextMenu';
 import blissWallpaper from '@/assets/bliss-wallpaper.jpg';
 import kaliWallpaper from '@/assets/kali-wallpaper.jpg';
-import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock, Plus, Pencil, X, FolderPlus } from 'lucide-react';
+import { HardDrive, Folder, Trash2, Globe, FileText, Code, UserCog, Lock, Plus, Pencil, X, FolderPlus, ArrowRight } from 'lucide-react';
 import { useIsMobile, useIsLandscape } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
@@ -57,6 +57,7 @@ interface DesktopIconData {
   open_behavior: 'window' | 'new_tab' | 'special' | 'folder' | 'iframe';
   sort_order: number;
   parent_id?: string | null;
+  in_start_menu?: boolean;
 }
 
 interface Program {
@@ -84,6 +85,7 @@ const Index = () => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [iconContextMenu, setIconContextMenu] = useState<{ x: number; y: number; icon: DesktopIconData } | null>(null);
   const [desktopIcons, setDesktopIcons] = useState<DesktopIconData[]>([]);
+  const [startMenuItems, setStartMenuItems] = useState<DesktopIconData[]>([]);
   const [iconsLoading, setIconsLoading] = useState(true);
   const [showIconEditor, setShowIconEditor] = useState(false);
   const [editingIcon, setEditingIcon] = useState<DesktopIconData | null>(null);
@@ -283,9 +285,11 @@ const Index = () => {
               )
             : data;
 
-          const rootIcons = allFilteredIcons.filter(icon => !icon.parent_id);
+          const rootIcons = allFilteredIcons.filter(icon => !icon.parent_id && !icon.in_start_menu);
+          const menuIcons = allFilteredIcons.filter(icon => icon.in_start_menu);
 
           setDesktopIcons(rootIcons as DesktopIconData[]);
+          setStartMenuItems(menuIcons as DesktopIconData[]);
         }
       } catch (error) {
         console.error('Error fetching desktop icons:', error);
@@ -338,8 +342,11 @@ const Index = () => {
 
       if (error) throw error;
       if (data) {
-        const rootIcons = (data as DesktopIconData[]).filter(icon => !icon.parent_id);
+        const allIcons = data as DesktopIconData[];
+        const rootIcons = allIcons.filter(icon => !icon.parent_id && !icon.in_start_menu);
+        const menuIcons = allIcons.filter(icon => icon.in_start_menu);
         setDesktopIcons(rootIcons);
+        setStartMenuItems(menuIcons);
       }
     } catch (err) {
       console.error('Error refetching icons:', err);
@@ -465,6 +472,34 @@ const Index = () => {
       toast({ title: 'Deleted', description: `"${icon.name}" has been removed` });
     } catch {
       toast({ title: 'Error', description: 'Failed to delete icon', variant: 'destructive' });
+    }
+  };
+
+  const handleSendToStartMenu = async () => {
+    if (!iconContextMenu) return;
+    const icon = iconContextMenu.icon;
+    setIconContextMenu(null);
+
+    try {
+      await adminRpc('admin_send_to_start_menu', {
+        p_token: apiKeyStorage.getAuthToken(),
+        p_icon_id: icon.id,
+      });
+      await refetchIcons();
+    } catch {
+      toast({ title: 'Error', description: 'Failed to move icon to Start Menu', variant: 'destructive' });
+    }
+  };
+
+  const handleSendToDesktop = async (iconId: string) => {
+    try {
+      await adminRpc('admin_send_to_desktop', {
+        p_token: apiKeyStorage.getAuthToken(),
+        p_icon_id: iconId,
+      });
+      await refetchIcons();
+    } catch {
+      toast({ title: 'Error', description: 'Failed to move icon to desktop', variant: 'destructive' });
     }
   };
 
@@ -1172,6 +1207,16 @@ const Index = () => {
               description: icon.description,
               category: icon.category || undefined
             }))}
+          startMenuItems={startMenuItems.map((icon) => ({
+            id: icon.id,
+            name: icon.name,
+            icon: icon.icon,
+            url: icon.url || '',
+            description: icon.description,
+            open_behavior: icon.open_behavior,
+          }))}
+          onSendToDesktop={handleSendToDesktop}
+          isAdmin={isAdmin}
         />
       )}
 
@@ -1280,6 +1325,15 @@ const Index = () => {
               </button>
             </>
           )}
+          <div className="border-t my-1" style={{ borderColor: theme === 'kali' ? 'hsl(var(--kali-border))' : 'hsl(var(--border))' }} />
+          <button
+            onClick={handleSendToStartMenu}
+            className="w-full text-left px-4 py-2 text-sm font-tahoma hover:bg-accent transition-colors flex items-center gap-2"
+            style={{ color: theme === 'kali' ? 'hsl(var(--kali-foreground))' : 'hsl(var(--foreground))' }}
+          >
+            <ArrowRight className="w-3.5 h-3.5" />
+            Send to Start Menu
+          </button>
           {iconContextMenu.icon.icon_type !== 'system' && (
             <button
               onClick={handleDeleteIconClick}
