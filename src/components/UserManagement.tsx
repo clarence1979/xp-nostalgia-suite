@@ -4,7 +4,7 @@ import { adminRpc } from '@/lib/adminRpc';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CircleCheck, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CircleCheck, ArrowUp, ArrowDown, ArrowUpDown, AppWindow, CheckSquare, XSquare } from 'lucide-react';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
 interface LoginLog {
@@ -76,7 +76,7 @@ function formatRelativeTime(dateStr: string | null): string {
 }
 
 export const UserManagement = ({ currentUsername }: UserManagementProps) => {
-  const [activeTab, setActiveTab] = useState<'users' | 'apikeys' | 'login-logs'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'apikeys' | 'login-logs' | 'program-access'>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -115,6 +115,13 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
   type SortDir = 'asc' | 'desc';
   const [sortKey, setSortKey] = useState<SortKey>('username');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  // Program Access tab state
+  const [paSelectedProgram, setPaSelectedProgram] = useState('');
+  const [paUsers, setPaUsers] = useState<{ user_id: string; username: string; is_admin: boolean; is_active: boolean; has_access: boolean }[]>([]);
+  const [paLoading, setPaLoading] = useState(false);
+  const [paSaving, setPaSaving] = useState(false);
+  const [paModified, setPaModified] = useState<Map<string, boolean>>(new Map());
 
   const { toast } = useToast();
 
@@ -630,6 +637,83 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     );
   }
 
+  // Program Access tab handlers
+  const fetchProgramAccess = async (programName: string) => {
+    setPaLoading(true);
+    setPaModified(new Map());
+    try {
+      const token = apiKeyStorage.getAuthToken();
+      if (!token) throw new Error('Not authenticated');
+      const { data, error } = await adminRpc<{ user_id: string; username: string; is_admin: boolean; is_active: boolean; has_access: boolean }[]>(
+        'get_program_users_access',
+        { p_token: token, p_program_name: programName }
+      );
+      if (error) throw error;
+      setPaUsers(data || []);
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to load program access', variant: 'destructive' });
+    } finally {
+      setPaLoading(false);
+    }
+  };
+
+  const handlePaToggle = (userId: string, currentAccess: boolean) => {
+    setPaModified(prev => {
+      const next = new Map(prev);
+      next.set(userId, !currentAccess);
+      return next;
+    });
+  };
+
+  const getPaAccess = (user: { user_id: string; has_access: boolean }) => {
+    return paModified.has(user.user_id) ? paModified.get(user.user_id)! : user.has_access;
+  };
+
+  const handlePaGrantAll = () => {
+    const next = new Map<string, boolean>();
+    paUsers.forEach(u => next.set(u.user_id, true));
+    setPaModified(next);
+  };
+
+  const handlePaRevokeAll = () => {
+    const next = new Map<string, boolean>();
+    paUsers.forEach(u => next.set(u.user_id, false));
+    setPaModified(next);
+  };
+
+  const handlePaSave = async () => {
+    if (paModified.size === 0 || !paSelectedProgram) return;
+    setPaSaving(true);
+    try {
+      const token = apiKeyStorage.getAuthToken();
+      if (!token) throw new Error('Not authenticated');
+
+      const grantIds = Array.from(paModified.entries()).filter(([, v]) => v).map(([k]) => k);
+      const revokeIds = Array.from(paModified.entries()).filter(([, v]) => !v).map(([k]) => k);
+
+      if (grantIds.length > 0) {
+        const { error } = await adminRpc('bulk_update_program_permissions', {
+          p_token: token, p_program_name: paSelectedProgram, p_user_ids: grantIds, p_has_access: true,
+        });
+        if (error) throw error;
+      }
+      if (revokeIds.length > 0) {
+        const { error } = await adminRpc('bulk_update_program_permissions', {
+          p_token: token, p_program_name: paSelectedProgram, p_user_ids: revokeIds, p_has_access: false,
+        });
+        if (error) throw error;
+      }
+
+      toast({ title: 'Saved', description: `Updated access for ${paModified.size} user(s).` });
+      setPaModified(new Map());
+      await fetchProgramAccess(paSelectedProgram);
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to save', variant: 'destructive' });
+    } finally {
+      setPaSaving(false);
+    }
+  };
+
   return (
     <div className="h-full bg-white flex flex-col" style={{ fontFamily: 'Tahoma, sans-serif' }}>
       <div className="border-b border-gray-300 p-3 bg-gradient-to-b from-white to-gray-50">
@@ -664,6 +748,15 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
           >
             <Activity className="w-4 h-4 inline mr-1" />
             Login Logs
+          </button>
+          <button
+            onClick={() => { setActiveTab('program-access'); if (availablePrograms.length === 0) fetchAvailablePrograms(); }}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'program-access' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <AppWindow className="w-4 h-4 inline mr-1" />
+            Program Access
           </button>
         </div>
 
@@ -1149,6 +1242,110 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
             )}
           </div>
         )}
+
+        {activeTab === 'program-access' && (
+          <div className="h-full flex flex-col">
+            <div className="flex items-center gap-2 p-3 border-b border-gray-200 bg-gray-50 flex-wrap">
+              <label className="text-xs font-semibold text-gray-700">Program:</label>
+              <select
+                value={paSelectedProgram}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPaSelectedProgram(val);
+                  if (val) fetchProgramAccess(val);
+                }}
+                className="px-2 py-1 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-[200px]"
+              >
+                <option value="">-- Select a program --</option>
+                {availablePrograms.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+
+              {paSelectedProgram && paUsers.length > 0 && (
+                <>
+                  <div className="h-4 border-l border-gray-300 mx-1" />
+                  <button onClick={handlePaGrantAll} className="flex items-center gap-1 px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                    <CheckSquare className="w-3 h-3" /> Grant All
+                  </button>
+                  <button onClick={handlePaRevokeAll} className="flex items-center gap-1 px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+                    <XSquare className="w-3 h-3" /> Revoke All
+                  </button>
+                  {paModified.size > 0 && (
+                    <button onClick={handlePaSave} disabled={paSaving} className="flex items-center gap-1 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50">
+                      {paSaving ? 'Saving...' : `Save Changes (${paModified.size})`}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+
+            {!paSelectedProgram ? (
+              <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
+                Select a program above to manage user access
+              </div>
+            ) : paLoading ? (
+              <div className="flex-1 flex items-center justify-center text-sm text-gray-500">Loading users...</div>
+            ) : paUsers.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center text-sm text-gray-400">No users found</div>
+            ) : (
+              <div className="flex-1 overflow-auto">
+                <table className="w-full text-xs border-collapse">
+                  <thead className="sticky top-0 bg-gray-200 border-b-2 border-gray-400">
+                    <tr>
+                      <th className="text-left p-2 font-semibold">User</th>
+                      <th className="text-center p-2 font-semibold w-20">Role</th>
+                      <th className="text-center p-2 font-semibold w-20">Status</th>
+                      <th className="text-center p-2 font-semibold w-24">Access</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paUsers.map((user) => {
+                      const access = getPaAccess(user);
+                      const isModified = paModified.has(user.user_id);
+                      return (
+                        <tr
+                          key={user.user_id}
+                          className={`border-b border-gray-200 cursor-pointer hover:bg-blue-50 transition-colors ${isModified ? 'bg-yellow-50' : ''}`}
+                          onClick={() => handlePaToggle(user.user_id, access)}
+                        >
+                          <td className="p-2">
+                            <span className="font-medium text-gray-800">{user.username}</span>
+                          </td>
+                          <td className="text-center p-2">
+                            {user.is_admin ? (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-700">
+                                <Shield className="w-2.5 h-2.5" /> Admin
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 text-[10px]">User</span>
+                            )}
+                          </td>
+                          <td className="text-center p-2">
+                            {user.is_active ? (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-700">Active</span>
+                            ) : (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-100 text-red-700">Disabled</span>
+                            )}
+                          </td>
+                          <td className="text-center p-2">
+                            <div className="flex items-center justify-center">
+                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                                access
+                                  ? 'bg-green-500 border-green-600 text-white'
+                                  : 'bg-white border-gray-400'
+                              }`}>
+                                {access && <span className="text-xs font-bold">&#10003;</span>}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Status Bar */}
@@ -1168,6 +1365,9 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
         )}
         {activeTab === 'login-logs' && (
           <>Total Logs: {loginLogs.filter(l => !loginLogFilter || l.username.toLowerCase().includes(loginLogFilter.toLowerCase())).length}</>
+        )}
+        {activeTab === 'program-access' && (
+          <>{paSelectedProgram ? `Program: ${paSelectedProgram} | Users: ${paUsers.length} | Unsaved: ${paModified.size}` : 'Select a program to manage access'}</>
         )}
       </div>
     </div>
