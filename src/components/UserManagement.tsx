@@ -514,7 +514,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
       const token = apiKeyStorage.getAuthToken();
       if (!token) throw new Error('Not authenticated');
       const { error } = await adminRpc('update_user_program_permission', {
-        p_token: token, target_user_id: userId, program_name: programName, has_access: !currentAccess,
+        p_token: token, target_user_id: userId, p_program_name: programName, p_has_access: !currentAccess,
       });
       if (error) throw error;
       setUserPrograms(prev => prev.map(p => p.program_name === programName ? { ...p, has_access: !currentAccess } : p));
