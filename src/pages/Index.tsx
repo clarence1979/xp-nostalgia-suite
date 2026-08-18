@@ -150,12 +150,12 @@ const Index = () => {
           OPENAI_API_KEY: session.apiKey,
         });
 
-        const apiKeys = apiKeyStorage.getApiKeys();
+        const freshKeys = await apiKeyStorage.fetchFreshApiKeys();
         apiCache.saveAll({
-          OPENAI_API_KEY: apiKeys.OPENAI_API_KEY,
-          CLAUDE_API_KEY: apiKeys.CLAUDE_API_KEY,
-          GEMINI_API_KEY: apiKeys.GEMINI_API_KEY,
-          REPLICATE_API_KEY: apiKeys.REPLICATE_API_KEY,
+          OPENAI_API_KEY: freshKeys.OPENAI_API_KEY || '',
+          CLAUDE_API_KEY: freshKeys.CLAUDE_API_KEY || '',
+          GEMINI_API_KEY: freshKeys.GEMINI_API_KEY || '',
+          REPLICATE_API_KEY: freshKeys.REPLICATE_API_KEY || '',
         });
       }
     }, 3000);
@@ -167,30 +167,13 @@ const Index = () => {
       if (event.data.type === 'REQUEST_API_KEY' || event.data.type === 'REQUEST_API_VALUES') {
         let allApiValues = apiCache.getAll();
         const session = apiKeyStorage.getSession();
-        let apiKeys = apiKeyStorage.getApiKeys();
-
-        if (!apiKeys.OPENAI_API_KEY && !apiKeys.CLAUDE_API_KEY && !apiKeys.GEMINI_API_KEY && !apiKeys.REPLICATE_API_KEY) {
-          try {
-            const { data: secrets, error } = await supabase
-              .from('secrets')
-              .select('key_name, key_value');
-
-            if (!error && secrets) {
-              const fetchedKeys = {
-                OPENAI_API_KEY: secrets.find(s => s.key_name === 'OPENAI_API_KEY')?.key_value || '',
-                CLAUDE_API_KEY: secrets.find(s => s.key_name === 'CLAUDE_API_KEY' || s.key_name === 'ANTHROPIC_API_KEY')?.key_value || '',
-                GEMINI_API_KEY: secrets.find(s => s.key_name === 'GEMINI_API_KEY')?.key_value || '',
-                REPLICATE_API_KEY: secrets.find(s => s.key_name === 'REPLICATE_API_KEY')?.key_value || '',
-              };
-
-              apiKeyStorage.saveApiKeys(fetchedKeys);
-              apiCache.saveAll(fetchedKeys);
-              apiKeys = fetchedKeys;
-            }
-          } catch (err) {
-            console.error('Failed to fetch API keys:', err);
-          }
-        }
+        const apiKeys = await apiKeyStorage.fetchFreshApiKeys();
+        apiCache.saveAll({
+          OPENAI_API_KEY: apiKeys.OPENAI_API_KEY || '',
+          CLAUDE_API_KEY: apiKeys.CLAUDE_API_KEY || '',
+          GEMINI_API_KEY: apiKeys.GEMINI_API_KEY || '',
+          REPLICATE_API_KEY: apiKeys.REPLICATE_API_KEY || '',
+        });
 
         const authToken = apiKeyStorage.getAuthToken();
 
@@ -648,31 +631,14 @@ const Index = () => {
             }
           }
           const session = apiKeyStorage.getSession();
-          let apiKeys = apiKeyStorage.getApiKeys();
+          const apiKeys = await apiKeyStorage.fetchFreshApiKeys();
           let updatedApiValues = { ...allApiValues };
-
-          if (!apiKeys.OPENAI_API_KEY && !apiKeys.CLAUDE_API_KEY && !apiKeys.GEMINI_API_KEY && !apiKeys.REPLICATE_API_KEY) {
-            try {
-              const { data: secrets, error } = await supabase
-                .from('secrets')
-                .select('key_name, key_value');
-
-              if (!error && secrets) {
-                const fetchedKeys = {
-                  OPENAI_API_KEY: secrets.find(s => s.key_name === 'OPENAI_API_KEY')?.key_value || '',
-                  CLAUDE_API_KEY: secrets.find(s => s.key_name === 'CLAUDE_API_KEY' || s.key_name === 'ANTHROPIC_API_KEY')?.key_value || '',
-                  GEMINI_API_KEY: secrets.find(s => s.key_name === 'GEMINI_API_KEY')?.key_value || '',
-                  REPLICATE_API_KEY: secrets.find(s => s.key_name === 'REPLICATE_API_KEY')?.key_value || '',
-                };
-
-                apiKeyStorage.saveApiKeys(fetchedKeys);
-                apiCache.saveAll(fetchedKeys);
-                apiKeys = fetchedKeys;
-              }
-            } catch (err) {
-              console.error('Failed to fetch API keys:', err);
-            }
-          }
+          apiCache.saveAll({
+            OPENAI_API_KEY: apiKeys.OPENAI_API_KEY || '',
+            CLAUDE_API_KEY: apiKeys.CLAUDE_API_KEY || '',
+            GEMINI_API_KEY: apiKeys.GEMINI_API_KEY || '',
+            REPLICATE_API_KEY: apiKeys.REPLICATE_API_KEY || '',
+          });
 
           const authToken = apiKeyStorage.getAuthToken();
 

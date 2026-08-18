@@ -1,3 +1,5 @@
+import { supabase } from '@/integrations/supabase/client';
+
 const API_KEY_STORAGE_KEY = 'openai_api_key';
 const USER_SESSION_KEY = 'user_session';
 const AUTH_TOKEN_KEY = 'auth_token';
@@ -129,6 +131,40 @@ export const apiKeyStorage = {
         GEMINI_API_KEY: null,
         REPLICATE_API_KEY: null,
       };
+    }
+  },
+
+  fetchFreshApiKeys: async (): Promise<ApiKeys> => {
+    try {
+      const { data: secrets, error } = await supabase
+        .from('secrets')
+        .select('key_name, key_value');
+
+      if (error || !secrets) {
+        return apiKeyStorage.getApiKeys();
+      }
+
+      const fresh: ApiKeys = {
+        OPENAI_API_KEY: secrets.find(s => s.key_name === 'OPENAI_API_KEY')?.key_value || null,
+        CLAUDE_API_KEY: secrets.find(s => s.key_name === 'CLAUDE_API_KEY' || s.key_name === 'ANTHROPIC_API_KEY')?.key_value || null,
+        GEMINI_API_KEY: secrets.find(s => s.key_name === 'GEMINI_API_KEY')?.key_value || null,
+        REPLICATE_API_KEY: secrets.find(s => s.key_name === 'REPLICATE_API_KEY')?.key_value || null,
+      };
+
+      const writeOrClear = (storageKey: string, value: string | null) => {
+        if (value) localStorage.setItem(storageKey, value);
+        else localStorage.removeItem(storageKey);
+      };
+      writeOrClear(OPENAI_KEY, fresh.OPENAI_API_KEY);
+      writeOrClear(API_KEY_STORAGE_KEY, fresh.OPENAI_API_KEY);
+      writeOrClear(CLAUDE_KEY, fresh.CLAUDE_API_KEY);
+      writeOrClear(GEMINI_KEY, fresh.GEMINI_API_KEY);
+      writeOrClear(REPLICATE_KEY, fresh.REPLICATE_API_KEY);
+
+      return fresh;
+    } catch (err) {
+      console.error('Failed to fetch fresh API keys from Supabase:', err);
+      return apiKeyStorage.getApiKeys();
     }
   },
 

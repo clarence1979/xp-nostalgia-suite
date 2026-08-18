@@ -4,7 +4,7 @@ import { adminRpc } from '@/lib/adminRpc';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CircleCheck, ArrowUp, ArrowDown, ArrowUpDown, AppWindow, CheckSquare, XSquare } from 'lucide-react';
+import { Search, Plus, Trash2, CreditCard as Edit2, UserCog, Key, ChevronDown, ChevronUp, Eye, EyeOff, MapPin, Clock, Activity, RefreshCw, Shield, TriangleAlert as AlertTriangle, Ban, CircleCheck, ArrowUp, ArrowDown, ArrowUpDown, AppWindow, SquareCheck as CheckSquare, Square as XSquare } from 'lucide-react';
 import { apiKeyStorage } from '@/lib/apiKeyStorage';
 
 interface LoginLog {
@@ -419,6 +419,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
         p_token: authToken, p_key_name: newApiKey.keyName, p_key_value: newApiKey.keyValue, p_description: newApiKey.description,
       });
       if (error) throw error;
+      await apiKeyStorage.fetchFreshApiKeys();
       toast({ title: 'Success', description: `API key ${newApiKey.keyName} added successfully` });
       setNewApiKey({ keyName: '', keyValue: '', description: '' });
       setShowAddApiKey(false);
@@ -438,6 +439,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
         p_token: authToken, p_id: editingApiKey.id, p_key_name: editingApiKey.key_name, p_key_value: editingApiKey.key_value, p_description: editingApiKey.description,
       });
       if (error) throw error;
+      await apiKeyStorage.fetchFreshApiKeys();
       toast({ title: 'Success', description: `API key ${editingApiKey.key_name} updated successfully` });
       setEditingApiKey(null);
       fetchApiKeys();
@@ -460,6 +462,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
         const { error } = await adminRpc('delete_secret_by_id', { p_token: authToken, p_id: keyId });
         if (error) throw error;
       }
+      await apiKeyStorage.fetchFreshApiKeys();
       toast({ title: 'Success', description: `${selectedApiKeys.size} API key(s) deleted successfully` });
       setSelectedApiKeys(new Set());
       fetchApiKeys();
@@ -475,6 +478,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
     try {
       const { error } = await adminRpc('delete_secret_by_id', { p_token: authToken, p_id: keyId });
       if (error) throw error;
+      await apiKeyStorage.fetchFreshApiKeys();
       toast({ title: 'Success', description: `API key ${keyName} deleted successfully` });
       fetchApiKeys();
     } catch (error: any) {
@@ -558,7 +562,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
       for (const userId of Array.from(selectedUsers)) {
         try {
           const { error } = await adminRpc('update_user_program_permission', {
-            target_user_id: userId, program_name: selectedProgramForBulk, has_access: true,
+            target_user_id: userId, p_program_name: selectedProgramForBulk, p_has_access: true,
           });
           if (error) throw error;
           successCount++;
@@ -586,7 +590,7 @@ export const UserManagement = ({ currentUsername }: UserManagementProps) => {
       for (const userId of Array.from(selectedUsers)) {
         try {
           const { error } = await adminRpc('update_user_program_permission', {
-            target_user_id: userId, program_name: selectedProgramForBulk, has_access: false,
+            target_user_id: userId, p_program_name: selectedProgramForBulk, p_has_access: false,
           });
           if (error) throw error;
           successCount++;
